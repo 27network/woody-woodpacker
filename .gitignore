@@ -3,5 +3,5 @@
 *.so
 *.a
 /.direnv/
-/woody-woodpacker
+/woody_woodpacker
 /development.mk
