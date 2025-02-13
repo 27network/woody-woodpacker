@@ -1,0 +1,7 @@
+*.o
+*.out
+*.so
+*.a
+/.direnv/
+/woody-woodpacker
+/development.mk
