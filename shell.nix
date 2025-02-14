@@ -3,7 +3,7 @@
 }:
 
 let
-  stdenv = pkgs.stdenvAdapters.useMoldLinker pkgs.llvmPackages_19.stdenv;
+  stdenv = pkgs.llvmPackages_19.stdenv;
 in
 (pkgs.mkShell.override { inherit stdenv; }) {
   nativeBuildInputs = with pkgs; [

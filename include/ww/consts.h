@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 22:35:35 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 00:43:42 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/14 01:45:32 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ A dead-simple ELF64 packer.\n\
   -V           Displays the version number and exit.\n\
   -o <output>  Sets the output file (default: '%s').\n\
   -s <sig>     Sets the signature to use (default: '%s').\n\
+  -e <mode>    Sets the encryption mode to use (default: '%s').\n\
   -k <key>     Sets the encryption key (default: random).\n\
   -c <comp>    Sets the compression algorithm to use (default: none).\n\
   -v           Increses the verbosity level for each occurence.\n\

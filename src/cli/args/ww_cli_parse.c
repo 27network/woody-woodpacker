@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:32:14 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 00:53:07 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/14 02:08:12 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,10 @@ static inline int	ww_cli_opt_handle(t_ww_args *args, int opt,
 {
 	if (opt == 'c')
 		return (ww_cli_opt_compression(args, opt_globals->optarg));
+	if (opt == 'e')
+		return (ww_cli_opt_encryption_algo(args, opt_globals->optarg));
 	if (opt == 'k')
-		return (ww_cli_opt_encryption(args, opt_globals->optarg));
+		return (ww_cli_opt_encryption_key(args, opt_globals->optarg));
 	if (opt == 'o')
 		return (ww_cli_opt_output(args, opt_globals->optarg));
 	if (opt == 's')
@@ -49,7 +51,7 @@ static inline int	ww_cli_args_handle(t_ww_args *args,
 	const int	argc = opt_args->argc - opt_globals->optind;
 	const char	**argv = (const char **) opt_args->argv + opt_globals->optind;
 
-	if (argc != 0)
+	if (argc != 1)
 	{
 		ft_dprintf(STDERR_FILENO, USAGE_LINE, opt_args->argv[0]);
 		ft_dprintf(STDERR_FILENO, "Try '%s --help' for more information.\n",

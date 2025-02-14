@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 00:49:50 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/14 02:05:29 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,10 @@
 
 #  define WW_SIGNATURE_DEFAULT "....WOODY...."
 #  define WW_OUTPUT_DEFAULT "woody"
+#  define WW_ENCRYPTION_DEFAULT "xor"
 
 // The getopt-like options string
-#  define OPTSTRING "hVc:k:o:s:v"
+#  define OPTSTRING "hVc:e:k:o:s:v"
 
 enum e_ww_cli_status
 {
@@ -33,6 +34,37 @@ enum e_ww_cli_status
 	CLI_EXIT_SUCCESS = 1,
 	CLI_EXIT_FAILURE = 2,
 };
+
+/**
+ * @brief	The compression algorithms available.
+ */
+enum e_ww_compression_algo
+{
+	COMPRESSION_ALGO_NONE = 0,
+	_COMPRESSION_ALGO_SIZE,
+};
+
+enum e_ww_compression_algo
+ww_compression_algo(const char *algo);
+
+const char
+*ww_compression_algo_str(enum e_ww_compression_algo algo);
+
+/**
+ * @brief	The encryption algorithms available.
+ */
+enum e_ww_encryption_algo
+{
+	ENCRYPTION_ALGO_NONE = 0,
+	ENCRYPTION_ALGO_XOR,
+	_ENCRYPTION_ALGO_SIZE,
+};
+
+enum e_ww_encryption_algo
+ww_encryption_algo(const char *algo);
+
+const char
+*ww_encryption_algo_str(enum e_ww_encryption_algo algo);
 
 /**
  * @brief	The structure that holds the arguments passed to the program.
@@ -44,6 +76,8 @@ enum e_ww_cli_status
  *							(required)
  * @param	output			The output file.
  *							(optional, default: "woody", env: WW_OUTPUT)
+ * @param	encryption_algo The encryption algorithm to use.
+ * 							(optional, default: xor)
  * @param	encryption_key	The encryption key.
  * 							(optional, env: WW_ENCRYPTION_KEY)
  * @param	log_level		The log verbosity level (see `log.h`).
@@ -52,16 +86,17 @@ enum e_ww_cli_status
  * 							(optional, default: `WW_SIGNATURE_DEFAULT`,
  * 							env: WW_SIGNATURE)
  * @param	compression		The compression algorithm to use.
- * 							(optional, default: none, env: WW_COMPRESSION)
+ * 							(optional, default: none)
  */
 typedef struct s_ww_args
 {
-	const char			*target;
-	const char			*output;
-	const char			*encryption_key;
-	enum e_ww_log_level	log_level;
-	const char			*signature;
-	const char			*compression;
+	const char					*target;
+	const char					*output;
+	enum e_ww_encryption_algo	encryption_algo;
+	const char					*encryption_key;
+	enum e_ww_log_level			log_level;
+	const char					*signature;
+	enum e_ww_compression_algo	compression;
 }	t_ww_args;
 
 /**
@@ -102,6 +137,19 @@ int
 ww_cli_opt_compression(t_ww_args *args, const char *compression);
 
 /**
+ * @brief	Handles the `-e` option, setting the encryption algorithm
+ * 			to use.  If an inappropriate algorithm is passed, it will
+ * 			fail and print the available algorithms.
+ *
+ * @param	args			The arguments.
+ * @param	encryption_key	The desired encryption algorithm.
+ *
+ * @return	An `enum e_ww_cli_status` value.
+ */
+int
+ww_cli_opt_encryption_algo(t_ww_args *args, const char *encryption_algo);
+
+/**
  * @brief	Handles the `-k` option, setting the encryption key.
  *
  * @param	args			The arguments.
@@ -110,7 +158,7 @@ ww_cli_opt_compression(t_ww_args *args, const char *compression);
  * @return	An `enum e_ww_cli_status` value.
  */
 int
-ww_cli_opt_encryption(t_ww_args *args, const char *encryption_key);
+ww_cli_opt_encryption_key(t_ww_args *args, const char *encryption_key);
 
 /**
  * @brief	Handles the `--help` option, printing the help message.

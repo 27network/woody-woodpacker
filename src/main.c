@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:53 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 00:42:32 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/14 02:04:22 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,13 @@ static void	ww_dump_args(t_ww_args *args)
 	ww_debug("struct s_ww_args {\n");
 	ww_debug("\ttarget: %s\n", args->target);
 	ww_debug("\toutput: %s\n", args->output);
+	ww_debug("\tencryption_algo: %s\n",
+		ww_encryption_algo_str(args->encryption_algo));
 	ww_debug("\tencryption_key: %s\n", args->encryption_key);
 	ww_debug("\tlog_level: %s\n", ww_log_level_str(args->log_level));
 	ww_debug("\tsignature: '%s'\n", args->signature);
-	ww_debug("\tcompression: %s\n", args->compression);
+	ww_debug("\tcompression: %s\n",
+		ww_compression_algo_str(args->compression));
 	ww_debug("}\n");
 }
 

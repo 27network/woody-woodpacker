@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ww_cli_opt_encryption.c                            :+:      :+:    :+:   */
+/*   ww_cli_opt_encryption_key.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 00:50:03 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 00:50:24 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/14 01:57:01 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #define __WW_CLI_INTERNAL__
 #include <ww/cli.h>
 
-int	ww_cli_opt_encryption(t_ww_args *args, const char *encryption_key)
+int	ww_cli_opt_encryption_key(t_ww_args *args, const char *encryption_key)
 {
 	if (!encryption_key)
 	{

@@ -6,13 +6,14 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:33:05 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 00:41:39 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/14 02:07:15 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft/mem.h>
 #include <ft/string.h>
 #include <ft/string/parse.h>
+#define __WW_CLI_INTERNAL__
 #include <ww/cli.h>
 
 /**
@@ -74,8 +75,11 @@ void	ww_cli_defaults(t_ww_args *args, char **envp)
 	ft_bzero(args, sizeof(t_ww_args));
 	args->output = ww_getenv(envp, "WW_OUTPUT", WW_OUTPUT_DEFAULT);
 	args->encryption_key = ww_getenv(envp, "WW_ENCRYPTION_KEY", NULL);
+	ww_cli_opt_encryption_algo(args,
+		ww_getenv(envp, "WW_ENCRYPTION_ALGO", WW_ENCRYPTION_DEFAULT));
 	verbosity = ww_getenv(envp, "WW_LOG_LEVEL", "INFO");
 	args->log_level = ww_parse_level(verbosity);
 	args->signature = ww_getenv(envp, "WW_SIGNATURE", WW_SIGNATURE_DEFAULT);
-	args->compression = ww_getenv(envp, "WW_COMPRESSION", NULL);
+	ww_cli_opt_compression(args,
+		ww_getenv(envp, "WW_COMPRESSION", NULL));
 }
