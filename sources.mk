@@ -21,3 +21,6 @@ SRCS += log/ww_log.c
 SRCS += log/ww_log_level.c
 SRCS += log/ww_vlog.c
 SRCS += main.c
+SRCS += util/ww_getenv.c
+SRCS += util/ww_strcmp_ignorecase.c
+SRCS += util/ww_strncmp_ignorecase.c
