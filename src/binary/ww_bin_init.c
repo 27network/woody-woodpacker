@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:40:15 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/17 23:16:26 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/17 23:20:36 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ enum e_ww_error	ww_bin_init(t_ww_binary *bin, t_ww_args *args)
 	bin->input_fd = open(bin->input, O_RDONLY);
 	if (bin->input_fd == -1)
 	{
-		ww_trace("Could not open input file: %m\n");
+		ww_error("Could not open input file '%s': %m\n", args->target);
 		return (WW_ERROR);
 	}
 	return (WW_OK);
