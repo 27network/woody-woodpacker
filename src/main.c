@@ -6,27 +6,65 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:53 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 02:04:22 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/17 23:18:11 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <ww/binary.h>
 #include <ww/cli.h>
 #include <ww/consts.h>
 
 static void	ww_dump_args(t_ww_args *args)
 {
-	ww_debug("struct s_ww_args {\n");
-	ww_debug("\ttarget: %s\n", args->target);
-	ww_debug("\toutput: %s\n", args->output);
-	ww_debug("\tencryption_algo: %s\n",
+	ww_bin_handler_registry_dump();
+	ww_trace("struct s_ww_args {\n");
+	ww_trace("\ttarget: %s\n", args->target);
+	ww_trace("\toutput: %s\n", args->output);
+	ww_trace("\tencryption_algo: %s\n",
 		ww_encryption_algo_str(args->encryption_algo));
-	ww_debug("\tencryption_key: %s\n", args->encryption_key);
-	ww_debug("\tlog_level: %s\n", ww_log_level_str(args->log_level));
-	ww_debug("\tsignature: '%s'\n", args->signature);
-	ww_debug("\tcompression: %s\n",
+	ww_trace("\tencryption_key: %s\n", args->encryption_key);
+	ww_trace("\tlog_level: %s\n", ww_log_level_str(args->log_level));
+	ww_trace("\tsignature: '%s'\n", args->signature);
+	ww_trace("\tcompression: %s\n",
 		ww_compression_algo_str(args->compression));
-	ww_debug("}\n");
+	ww_trace("}\n");
 }
+
+static int	ww_process(t_ww_args *args)
+{
+	t_ww_binary	bin;
+	bool		err;
+
+	err = ww_bin_init(&bin, args);
+	if (!err)
+		err = ww_bin_identify(&bin);
+	if (!err)
+		err = ww_bin_read(&bin);
+	if (!err)
+		err = ww_bin_process(&bin);
+	if (!err)
+		err = ww_bin_write(&bin);
+	ww_trace("Done processing %s (success: %s)\n", bin.input,
+		(char*)((err == WW_OK) * (long long)(void*)"true")
+		+ ((err == WW_ERROR) * (long long)(void*)"false"));
+	ww_bin_free(&bin);
+	return (err == true);
+}
+
+// static int	ww_process(t_ww_args *args)
+// {
+// 	t_ww_elf	*elf;
+// 	bool		err;
+//
+// 	elf = ww_elf_parse(args->target);
+// 	if (!elf)
+// 		return (1);
+// 	ww_trace("%s is a valid ELF file.\n", args->target);
+// 	ww_trace("Trying to write ELF file...\n");
+// 	err = ww_elf_write(args, elf, args->output);
+// 	ww_elf_free(&elf);
+// 	return (err == true);
+// }
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -39,7 +77,6 @@ int	main(int argc, char **argv, char **envp)
 	if (ret != CLI_SUCCESS)
 		return (ret - 1);
 	ww_log_set_level(args.log_level);
-	ww_info("Hello, "WW_PROJECT_NAME"!\n");
 	ww_dump_args(&args);
-	return (0);
+	return (ww_process(&args));
 }

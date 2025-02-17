@@ -4,4 +4,5 @@
 *.a
 /.direnv/
 /woody_woodpacker
+/woody
 /development.mk

@@ -9,6 +9,7 @@ in
   nativeBuildInputs = with pkgs; [
     nasm
     valgrind
+    python312Packages.pyelftools
   ];
 }
 
