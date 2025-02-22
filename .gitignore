@@ -1,8 +1,11 @@
 *.o
+*.bin
 *.out
 *.so
 *.a
 /.direnv/
 /woody_woodpacker
 /woody
+/test
 /development.mk
+/build
