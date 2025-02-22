@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:51:46 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/17 23:14:29 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/22 15:11:31 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ enum e_ww_error	ww_bin_elf_identifier(t_ww_binary *bin)
 	const size_t	size = sizeof(Elf32_Ehdr);
 
 	ft_memset(&tmp, 0, sizeof(Elf32_Ehdr));
-	if (read(bin->input_fd, &tmp, size) != size)
+	if ((size_t)read(bin->input_fd, &tmp, size) != size)
 		return (WW_ERROR);
 	if (ft_memcmp(&tmp.e_ident, ELFMAG, SELFMAG) != 0)
 		return (WW_ERROR);
