@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:19:39 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/24 17:35:29 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/24 17:45:27 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@
 enum e_ww_error
 {
 	WW_OK = 0,
-	WW_ERROR = 1
+	WW_ERROR,
+	WW_ERROR_FORMAT,
 };
 
 struct					s_ww_binary_handler;

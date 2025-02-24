@@ -70,8 +70,8 @@ $(SHSRC_DIR)/%.bin: $(SHSRC_DIR)/%.s
 	$(NASM) -f bin -o $@ $<
 
 test:
-	@$(shell echo $$'#include<stdio.h>\nint main(){printf("Hello, Woody!\\n");}' | clang -xc -o test -) #'
-	@./test
+	clang -g3 -o test-dyna testing/test.c
+	nix-shell -p pkgs.glibc.static --command "clang -static -g3 -o test-static testing/test.c"
 
 oclean:
 	rm -rf $(BUILD_DIR) $(SHBINS)
