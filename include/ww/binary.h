@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:19:39 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/22 15:53:32 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/02/24 17:35:29 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ ww_bin_write(t_ww_binary *bin);
 
 typedef enum e_ww_error	t_ww_binary_handler_fn(struct s_ww_binary_handler *self,
 							t_ww_binary * bin);
-typedef enum e_ww_error	t_ww_binary_ident_fn(struct s_ww_binary_handler *self);
+typedef enum e_ww_error	t_ww_binary_ident_fn(t_ww_binary *bin);
 
 typedef struct s_ww_binary_handler
 {
