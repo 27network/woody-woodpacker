@@ -1,21 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ww_bin_elf_process.c                               :+:      :+:    :+:   */
+/*   ww_err_release.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/03/03 03:09:48 by kiroussa         ###   ########.fr       */
+/*   Created: 2025/03/03 03:54:20 by kiroussa          #+#    #+#             */
+/*   Updated: 2025/03/03 03:54:47 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <ww/binary/elf.h>
+#include <ww/error.h>
 
-bool	ww_bin_elf_process(t_ww_elf_handler *self, t_ww_binary *bin)
+void	ww_err_release(t_ww_error err)
 {
-	(void)self;
-	(void)bin;
-	(void)g_shellcode;
-	return (WW_ERROR);
+	if (err.type & ERROR_FMT == ERROR_FMT)
+		ft_strdel((char *) &err.data);
 }

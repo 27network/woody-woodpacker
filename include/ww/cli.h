@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 14:41:05 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/03/04 15:03:22 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ enum e_ww_cli_status
 enum e_ww_compression_algo
 {
 	COMPRESSION_ALGO_NONE = 0,
+	COMPRESSION_ALGO_SMOL,
 	_COMPRESSION_ALGO_SIZE,
 };
 
@@ -57,6 +58,7 @@ enum e_ww_encryption_algo
 {
 	ENCRYPTION_ALGO_NONE = 0,
 	ENCRYPTION_ALGO_XOR,
+	ENCRYPTION_ALGO_AES,
 	_ENCRYPTION_ALGO_SIZE,
 };
 

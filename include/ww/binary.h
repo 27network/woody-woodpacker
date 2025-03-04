@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:19:39 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/24 17:45:27 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/03/03 03:46:32 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,18 +17,12 @@
 #  define __WW_BINARY_H__
 
 #  include <ww/cli.h>
+#  include <ww/error.h>
 #  include <stdbool.h>
 
 #  define WW_BIN_HANDLERS_MAX 64
 
-enum e_ww_error
-{
-	WW_OK = 0,
-	WW_ERROR,
-	WW_ERROR_FORMAT,
-};
-
-struct					s_ww_binary_handler;
+struct				s_ww_binary_handler;
 
 typedef struct s_ww_binary
 {
@@ -40,32 +34,32 @@ typedef struct s_ww_binary
 	struct s_ww_binary_handler	*handler;
 }	t_ww_binary;
 
-enum e_ww_error
+t_ww_error
 ww_bin_init(t_ww_binary *bin, t_ww_args *args);
 
 void
 ww_bin_free(t_ww_binary *bin);
 
-enum e_ww_error
+t_ww_error
 ww_bin_identify(t_ww_binary *bin);
 
-enum e_ww_error
+t_ww_error
 ww_bin_map(t_ww_binary *bin);
 
-enum e_ww_error
+t_ww_error
 ww_bin_read(t_ww_binary *bin);
 
-enum e_ww_error
+t_ww_error
 ww_bin_process(t_ww_binary *bin);
 
-enum e_ww_error
+t_ww_error
 ww_bin_write(t_ww_binary *bin);
 
 //
 
-typedef enum e_ww_error	t_ww_binary_handler_fn(struct s_ww_binary_handler *self,
+typedef t_ww_error	t_ww_binary_handler_fn(struct s_ww_binary_handler *self,
 							t_ww_binary * bin);
-typedef enum e_ww_error	t_ww_binary_ident_fn(t_ww_binary *bin);
+typedef t_ww_error	t_ww_binary_ident_fn(t_ww_binary *bin);
 
 typedef struct s_ww_binary_handler
 {

@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:53 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/24 17:44:24 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/03/03 03:58:11 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,22 +33,22 @@ static void	ww_dump_args(t_ww_args *args)
 static int	ww_process(t_ww_args *args)
 {
 	t_ww_binary		bin;
-	enum e_ww_error	err;
+	t_ww_error		err;
 
 	err = ww_bin_init(&bin, args);
-	if (err == WW_OK)
+	if (!err.type)
 		err = ww_bin_identify(&bin);
-	if (err == WW_OK)
+	if (!err.type)
 		err = ww_bin_read(&bin);
-	if (err == WW_OK)
+	if (!err.type)
 		err = ww_bin_process(&bin);
-	if (err == WW_OK)
+	if (!err.type)
 		err = ww_bin_write(&bin);
-	ww_trace("Done processing %s (success: %s)\n", bin.input,
-		(char*)((err == WW_OK) * (long long)(void*)"true")
-		+ ((err != WW_OK) * (long long)(void*)"false"));
+	if (err.type)
+		ww_err_print(err);
+	ww_err_release(err);
 	ww_bin_free(&bin);
-	return (err != WW_OK);
+	return (!!err.type);
 }
 
 // static int	ww_process(t_ww_args *args)

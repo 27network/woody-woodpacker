@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ww_bin_elf_process.c                               :+:      :+:    :+:   */
+/*   ww_err.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/03/03 03:09:48 by kiroussa         ###   ########.fr       */
+/*   Created: 2025/03/03 03:48:17 by kiroussa          #+#    #+#             */
+/*   Updated: 2025/03/03 03:48:20 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <ww/binary/elf.h>
+#include <ww/error.h>
 
-bool	ww_bin_elf_process(t_ww_elf_handler *self, t_ww_binary *bin)
+t_ww_error	ww_err(enum e_ww_error_type type)
 {
-	(void)self;
-	(void)bin;
-	(void)g_shellcode;
-	return (WW_ERROR);
+	return ((t_ww_error){
+		.type = type,
+		.data = NULL
+	});
 }
