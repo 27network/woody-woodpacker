@@ -6,9 +6,15 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 17:16:54 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/17 20:06:30 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/03/30 15:34:37 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#define ELF_BITNESS 32
+#include "ww_elf_write_arch.template"
+
+#define ELF_BITNESS 64
+#include "ww_elf_write_arch.template"
 
 #ifndef ELF_BITNESS
 # error "ELF_BITNESS not defined"

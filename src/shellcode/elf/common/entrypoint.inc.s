@@ -1,19 +1,31 @@
 ; **************************************************************************** ;
 ;                                                                              ;
 ;                                                         :::      ::::::::    ;
-;    entrypoint.s                                       :+:      :+:    :+:    ;
+;    entrypoint.inc.s                                   :+:      :+:    :+:    ;
 ;                                                     +:+ +:+         +:+      ;
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
-;    Created: 2025/02/20 17:48:45 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/03/30 15:38:15 by kiroussa         ###   ########.fr        ;
+;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
+;    Updated: 2025/03/30 15:38:48 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
-%define BITS 64
-%define RAX rax
-%define RDI rdi
-%define RSI rsi
-%define RDX rdx
-%define SYSCALL syscall
-%include "src/shellcode/elf/common/entrypoint.inc.s"
+bits BITS
+default rel
+global _wentry 
+
+_wentry:
+    ; write(1, hello, 14)
+    mov RAX, 1
+    mov RDI, 1
+	lea RSI, [rel hello]
+    mov RDX, 14
+    SYSCALL
+
+    ; exit(0)
+    mov RAX, 60
+    xor RDI, RDI
+	SYSCALL
+
+hello:
+    db "Hello, Woody!\n", 0

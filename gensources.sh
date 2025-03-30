@@ -16,10 +16,14 @@ done
 echo >> sources.mk
 
 for file in $(find $SHSRC_DIR -name '*.s' -print | sort); do
+	if [[ $file == *.inc.s ]]; then
+		continue
+	fi
 	directory=${file%/*}
 	if [ -f "$directory/.srcignore" ]; then
 		continue
 	fi
+
 	without_prefix=${file#$SHSRC_DIR/}
 	echo "SHSRCS += $without_prefix" >> sources.mk
 done
