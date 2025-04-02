@@ -31,6 +31,7 @@ SRCS += util/error/ww_err.c
 SRCS += util/error/ww_err_fmt.c
 SRCS += util/error/ww_err_release.c
 SRCS += util/error/ww_ok.c
+SRCS += util/error/ww_strerror.c
 SRCS += util/log/wrapper/ww_debug.c
 SRCS += util/log/wrapper/ww_error.c
 SRCS += util/log/wrapper/ww_fatal.c

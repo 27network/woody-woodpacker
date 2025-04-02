@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 03:11:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/03/03 03:56:31 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/02 12:31:44 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,19 @@
 # ifndef __WW_ERROR_H__
 #  define __WW_ERROR_H__
 
-/**
- * @file error.h
- * @brief A flexible error type system.
- */
-
-#  define ERROR_MAX 2
-#  define ERROR_META_MAX 3
+#  define ERROR_TYPE_MASK 0b00001111
+#  define ERROR_META_MASK 0b11110000
 
 enum e_ww_error_type
 {
-	ERROR_NONE = 0b0000,
-	ERROR_ALLOC = 0b0001,
-	ERROR_FMT = 0b0010,
+	ERROR_NONE = 0b00000000,	// No error
+	ERROR_ALLOC = 0b000000010,	// Memory allocation error
+	ERROR_IO = 0b000000100,		// IO error
+	ERROR_FMT = 0b00010000,		// META: Has a format string, to be free'd 
 };
+
+const char
+*ww_strerror(enum e_ww_error_type type);
 
 typedef struct s_ww_error
 {

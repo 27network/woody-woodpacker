@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/03/04 15:03:22 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/02 17:24:44 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 #  define WW_ENCRYPTION_DEFAULT "xor"
 
 // The getopt-like options string
-#  define OPTSTRING "hVc:e:k:o:s:v"
+#  define OPTSTRING "hVc:e:k:o:p:s:v"
 
 enum e_ww_cli_status
 {
@@ -79,7 +79,7 @@ const char
  * @param	output			The output file.
  *							(optional, default: "woody", env: WW_OUTPUT)
  * @param	encryption_algo The encryption algorithm to use.
- * 							(optional, default: xor)
+ * 							(optional, default: AES, env: WW_ENCRYPTION_ALGO)
  * @param	encryption_key	The encryption key.
  * 							(optional, env: WW_ENCRYPTION_KEY)
  * @param	log_level		The log verbosity level (see `log.h`).
@@ -88,7 +88,9 @@ const char
  * 							(optional, default: `WW_SIGNATURE_DEFAULT`,
  * 							env: WW_SIGNATURE)
  * @param	compression		The compression algorithm to use.
- * 							(optional, default: none)
+ * 							(optional, default: none, env: WW_COMPRESSION)
+ * @param	payload_file	The payload file to use.
+ * 							(optional, default: <built-in>, env: WW_PAYLOAD_FILE)
  */
 typedef struct s_ww_args
 {
@@ -99,6 +101,7 @@ typedef struct s_ww_args
 	enum e_ww_log_level			log_level;
 	const char					*signature;
 	enum e_ww_compression_algo	compression;
+	const char					*payload_file;
 }	t_ww_args;
 
 /**
@@ -185,6 +188,17 @@ ww_cli_opt_help(char **argv, int fd);
  */
 int
 ww_cli_opt_output(t_ww_args *args, const char *output);
+
+/**
+ * @brief	Handles the `-p` option, setting the payload file to use.
+ *
+ * @param	args		The arguments.
+ * @param	payload	The desired payload file.
+ *
+ * @return	An `enum e_ww_cli_status` value.
+ */
+int
+ww_cli_opt_payload(t_ww_args *args, const char *payload);
 
 /**
  * @brief	Handles the `-s` option, setting the signature to use.
