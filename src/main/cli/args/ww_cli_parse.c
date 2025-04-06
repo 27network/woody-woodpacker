@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:32:14 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 10:09:30 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 11:54:11 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ static inline int	ww_cli_args_handle(t_ww_args *args,
 	const int	argc = opt_args->argc - opt_globals->optind;
 	const char	**argv = (const char **) opt_args->argv + opt_globals->optind;
 
+	ww_trace("Parsing arguments (argc: %d)\n", argc);
+	ww_trace("Parsing arguments (argv[0]: %s)\n", argv[0]);
 	if (argc != 1)
 	{
 		ft_dprintf(STDERR_FILENO, USAGE_LINE, opt_args->argv[0]);

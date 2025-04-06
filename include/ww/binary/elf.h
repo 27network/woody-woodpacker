@@ -6,15 +6,15 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 14:24:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/17 22:28:00 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 11:36:47 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ELF_H
 # define ELF_H
 # undef ELF_H
-# ifndef __WW_ELF_H__
-#  define __WW_ELF_H__
+# ifndef __WW_BINARY_ELF_H__
+#  define __WW_BINARY_ELF_H__
 
 #  include <elf.h>
 #  include <stdbool.h>
@@ -52,5 +52,5 @@ typedef struct s_ww_elf_handler
 // void
 // ww_elf_free(t_ww_elf **elf);
 
-# endif // __WW_ELF_H__
+# endif // __WW_BINARY_ELF_H__
 #endif // ELF_H
