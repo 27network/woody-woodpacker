@@ -28,6 +28,8 @@ OBJ_DIR = $(BUILD_DIR)/obj
 ifeq ($(DEVELOPMENT),1)
 CFLAGS += -g3 -gdwarf-3 -ggdb -DWW_DEBUG=1
 _ := $(shell bash gensources.sh $(SRC_DIR) $(SHSRC_DIR))
+#TODO: REMOVE THIS
+# _ := $(shell $(MAKE) -C third-party/libelfstream)
 endif
 include sources.mk
 
@@ -40,23 +42,26 @@ SHBINS := $(patsubst %.s,%.bin,$(SHSRCS))
 LIB_DIR = third-party
 LIBFT_DIR = $(LIB_DIR)/libft
 LIBFT = $(LIBFT_DIR)/build/output/libft.a
+LIBELFSTREAM_DIR = $(LIB_DIR)/libelfstream
+LIBELFSTREAM = $(LIBELFSTREAM_DIR)/libelfstream.a
 
-CLEAN_DEPS += clean_libft
-FCLEAN_DEPS += fclean_libft
+CLEAN_DEPS += clean_libft clean_libelfstream
+FCLEAN_DEPS += fclean_libft fclean_libelfstream
 
 CFLAGS += -I$(LIBFT_DIR)/include
+CFLAGS += -I$(LIBELFSTREAM_DIR)/include
 LDFLAGS += $(LIBFT)
+LDFLAGS += $(LIBELFSTREAM)
 
-all:
-	$(MAKE) -j$(shell nproc) $(NAME)
+all: $(NAME)
 
-$(LIBFT_DIR):
-	git submodule update --init --recursive
-
-$(LIBFT): $(LIBFT_DIR)
+$(LIBFT):
 	$(MAKE) -C $(LIBFT_DIR) -j$(shell nproc)
 
-$(NAME): $(OBJS) $(LIBFT)
+$(LIBELFSTREAM):
+	$(MAKE) -C $(LIBELFSTREAM_DIR) LIBFT_DIR=../libft -j$(shell nproc)
+
+$(NAME): $(OBJS) $(LIBFT) $(LIBELFSTREAM)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(SHBINS)
@@ -85,8 +90,14 @@ fclean: $(FCLEAN_DEPS) oclean
 clean_libft:
 	$(MAKE) -C $(LIBFT_DIR) clean
 
+clean_libelfstream:
+	$(MAKE) -C $(LIBELFSTREAM_DIR) clean
+
 fclean_libft:
 	$(MAKE) -C $(LIBFT_DIR) fclean
+
+fclean_libelfstream:
+	$(MAKE) -C $(LIBELFSTREAM_DIR) fclean
 
 re: fclean all
 
