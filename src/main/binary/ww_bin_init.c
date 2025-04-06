@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:40:15 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/17 23:20:36 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 10:25:11 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,15 @@
 #include <ww/binary.h>
 #include <ww/log.h>
 
-enum e_ww_error	ww_bin_init(t_ww_binary *bin, t_ww_args *args)
+t_ww_error	ww_bin_init(t_ww_binary *bin, t_ww_args *args)
 {
 	ft_memset(bin, 0, sizeof(t_ww_binary));
 	bin->input = args->target;
 	bin->output = args->output;
+	ww_trace("Opening input file '%s'\n", bin->input);
 	bin->input_fd = open(bin->input, O_RDONLY);
 	if (bin->input_fd == -1)
-	{
-		ww_error("Could not open input file '%s': %m\n", args->target);
-		return (WW_ERROR);
-	}
-	return (WW_OK);
+		return (ww_err_fmt(ERROR_IO, "Could not open input file '%s': %m\n",
+				bin->input));
+	return (ww_ok());
 }

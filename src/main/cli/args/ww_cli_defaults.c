@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:33:05 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 14:41:12 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 10:19:21 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,4 +49,6 @@ void	ww_cli_defaults(t_ww_args *args, char **envp)
 	args->signature = ww_getenv(envp, "WW_SIGNATURE", WW_SIGNATURE_DEFAULT);
 	ww_cli_opt_compression(args,
 		ww_getenv(envp, "WW_COMPRESSION", NULL));
+	ww_cli_opt_payload(args,
+		ww_getenv(envp, "WW_PAYLOAD_FILE", NULL));
 }

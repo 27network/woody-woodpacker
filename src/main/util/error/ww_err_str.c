@@ -1,30 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ww_elf_free.c                                      :+:      :+:    :+:   */
+/*   ww_err_str.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/17 14:47:46 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/17 15:51:49 by kiroussa         ###   ########.fr       */
+/*   Created: 2025/04/06 09:47:43 by kiroussa          #+#    #+#             */
+/*   Updated: 2025/04/06 09:59:09 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <ft/io.h>
-#include <ft/mem.h>
-#include <sys/mman.h>
-#include <ww/elf.h>
+#include <errno.h>
+#include <ww/error.h>
 
-void	ww_elf_free(t_ww_elf **elf_ptr)
+t_ww_error	ww_err_str(enum e_ww_error_type type, const char *str)
 {
-	t_ww_elf	*elf;
-
-	if (elf_ptr && *elf_ptr)
-	{
-		elf = *elf_ptr;
-		ft_closep(&elf->fd);
-		if (elf->e32)
-			munmap((void *) elf->e32, elf->size);
-	}
-	ft_freep((void **) elf_ptr);
+	return ((t_ww_error){
+		.type = type,
+		.data = (void *) str,
+		.cached_errno = errno
+	});
 }

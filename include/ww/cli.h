@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/02 17:24:44 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 10:15:03 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 #  include <ft/opt.h>
 #  include <ft/print.h>
 #  include <stdbool.h>
+#  include <ww/compress.h>
+#  include <ww/encrypt.h>
 #  include <ww/log.h>
 
 #  define WW_SIGNATURE_DEFAULT "....WOODY...."
@@ -26,7 +28,7 @@
 #  define WW_ENCRYPTION_DEFAULT "xor"
 
 // The getopt-like options string
-#  define OPTSTRING "hVc:e:k:o:p:s:v"
+#  define OPTSTRING "hVc:e:k:o:ap:s:v"
 
 enum e_ww_cli_status
 {
@@ -34,39 +36,6 @@ enum e_ww_cli_status
 	CLI_EXIT_SUCCESS = 1,
 	CLI_EXIT_FAILURE = 2,
 };
-
-/**
- * @brief	The compression algorithms available.
- */
-enum e_ww_compression_algo
-{
-	COMPRESSION_ALGO_NONE = 0,
-	COMPRESSION_ALGO_SMOL,
-	_COMPRESSION_ALGO_SIZE,
-};
-
-enum e_ww_compression_algo
-ww_compression_algo(const char *algo);
-
-const char
-*ww_compression_algo_str(enum e_ww_compression_algo algo);
-
-/**
- * @brief	The encryption algorithms available.
- */
-enum e_ww_encryption_algo
-{
-	ENCRYPTION_ALGO_NONE = 0,
-	ENCRYPTION_ALGO_XOR,
-	ENCRYPTION_ALGO_AES,
-	_ENCRYPTION_ALGO_SIZE,
-};
-
-enum e_ww_encryption_algo
-ww_encryption_algo(const char *algo);
-
-const char
-*ww_encryption_algo_str(enum e_ww_encryption_algo algo);
 
 /**
  * @brief	The structure that holds the arguments passed to the program.
@@ -91,6 +60,8 @@ const char
  * 							(optional, default: none, env: WW_COMPRESSION)
  * @param	payload_file	The payload file to use.
  * 							(optional, default: <built-in>, env: WW_PAYLOAD_FILE)
+ * @param	payload_async	Whether the payload should run asynchronously.
+ * 							(optional, default: false, env: WW_PAYLOAD_ASYNC)
  */
 typedef struct s_ww_args
 {
@@ -102,6 +73,7 @@ typedef struct s_ww_args
 	const char					*signature;
 	enum e_ww_compression_algo	compression;
 	const char					*payload_file;
+	bool						payload_async;
 }	t_ww_args;
 
 /**

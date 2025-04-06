@@ -6,12 +6,12 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 01:52:13 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/03/04 14:52:10 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 10:16:25 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <ft/string.h>
-#include <ww/cli.h>
+#include <ww/encrypt.h>
+#include <ww/util.h>
 
 enum e_ww_encryption_algo	ww_encryption_algo(const char *algo)
 {
@@ -22,7 +22,7 @@ enum e_ww_encryption_algo	ww_encryption_algo(const char *algo)
 	i = 0;
 	while (i < len)
 	{
-		if (!ft_strcmp(algo, algos[i]))
+		if (!ww_strcmp_ignorecase(algo, algos[i]))
 			break ;
 		i++;
 	}

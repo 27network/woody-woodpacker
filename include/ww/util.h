@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 14:35:54 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 14:39:11 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 10:16:57 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 # undef UTIL_H
 # ifndef __WW_UTIL_H__
 #  define __WW_UTIL_H__
+
+#  include <stddef.h>
 
 /**
  * @brief	Compares two strings, ignoring case, up to `n` characters.

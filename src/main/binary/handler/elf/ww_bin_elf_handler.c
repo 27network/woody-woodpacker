@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:57:12 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/02 17:20:01 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 09:31:39 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 // in the target functions (s_ww_binary_handler* -> s_ww_elf_handler*).
 // It's a pointer either way, so it's fine.
 
-t_ww_error	ww_bin_elf_identifier(t_ww_binary *bin);
+t_ww_error	ww_bin_elf_identifier(t_ww_binary *bin, bool *is_elf);
 t_ww_error	ww_bin_elf_read(struct s_ww_binary_handler *self,
 				t_ww_binary *bin);
 t_ww_error	ww_bin_elf_process(struct s_ww_binary_handler *self,

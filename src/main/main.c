@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:53 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/03/30 15:58:17 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 11:11:53 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ static void	ww_dump_args(t_ww_args *args)
 	ww_trace("\tsignature: '%s'\n", args->signature);
 	ww_trace("\tcompression: %s\n",
 		ww_compression_algo_str(args->compression));
+	ww_trace("\tpayload_file: %s\n", args->payload_file);
+	ww_trace("\tpayload_async: %d\n", args->payload_async);
 	ww_trace("}\n");
 }
 

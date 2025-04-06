@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:19:39 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/02 14:10:26 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/04 20:46:33 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void
 ww_bin_free(t_ww_binary *bin);
 
 t_ww_error
-ww_bin_identify(t_ww_binary *bin, bool *identified);
+ww_bin_identify(t_ww_binary *bin);
 
 t_ww_error
 ww_bin_map(t_ww_binary *bin);
@@ -59,7 +59,7 @@ ww_bin_write(t_ww_binary *bin);
 
 typedef t_ww_error	t_ww_binary_handler_fn(struct s_ww_binary_handler *self,
 							t_ww_binary * bin);
-typedef t_ww_error	t_ww_binary_ident_fn(t_ww_binary *bin);
+typedef t_ww_error	t_ww_binary_ident_fn(t_ww_binary *bin, bool *found);
 
 typedef struct s_ww_binary_handler
 {

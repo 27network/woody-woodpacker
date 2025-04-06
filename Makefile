@@ -2,7 +2,7 @@
 # https://codeberg.org/xtrm/scaffold
 
 NAME = woody_woodpacker
-VERSION = 0.1.0
+VERSION = 0.3.0
 
 MAKE = make --no-print-directory
 
@@ -47,7 +47,8 @@ FCLEAN_DEPS += fclean_libft
 CFLAGS += -I$(LIBFT_DIR)/include
 LDFLAGS += $(LIBFT)
 
-all: $(NAME)
+all:
+	$(MAKE) -j$(shell nproc) $(NAME)
 
 $(LIBFT_DIR):
 	git submodule update --init --recursive

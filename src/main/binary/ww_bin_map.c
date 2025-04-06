@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 22:28:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/02 13:14:18 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 09:17:44 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,6 @@ t_ww_error	ww_bin_map(t_ww_binary *bin)
 			bin->input_fd, 0);
 	ww_trace("Mapped %s to %p\n", bin->input, (void *)bin->blob);
 	if (bin->blob == MAP_FAILED)
-		return (ww_err("ww_bin_map: mmap failed: %m\n"));
+		return (ww_err_fmt(ERROR_IO, "ww_bin_map: mmap failed: %m\n"));
 	return (ww_ok());
 }

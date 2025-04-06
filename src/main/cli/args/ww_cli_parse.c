@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:32:14 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 02:08:12 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 10:09:30 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,12 @@ static inline int	ww_cli_opt_invalid(t_opt_globals *globals, t_opt_args *args)
 	return (CLI_EXIT_FAILURE);
 }
 
+static inline int	ww_cli_opt_payload_async(t_ww_args *args)
+{
+	args->payload_async = true;
+	return (CLI_SUCCESS);
+}
+
 static inline int	ww_cli_opt_handle(t_ww_args *args, int opt,
 				t_opt_globals *opt_globals)
 {
@@ -39,8 +45,12 @@ static inline int	ww_cli_opt_handle(t_ww_args *args, int opt,
 		return (ww_cli_opt_output(args, opt_globals->optarg));
 	if (opt == 's')
 		return (ww_cli_opt_signature(args, opt_globals->optarg));
+	if (opt == 'p')
+		return (ww_cli_opt_payload(args, opt_globals->optarg));
 	if (opt == 'v')
 		return (ww_cli_opt_verbose(args));
+	if (opt == 'a')
+		return (ww_cli_opt_payload_async(args));
 	ww_error("Unrecognized option: '%c'\n", opt);
 	return (CLI_EXIT_FAILURE);
 }

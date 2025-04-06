@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:49:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/02/14 00:41:55 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/06 11:11:16 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ static inline void	ww_log_prefix(enum e_ww_log_level level)
 
 	if (!setup)
 	{
-		ft_bzero(prefix + sizeof(WW_PROJECT_NAME), WW_BUFFER_EXTRA);
+		ft_bzero(prefix, WW_BUFFER_EXTRA + sizeof(WW_PROJECT_NAME));
 		ft_strcpy(prefix, WW_PROJECT_NAME"(     ): ");
 		ft_strcpy(prefix + ft_strlen(prefix) + 1, WW_PROJECT_NAME"(    ): ");
 		setup = true;
@@ -63,17 +63,12 @@ static inline void	ww_log_prefix(enum e_ww_log_level level)
 	copy_size = 5;
 	if (level == LOG_WARN || level == LOG_INFO)
 	{
-		target += ft_strlen(target);
+		target += ft_strlen(target) + 1;
 		copy_size--;
 	}
 	ft_strncpy(target + sizeof(WW_PROJECT_NAME), ww_log_level_str(level),
 		copy_size);
 	ft_putstr_fd(target, WW_LOG_TARGET_FD);
-}
-
-static inline void	ww_log_message(const char *fmt, va_list args)
-{
-	ft_vdprintf(WW_LOG_TARGET_FD, fmt, args);
 }
 
 void	ww_vlog(enum e_ww_log_level level, const char *fmt, va_list args)
@@ -85,5 +80,5 @@ void	ww_vlog(enum e_ww_log_level level, const char *fmt, va_list args)
 	if (*ww_log_level() < level)
 		return ;
 	ww_log_prefix(level);
-	ww_log_message(fmt, args);
+	ft_vdprintf(WW_LOG_TARGET_FD, fmt, args);
 }
