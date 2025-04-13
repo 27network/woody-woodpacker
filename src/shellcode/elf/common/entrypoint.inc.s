@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/03/30 15:38:48 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/04/08 13:37:05 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -28,4 +28,5 @@ _wentry:
 	SYSCALL
 
 hello:
-    db "Hello, Woody!\n", 0
+    db hello, "Hello, Woody!\n", 0
+

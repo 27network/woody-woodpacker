@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 20:28:34 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/13 18:46:59 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,6 @@
 # include <elf.h>
 # include <stddef.h>
 # include <stdint.h>
-
-#define BIT_SELECT(self, field64, field32) \
-	((self)->bitness == ELFSTREAM_64 ? (self)->field64 : (self)->field32)
-
-#define BIT(self, target, field) \
-	BIT_SELECT(self, target##64.field, target##32.field)
 
 enum e_elfstream_error
 {
@@ -46,7 +40,7 @@ typedef struct s_elfstream	t_elfstream;
 
 enum e_content_source_type
 {
-	CONTENT_SOURCE_FILE,
+	CONTENT_SOURCE_FILE = 0,
 	CONTENT_SOURCE_MEMORY,
 };
 
@@ -57,14 +51,15 @@ typedef struct s_content_source
 	{
 		struct
 		{
+			int			fd;
 			size_t		offset;
 			size_t		size;
-		}	file;
+		}	s_file;
 		struct
 		{
 			const char	*data;
 			size_t		size;
-		}	memory;
+		}	s_memory;
 	};
 	struct s_content_source		*next;
 }	t_content_source;
@@ -88,6 +83,15 @@ typedef struct s_elf_segment
 	};
 	t_content_source			*content;
 }	t_elf_segment;
+
+typedef struct s_elf_section
+{
+	t_elfstream					*stream;
+	union
+	{
+
+	};
+}	t_elf_section;
 
 /**
  *

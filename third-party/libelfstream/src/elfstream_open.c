@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:30:37 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 20:29:51 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/13 17:10:55 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,23 +41,34 @@ static inline bool	elfstream_validate(t_elfstream *self, int fd)
 	return (true);
 }
 
+static inline size_t	pick(t_elfstream *self, size_t off_32, size_t off_64)
+{
+	if (self->bitness == ELFSTREAM_32)
+		return (off_32);
+	return (off_64);
+}
+
 static inline bool	elfstream_segments_fill(t_elfstream *self, int fd)
 {
-	size_t	i;
-	size_t	to_read;
+	size_t			i;
+	const size_t	to_read = pick(self, sizeof(Elf32_Phdr),
+			sizeof(Elf64_Phdr));
+	const size_t	offset_offset = pick(self, offsetof(Elf32_Phdr, p_offset),
+			offsetof(Elf64_Phdr, p_offset));
+	const size_t	filesz_offset = pick(self, offsetof(Elf32_Phdr, p_filesz),
+			offsetof(Elf64_Phdr, p_filesz));
+	void			*data;
 
-	to_read = self->ehdr32.e_phentsize;
-	if (self->bitness == ELFSTREAM_64)
-		to_read = self->ehdr64.e_phentsize;
 	i = 0;
 	while (i < self->segment_count)
 	{
 		self->segments[i].stream = self;
-		if (read(fd, &self->segments[i].phdr64, to_read) != to_read)
+		if (read(fd, &self->segments[i].phdr32, to_read) != to_read)
 			return (false);
-		self->segments[i].content = elfstream_source_fd(
-			
-		);
+		data = &self->segments[i].phdr32;
+		self->segments[i].content = elfstream_source_fd(fd,
+				*((size_t *)(data + offset_offset)),
+				*((size_t *)(data + filesz_offset)));
 		i++;
 	}
 }
