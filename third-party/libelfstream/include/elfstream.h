@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/13 18:46:59 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/14 02:34:27 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,11 @@
 # define ELFSTREAM_H
 
 # include <elf.h>
+# include <stdbool.h>
 # include <stddef.h>
 # include <stdint.h>
+# include <stdlib.h>
+# include <unistd.h>
 
 enum e_elfstream_error
 {
@@ -89,7 +92,8 @@ typedef struct s_elf_section
 	t_elfstream					*stream;
 	union
 	{
-
+		Elf32_Shdr	shdr32;
+		Elf64_Shdr	shdr64;
 	};
 }	t_elf_section;
 

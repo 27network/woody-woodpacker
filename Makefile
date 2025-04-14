@@ -59,7 +59,7 @@ $(LIBFT):
 	$(MAKE) -C $(LIBFT_DIR) -j$(shell nproc)
 
 $(LIBELFSTREAM):
-	$(MAKE) -C $(LIBELFSTREAM_DIR) LIBFT_DIR=../libft -j$(shell nproc)
+	$(MAKE) -C $(LIBELFSTREAM_DIR) LIBFT_DIR=../libft -j$(shell nproc) DEVELOPMENT=$(DEVELOPMENT)
 
 $(NAME): $(OBJS) $(LIBFT) $(LIBELFSTREAM)
 	$(CC) $(LDFLAGS) -o $@ $^

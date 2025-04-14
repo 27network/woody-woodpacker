@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:30:37 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/13 17:10:55 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/14 02:38:34 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static inline bool	elfstream_validate(t_elfstream *self, int fd)
 	else
 	{
 		lseek(fd, 0, SEEK_SET);
-		if (read(fd, &self->ehdr64, sizeof(Elf64_Ehdr)) != sizeof(Elf64_Ehdh))
+		if (read(fd, &self->ehdr64, sizeof(Elf64_Ehdr)) != sizeof(Elf64_Ehdr))
 			return (false);
 		self->segment_count = self->ehdr64.e_phnum;
 		self->section_count = self->ehdr64.e_shnum;
@@ -51,13 +51,13 @@ static inline size_t	pick(t_elfstream *self, size_t off_32, size_t off_64)
 static inline bool	elfstream_segments_fill(t_elfstream *self, int fd)
 {
 	size_t			i;
-	const size_t	to_read = pick(self, sizeof(Elf32_Phdr),
+	const ssize_t	to_read = pick(self, sizeof(Elf32_Phdr),
 			sizeof(Elf64_Phdr));
 	const size_t	offset_offset = pick(self, offsetof(Elf32_Phdr, p_offset),
 			offsetof(Elf64_Phdr, p_offset));
 	const size_t	filesz_offset = pick(self, offsetof(Elf32_Phdr, p_filesz),
 			offsetof(Elf64_Phdr, p_filesz));
-	void			*data;
+	char			*data;
 
 	i = 0;
 	while (i < self->segment_count)
@@ -65,12 +65,13 @@ static inline bool	elfstream_segments_fill(t_elfstream *self, int fd)
 		self->segments[i].stream = self;
 		if (read(fd, &self->segments[i].phdr32, to_read) != to_read)
 			return (false);
-		data = &self->segments[i].phdr32;
+		data = (char *) &self->segments[i].phdr32;
 		self->segments[i].content = elfstream_source_fd(fd,
 				*((size_t *)(data + offset_offset)),
 				*((size_t *)(data + filesz_offset)));
 		i++;
 	}
+	return (true);
 }
 
 enum e_elfstream_error	elfstream_open(t_elfstream *self, int fd)
@@ -83,7 +84,6 @@ enum e_elfstream_error	elfstream_open(t_elfstream *self, int fd)
 	if (!elfstream_segments_fill(self, fd))
 	{
 		elfstream_close(self);
-		*self = NULL;
 		return (ELFSTREAM_ERROR);
 	}
 	return (ELFSTREAM_OK);
