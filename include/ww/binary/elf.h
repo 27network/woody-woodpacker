@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 14:24:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 18:01:43 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/15 03:03:47 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,6 @@
 #  include <elfstream.h>
 #  include <stdbool.h>
 #  include <ww/binary.h>
-
-enum e_ww_elf_bitness
-{
-	ELF_BITNESS_32 = 32,
-	ELF_BITNESS_64 = 64,
-};
 
 typedef struct s_ww_elf_handler
 {
