@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/03/21 00:55:15 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/16 18:28:01 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 #define SMOL_MIN_LENGTH		3			// The min match length for flm
 #define SMOL_WINDOW_SIZE	4096		// The window size for flm
 
-#define SMOL_MAGIC			"SM0L"
+#define SMOL_MAGIC			"SMLZ"
 #define SMOL_VERSION_MASK	0b00001111
 #define SMOL_METADATA_MASK	0b01110000
 

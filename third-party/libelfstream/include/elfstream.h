@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/14 02:34:27 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/16 17:24:08 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,6 +120,12 @@ typedef struct s_elfstream
  */
 enum e_elfstream_error
 elfstream_open(t_elfstream *self, int fd);
+
+/**
+ *
+ */
+enum e_elfstream_error
+elfstream_write(t_elfstream *self, int fd);
 
 /**
  * 
