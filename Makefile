@@ -28,8 +28,6 @@ OBJ_DIR = $(BUILD_DIR)/obj
 ifeq ($(DEVELOPMENT),1)
 CFLAGS += -g3 -gdwarf-3 -ggdb -DWW_DEBUG=1
 _ := $(shell bash gensources.sh $(SRC_DIR) $(SHSRC_DIR))
-#TODO: REMOVE THIS
-# _ := $(shell $(MAKE) -C third-party/libelfstream)
 endif
 include sources.mk
 

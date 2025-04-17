@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:30:37 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/14 02:38:34 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/17 10:40:03 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 static inline bool	elfstream_validate(t_elfstream *self, int fd)
 {
+	ft_memset(self, 0, sizeof(t_elfstream));
 	lseek(fd, 0, SEEK_SET);
 	self->fd = fd;
 	if (read(fd, &self->ehdr32, sizeof(Elf32_Ehdr)) != sizeof(Elf32_Ehdr)
@@ -74,14 +75,40 @@ static inline bool	elfstream_segments_fill(t_elfstream *self, int fd)
 	return (true);
 }
 
+static inline bool	elfstream_sections_fill(t_elfstream *self, int fd)
+{
+	size_t			i;
+	const ssize_t	to_read = pick(self, sizeof(Elf32_Shdr),
+			sizeof(Elf64_Shdr));
+
+	i = 0;
+	while (i < self->section_count)
+	{
+		self->sections[i].stream = self;
+		if (read(fd, &self->sections[i].shdr32, to_read) != to_read)
+			return (false);
+		i++;
+	}
+	return (true);
+}
+
 enum e_elfstream_error	elfstream_open(t_elfstream *self, int fd)
 {
 	if (!elfstream_validate(self, fd))
 		return (ELFSTREAM_INVALID);
 	self->segments = ft_calloc(self->segment_count, sizeof(t_elf_segment));
-	if (!self->segments)
+	self->sections = ft_calloc(self->section_count, sizeof(t_elf_section));
+	if (!self->segments || !self->sections)
+	{
+		elfstream_close(self);
 		return (ELFSTREAM_ALLOC);
+	}
 	if (!elfstream_segments_fill(self, fd))
+	{
+		elfstream_close(self);
+		return (ELFSTREAM_ERROR);
+	}
+	if (!elfstream_sections_fill(self, fd))
 	{
 		elfstream_close(self);
 		return (ELFSTREAM_ERROR);

@@ -1,0 +1,73 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   elfstream_write.template                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
+/*   Updated: 2025/04/17 14:12:36 by kiroussa         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef ELF_BITNESS
+# error "ELF_BITNESS not defined"
+#endif
+
+#define _APPEND(x, y) x##y
+#define APPEND(x, y) _APPEND(x, y)
+
+#define Elf(x) APPEND(APPEND(APPEND(Elf, ELF_BITNESS), _), x)
+#define Func(x) APPEND(APPEND(x, _), ELF_BITNESS)
+
+static inline enum	e_elfstream_error
+Func(elfstream_write_header)(t_elfstream *self, int fd)
+{
+	Elf(Ehdr)	ehdr;
+}
+
+// static inline enum e_elfstream_error	elfstream_write_header(
+// 					t_elfstream *self, int fd)
+// {
+// 	size_t				i;
+//
+// 	lseek(fd, 0, SEEK_SET);
+// 	if (self->bitness == ELFSTREAM_32
+// 		&& write(fd, &self->ehdr32, sizeof(Elf32_Ehdr)) != sizeof(Elf32_Ehdr))
+// 		return (ELFSTREAM_IO);
+// 	if (self->bitness == ELFSTREAM_64
+// 		&& write(fd, &self->ehdr64, sizeof(Elf64_Ehdr)) != sizeof(Elf64_Ehdr))
+// 		return (ELFSTREAM_IO);
+// 	return (ELFSTREAM_OK);
+// }
+//
+// static inline enum e_elfstream_error	elfstream_write_segments(
+// 					t_elfstream *self, int fd)
+// {
+// 	size_t				i;
+// 	const ssize_t		to_write = pick(self, sizeof(Elf32_Phdr),
+// 			sizeof(Elf64_Phdr));
+//
+// 	i = 0;
+// 	while (i < self->segment_count)
+// 	{
+// 		if (write(fd, &self->segments[i].phdr32, to_write) != to_write)
+// 			return (ELFSTREAM_IO);
+// 		i++;
+// 	}
+// 	i = 0;
+// 	while (i < self->segment_count)
+// 	{
+// 		if (!elfstream_write_segment(self->segments + i))
+// 			return (ELFSTREAM_ERROR);
+// 		i++;
+// 	}
+// }
+//
+// static inline enum e_elfstream_error	elfstream_write_x32(
+// 					t_elfstream *self, int fd)
+// {
+// 	size_t				i;
+// }
+
+#undef BITNESS

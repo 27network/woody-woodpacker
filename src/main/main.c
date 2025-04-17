@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:53 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 11:11:53 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/17 09:20:31 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,21 +52,6 @@ static int	ww_process(t_ww_args *args)
 	ww_bin_free(&bin);
 	return (!!err.type);
 }
-
-// static int	ww_process(t_ww_args *args)
-// {
-// 	t_ww_elf	*elf;
-// 	bool		err;
-//
-// 	elf = ww_elf_parse(args->target);
-// 	if (!elf)
-// 		return (1);
-// 	ww_trace("%s is a valid ELF file.\n", args->target);
-// 	ww_trace("Trying to write ELF file...\n");
-// 	err = ww_elf_write(args, elf, args->output);
-// 	ww_elf_free(&elf);
-// 	return (err == true);
-// }
 
 int	main(int argc, char **argv, char **envp)
 {

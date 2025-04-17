@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/16 17:24:08 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/17 11:49:39 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ enum e_elfstream_error
 	ELFSTREAM_OK = 0,
 	ELFSTREAM_ERROR,
 	ELFSTREAM_INVALID,
+	ELFSTREAM_IO,
 	ELFSTREAM_EOF,
 	ELFSTREAM_ALLOC,
 	_ELFSTREAM_ERROR_MAX,
@@ -112,7 +113,7 @@ typedef struct s_elfstream
 	size_t						segment_count;
 	t_elf_segment				*segments;
 	size_t						section_count;
-	// t_elf_section				*sections;
+	t_elf_section				*sections;
 }	t_elfstream;
 
 /**
