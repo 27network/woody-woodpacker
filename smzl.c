@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/16 18:28:01 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/21 13:15:32 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#define SMOL_MAX_LENGTH		512			// The max lookahead check for flm
-#define SMOL_MIN_LENGTH		3			// The min match length for flm
-#define SMOL_WINDOW_SIZE	4096		// The window size for flm
+#define SMLZ_MAX_LENGTH		512			// The max lookahead check for flm
+#define SMLZ_MIN_LENGTH		3			// The min match length for flm
+#define SMLZ_WINDOW_SIZE	4096		// The window size for flm
 
-#define SMOL_MAGIC			"SMLZ"
-#define SMOL_VERSION_MASK	0b00001111
-#define SMOL_METADATA_MASK	0b01110000
+#define SMLZ_MAGIC			"SMLZ"
+#define SMLZ_VERSION_MASK	0b00001111
+#define SMLZ_METADATA_MASK	0b01110000
 
-#define SMOL_FLAG_V1		0b00000001
+#define SMLZ_FLAG_V1		0b00000001
 
 typedef struct s_sml_header
 {
@@ -156,44 +156,40 @@ static void	smol_compress_block(t_sml_header *header, t_sml_buffer *in,
 					t_sml_buffer *out)
 {
 	const size_t	block_size = header->block_size;
-	t_sml_token		token;
-	char			*sml_block;
-	int				i;
+	char			*sml_block_header;
+	char			*sml_block_data;
+	size_t			written;
 
-	sml_block = out->data + out->offset;
-	out->offset += block_size / SMOL_BITS;
-	i = 0;
-	while (i++ < block_size)
+	// Set the block header 
+	sml_block_header = out->data + out->offset;
+	out->offset += block_size / SMLZ_BITS;
+	sml_block_data = sml_block_header + block_size / SMLZ_BITS;
+
+	// Write out compressed/litterals sequentially until we
+	// get enough to fill the block
+	written = 0;
+	while (written < block_size)
 	{
-		token.offset = find_longest_match((uint8_t *)in->data, in->offset,
-				in->size, &token.length);
-		if (token.length >= SMOL_MIN_LENGTH)
-		{
-			smol_compress_block_flip_bit(sml_block, i);
-			in->offset += token.length;
-			smol_write(out, &token, sizeof(t_sml_token));
-			continue ;
-		}
-		in->offset += smol_write(out, in->data + in->offset, 1);
+		if (smol_compress_litteral(in, out))
+			sml_block_header[written / SMLZ_BITS]
+				|= (1 << ((SMLZ_BITS - (written + 1)) % SMLZ_BITS));
+		written++;
 	}
 }
 
 static void	smol_compress_blocks(t_sml_header *header, t_sml_buffer *in,
 					t_sml_buffer *out)
 {
-	const size_t	block_size = header->block_size;
+	size_t	last_block_size;
 
+	last_block_size = 0;
 	while (in->offset < in->size)
 	{
-		if (in->offset + block_size > in->size)
-		{
-			header->remaining = smol_write(out, in->data + in->offset,
-					in->size - in->offset);
-			break ;
-		}
-		smol_compress_block(header, in, out);
-		in->offset += block_size;
+		last_block_size = smol_compress_block(header, in, out);
+		header->nblocks++;
 	}
+	if (last_block_size != header->block_size)
+		header->remaining = last_block_size;
 }
 
 static void	smol_compress_init(t_sml_buffer *in, t_sml_buffer *out)
