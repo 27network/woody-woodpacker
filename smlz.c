@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   smol_tests.c                                       :+:      :+:    :+:   */
+/*   smzl.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/21 13:15:32 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/04/24 18:19:44 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 
 #define SMLZ_FLAG_V1		0b00000001
 
-typedef struct s_sml_header
+typedef struct s_smlz_header
 {
 	uint8_t		magic[4];
 	uint8_t		flags;
@@ -35,17 +35,17 @@ typedef struct s_sml_header
 	uint16_t	block_size;
 	uint8_t		remaining;
 	uint8_t		reserved[2];
-}	t_sml_header;
+}	t_smlz_header;
 
-typedef struct s_sml_buffer
+typedef struct s_smlz_buffer
 {
 	char	*data;
 	size_t	size;
 	size_t	offset;
-}	t_sml_buffer;
+}	t_smlz_buffer;
 
-size_t	smol_compress(char *in_buf, size_t in_len, char *out_buf);
-size_t	smol_decompress(char *in_buf, size_t in_len, char *out_buf);
+size_t	smlz_compress(char *in_buf, size_t in_len, char *out_buf);
+size_t	smlz_decompress(char *in_buf, size_t in_len, char *out_buf);
 
 static inline size_t	min(size_t a, size_t b)
 {
@@ -67,27 +67,27 @@ static size_t	find_longest_match(
 	size_t data_size,
 	uint16_t *length
 ) {
-	const size_t	max_match_length = min(data_size - pos, SMOL_MAX_LENGTH);
+	const size_t	max_match_length = min(data_size - pos, smlz_MAX_LENGTH);
 	size_t			current_length;
 	size_t			i;
 	size_t			offset;
 
 	*length = 0;
-	if (max_match_length < SMOL_MIN_LENGTH)
+	if (max_match_length < smlz_MIN_LENGTH)
 		return (0);
 	offset = 0;
-	i = max(pos - SMOL_WINDOW_SIZE, 0);
+	i = max(pos - smlz_WINDOW_SIZE, 0);
 	while (i++ < pos)
 	{
 		current_length = 0;
 		while (current_length < max_match_length
 			&& data[(i - 1) + current_length] == data[pos + current_length])
 			current_length++;
-		if (current_length >= SMOL_MIN_LENGTH && current_length > *length)
+		if (current_length >= smlz_MIN_LENGTH && current_length > *length)
 		{
 			*length = current_length;
 			offset = pos - (i - 1);
-			if (current_length == SMOL_MAX_LENGTH)
+			if (current_length == smlz_MAX_LENGTH)
 				break ;
 		}
 	}
@@ -95,7 +95,7 @@ static size_t	find_longest_match(
 }
 
 [[nodiscard]]
-static size_t	smol_write_direct(char *buf, size_t offset, void *data,
+static size_t	smlz_write_direct(char *buf, size_t offset, void *data,
 					size_t len)
 {
 	if (buf)
@@ -103,29 +103,27 @@ static size_t	smol_write_direct(char *buf, size_t offset, void *data,
 	return (len);
 }
 
-static size_t	smol_write(t_sml_buffer *buf, void *data, size_t len)
+static size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
 {
 	const size_t	ret_len
-		= smol_write_direct(buf->data, buf->offset, data, len);
+		= smlz_write_direct(buf->data, buf->offset, data, len);
 
 	buf->offset += ret_len;
 	return (ret_len);
 }
 
-static void	smol_block_write(t_sml_buffer *buf, t_sml_buffer *in,
+static void	smlz_block_write(t_smlz_buffer *buf, t_smlz_buffer *in,
 				bool trailing)
 {
 
 }
 
-#define SMOL_MIN_DATA_SIZE	
-
-static bool	smol_header_init(t_sml_header *header, t_sml_buffer *in)
+static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 {
 	size_t	size;
 
 	size = in->size;
-	header->flags = SMOL_FLAG_V1;
+	header->flags = SMLZ_FLAG_V1;
 	if (in->size < 32)
 		return (false);
 	header->block_size = 8;
@@ -137,111 +135,111 @@ static bool	smol_header_init(t_sml_header *header, t_sml_buffer *in)
 	return (true);
 }
 
-#define SMOL_BITS 8  // I hope thats not changing soon :pray:
+#define smlz_BITS 8  // I hope thats not changing soon :pray:
 
-typedef struct s_sml_token
+typedef struct s_smlz_token
 {
 	uint16_t	length;
 	uint8_t		offset;
-}	t_sml_token;
+}	t_smlz_token;
 
-static inline void	smol_compress_block_flip_bit(char *data, char *sml_block, int bit)
+static inline void	smlz_compress_block_flip_bit(char *data, char *sml_block, int bit)
 {
 	if (data)
-		sml_block[bit / SMOL_BITS]
-			|= (1 << ((SMOL_BITS - (bit + 1)) % SMOL_BITS));
+		sml_block[bit / SMLZ_BITS]
+			|= (1 << ((SMLZ_BITS - (bit + 1)) % SMLZ_BITS));
 }
 
-static void	smol_compress_block(t_sml_header *header, t_sml_buffer *in,
-					t_sml_buffer *out)
+static void	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
+					t_smlz_buffer *out)
 {
 	const size_t	block_size = header->block_size;
-	char			*sml_block_header;
-	char			*sml_block_data;
+	char			*block_header;
+	char			*block_data;
 	size_t			written;
 
 	// Set the block header 
-	sml_block_header = out->data + out->offset;
+	block_header = out->data + out->offset;
 	out->offset += block_size / SMLZ_BITS;
-	sml_block_data = sml_block_header + block_size / SMLZ_BITS;
+	block_data = block_header + block_size / SMLZ_BITS;
 
 	// Write out compressed/litterals sequentially until we
 	// get enough to fill the block
 	written = 0;
 	while (written < block_size)
 	{
-		if (smol_compress_litteral(in, out))
-			sml_block_header[written / SMLZ_BITS]
+		if (smlz_compress_litteral(in, out))
+			block_header[written / SMLZ_BITS]
 				|= (1 << ((SMLZ_BITS - (written + 1)) % SMLZ_BITS));
 		written++;
 	}
 }
 
-static void	smol_compress_blocks(t_sml_header *header, t_sml_buffer *in,
-					t_sml_buffer *out)
+static void	smlz_compress_blocks(t_smlz_header *header, t_smlz_buffer *in,
+					t_smlz_buffer *out)
 {
 	size_t	last_block_size;
 
 	last_block_size = 0;
 	while (in->offset < in->size)
 	{
-		last_block_size = smol_compress_block(header, in, out);
+		last_block_size = smlz_compress_block(header, in, out);
 		header->nblocks++;
 	}
 	if (last_block_size != header->block_size)
 		header->remaining = last_block_size;
 }
 
-static void	smol_compress_init(t_sml_buffer *in, t_sml_buffer *out)
+static void	smlz_compress_init(t_smlz_buffer *in, t_smlz_buffer *out)
 {
-	t_sml_header	header;
+	t_smlz_header	header;
 
 	memset(&header, 0, sizeof(header));
-	out->offset = sizeof(t_sml_header);
+	out->offset = sizeof(t_smlz_header);
 	memcpy(&header.magic, SMOL_MAGIC, sizeof(header.magic));
-	if (!smol_header_init(&header, in))
+	if (!smlz_header_init(&header, in))
 	{
-		smol_write(out, &header, sizeof(t_sml_header));
+		smlz_write(out, &header, sizeof(t_smlz_header));
 		header.remaining = in->size;
-		smol_write(out, in->data, in->size);
+		smlz_write(out, in->data, in->size);
 		return ;
 	}
-	smol_compress_blocks(&header, in, out);
-	(void)smol_write_direct(out->data, 0, &header, sizeof(t_sml_header));
+	smlz_compress_blocks(&header, in, out);
+	(void)smlz_write_direct(out->data, 0, &header, sizeof(t_smlz_header));
 }
 
-size_t	smol_compress(char *in_buf, size_t in_len, char *out_buf)
+size_t	smlz_compress(char *in_buf, size_t in_len, char *out_buf)
 {
-	t_sml_buffer	input_buffer;
-	t_sml_buffer	output_buffer;
+	t_smlz_buffer	input_buffer;
+	t_smlz_buffer	output_buffer;
 
-	memset(&input_buffer, 0, sizeof(t_sml_buffer));
-	memset(&output_buffer, 0, sizeof(t_sml_buffer));
+	memset(&input_buffer, 0, sizeof(t_smlz_buffer));
+	memset(&output_buffer, 0, sizeof(t_smlz_buffer));
 	input_buffer.data = in_buf;
 	input_buffer.size = in_len;
 	output_buffer.data = out_buf;
-	smol_compress_init(&input_buffer, &output_buffer);
+	smlz_compress_init(&input_buffer, &output_buffer);
 	return (output_buffer.offset);
 }
 
-static size_t	smol_decompress0(t_sml_buffer *in, t_sml_buffer *out)
+static size_t	smlz_decompress0(t_smlz_buffer *in, t_smlz_buffer *out)
 {
 	(void)in;
 	(void)out;
 	return (0);
 }
 
-size_t	smol_decompress(char *in_buf, size_t in_len, char *out_buf)
+size_t	smlz_decompress(char *in_buf, size_t in_len, char *out_buf)
 {
-	t_sml_buffer	input_buffer;
-	t_sml_buffer	output_buffer;
+	t_smlz_buffer	input_buffer;
+	t_smlz_buffer	output_buffer;
 
-	memset(&input_buffer, 0, sizeof(t_sml_buffer));
-	memset(&output_buffer, 0, sizeof(t_sml_buffer));
+	memset(&input_buffer, 0, sizeof(t_smlz_buffer));
+	memset(&output_buffer, 0, sizeof(t_smlz_buffer));
 	input_buffer.data = in_buf;
 	input_buffer.size = in_len;
 	output_buffer.data = out_buf;
-	smol_decompress0(&input_buffer, &output_buffer);
+	smlz_decompress0(&input_buffer, &output_buffer);
 	return (output_buffer.offset);
 }
 
@@ -253,13 +251,13 @@ size_t	smol_decompress(char *in_buf, size_t in_len, char *out_buf)
 #include <unistd.h>
 #include <fcntl.h>
 
-void	print_hdr(t_sml_header *hdr)
+void	print_hdr(t_smlz_header *hdr)
 {
-	printf(">>> SMOL Header\n");
-	// printf("magic: %s\n", hdr->magic);
+	printf(">>> SMLZ Header\n");
+	printf("magic: %s\n", hdr->magic);
 	// printf("flags: %d\n", hdr->flags);
-	printf("version: %d\n", hdr->flags & SMOL_VERSION_MASK);
-	printf("metadata: %d\n", hdr->flags & SMOL_METADATA_MASK);
+	printf("version: %d\n", hdr->flags & SMLZ_VERSION_MASK);
+	printf("metadata: %d\n", hdr->flags & SMLZ_METADATA_MASK);
 	printf("nblocks: %d\n", hdr->nblocks);
 	printf("block_size: %d\n", hdr->block_size);
 	printf("remaining: %d\n", hdr->remaining);
@@ -274,25 +272,25 @@ void	try(char *buf, size_t len)
 
 	printf("Trying to compress %zu bytes\n", len);
 	printf("Data: '%s'\n", buf);
-	compressed_len = smol_compress(buf, len, NULL);
+	compressed_len = smzl_compress(buf, len, NULL);
 	if (compressed_len == (size_t)-1)
 		return ;
 	compressed = malloc(compressed_len);
 	decompressed = malloc(len + 1);
 	if (compressed && decompressed)
 	{
-		tmp = smol_compress(buf, len, compressed);
+		tmp = smzl_compress(buf, len, compressed);
 		if (tmp != compressed_len)
 			printf(COMPRESS_SIZE_ERROR, tmp, compressed_len);
 		else
 		{
 			printf("Got %zu bytes\n", tmp);
-			print_hdr((t_sml_header *)compressed);
+			print_hdr((t_smlz_header *)compressed);
 			int fd = open("test.bin", O_CREAT | O_WRONLY, 0644);
 			(void)!write(fd, compressed, tmp);
 			close(fd);
 		}
-		// else if (tmp != smol_decompress(compressed, tmp, decompressed))
+		// else if (tmp != smzl_decompress(compressed, tmp, decompressed))
 		// 	printf("Decompressed size is %zu, expected %zu\n", tmp, len);
 		// else if (memcmp(buf, decompressed, len))
 		// 	printf("Decompressed data is different from original\n");
