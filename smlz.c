@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   smzl.c                                             :+:      :+:    :+:   */
+/*   smlz.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/24 18:19:44 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/02 15:46:05 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,27 +67,27 @@ static size_t	find_longest_match(
 	size_t data_size,
 	uint16_t *length
 ) {
-	const size_t	max_match_length = min(data_size - pos, smlz_MAX_LENGTH);
+	const size_t	max_match_length = min(data_size - pos, SMLZ_MAX_LENGTH);
 	size_t			current_length;
 	size_t			i;
 	size_t			offset;
 
 	*length = 0;
-	if (max_match_length < smlz_MIN_LENGTH)
+	if (max_match_length < SMLZ_MIN_LENGTH)
 		return (0);
 	offset = 0;
-	i = max(pos - smlz_WINDOW_SIZE, 0);
+	i = max(pos - SMLZ_WINDOW_SIZE, 0);
 	while (i++ < pos)
 	{
 		current_length = 0;
 		while (current_length < max_match_length
 			&& data[(i - 1) + current_length] == data[pos + current_length])
 			current_length++;
-		if (current_length >= smlz_MIN_LENGTH && current_length > *length)
+		if (current_length >= SMLZ_MIN_LENGTH && current_length > *length)
 		{
 			*length = current_length;
 			offset = pos - (i - 1);
-			if (current_length == smlz_MAX_LENGTH)
+			if (current_length == SMLZ_MAX_LENGTH)
 				break ;
 		}
 	}
@@ -112,12 +112,6 @@ static size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
 	return (ret_len);
 }
 
-static void	smlz_block_write(t_smlz_buffer *buf, t_smlz_buffer *in,
-				bool trailing)
-{
-
-}
-
 static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 {
 	size_t	size;
@@ -135,7 +129,7 @@ static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 	return (true);
 }
 
-#define smlz_BITS 8  // I hope thats not changing soon :pray:
+#define SMLZ_BITS 8  // I hope thats not changing soon :pray:
 
 typedef struct s_smlz_token
 {
@@ -143,11 +137,10 @@ typedef struct s_smlz_token
 	uint8_t		offset;
 }	t_smlz_token;
 
-static inline void	smlz_compress_block_flip_bit(char *data, char *sml_block, int bit)
+static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
+					t_smlz_buffer *out)
 {
-	if (data)
-		sml_block[bit / SMLZ_BITS]
-			|= (1 << ((SMLZ_BITS - (bit + 1)) % SMLZ_BITS));
+
 }
 
 static void	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
@@ -171,6 +164,8 @@ static void	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
 		if (smlz_compress_litteral(in, out))
 			block_header[written / SMLZ_BITS]
 				|= (1 << ((SMLZ_BITS - (written + 1)) % SMLZ_BITS));
+		else
+			smlz_write(out, in->data + in->offset, 1);
 		written++;
 	}
 }
@@ -181,6 +176,7 @@ static void	smlz_compress_blocks(t_smlz_header *header, t_smlz_buffer *in,
 	size_t	last_block_size;
 
 	last_block_size = 0;
+	header->remaining = 0;
 	while (in->offset < in->size)
 	{
 		last_block_size = smlz_compress_block(header, in, out);
@@ -196,7 +192,7 @@ static void	smlz_compress_init(t_smlz_buffer *in, t_smlz_buffer *out)
 
 	memset(&header, 0, sizeof(header));
 	out->offset = sizeof(t_smlz_header);
-	memcpy(&header.magic, SMOL_MAGIC, sizeof(header.magic));
+	memcpy(&header.magic, SMLZ_MAGIC, sizeof(header.magic));
 	if (!smlz_header_init(&header, in))
 	{
 		smlz_write(out, &header, sizeof(t_smlz_header));
@@ -272,14 +268,14 @@ void	try(char *buf, size_t len)
 
 	printf("Trying to compress %zu bytes\n", len);
 	printf("Data: '%s'\n", buf);
-	compressed_len = smzl_compress(buf, len, NULL);
+	compressed_len = smlz_compress(buf, len, NULL);
 	if (compressed_len == (size_t)-1)
 		return ;
 	compressed = malloc(compressed_len);
 	decompressed = malloc(len + 1);
 	if (compressed && decompressed)
 	{
-		tmp = smzl_compress(buf, len, compressed);
+		tmp = smlz_compress(buf, len, compressed);
 		if (tmp != compressed_len)
 			printf(COMPRESS_SIZE_ERROR, tmp, compressed_len);
 		else
@@ -290,7 +286,7 @@ void	try(char *buf, size_t len)
 			(void)!write(fd, compressed, tmp);
 			close(fd);
 		}
-		// else if (tmp != smzl_decompress(compressed, tmp, decompressed))
+		// else if (tmp != smlz_decompress(compressed, tmp, decompressed))
 		// 	printf("Decompressed size is %zu, expected %zu\n", tmp, len);
 		// else if (memcmp(buf, decompressed, len))
 		// 	printf("Decompressed data is different from original\n");
