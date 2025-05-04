@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/17 11:49:39 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/03 17:47:37 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,14 +65,22 @@ typedef struct s_content_source
 			size_t		size;
 		}	s_memory;
 	};
+	enum e_elfstream_error		(*write_fn)(struct s_content_source *self,
+			int fd);
 	struct s_content_source		*next;
 }	t_content_source;
 
 t_content_source
 *elfstream_source_fd(int fd, size_t offset, size_t size);
 
+enum e_elfstream_error
+elfstream_write_source_fd(t_elfstream *self, int fd);
+
 t_content_source
 *elfstream_source_data(const char *data, size_t size);
+
+enum e_elfstream_error
+elfstream_write_source_data(t_elfstream *self, int fd);
 
 /**
  *
@@ -88,6 +96,9 @@ typedef struct s_elf_segment
 	t_content_source			*content;
 }	t_elf_segment;
 
+/**
+ *
+ */
 typedef struct s_elf_section
 {
 	t_elfstream					*stream;

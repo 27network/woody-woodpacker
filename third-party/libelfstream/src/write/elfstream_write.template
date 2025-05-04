@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/17 14:12:36 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/04 01:43:33 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,29 @@
 #define _APPEND(x, y) x##y
 #define APPEND(x, y) _APPEND(x, y)
 
-#define Elf(x) APPEND(APPEND(APPEND(Elf, ELF_BITNESS), _), x)
-#define Func(x) APPEND(APPEND(x, _), ELF_BITNESS)
+#define Elf(n) APPEND(APPEND(APPEND(Elf, ELF_BITNESS), _), n)
+#define Func(n) APPEND(APPEND(n, _x), ELF_BITNESS)
 
-static inline enum	e_elfstream_error
+static inline enum e_elfstream_error
 Func(elfstream_write_header)(t_elfstream *self, int fd)
 {
-	Elf(Ehdr)	ehdr;
+	const ssize_t			to_write = sizeof(Elf(Ehdr)));
+	Elf(Ehdr)				*hdr = (Elf(Ehdr) *) &self->ehdr32;
+
+	if (lseek(fd, 0, SEEK_SET) == -1)
+		return (ELFSTREAM_IO);
+	if (write(fd, hdr, to_write) != to_write)
+		return (ELFSTREAM_IO);
+	return (ELFSTREAM_OK);
+}
+
+static inline enum e_elfstream_error
+Func(elfstream_write_segments)(t_elfstream *self, int fd)
+{
+	t_content_source	*content;
+
+	content = self->segments;
+	return (ELFSTREAM_OK);
 }
 
 // static inline enum e_elfstream_error	elfstream_write_header(
@@ -70,4 +86,6 @@ Func(elfstream_write_header)(t_elfstream *self, int fd)
 // 	size_t				i;
 // }
 
-#undef BITNESS
+#undef ELF_BITNESS
+
+// vim: set ft=c:
