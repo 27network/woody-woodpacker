@@ -6,7 +6,7 @@
 #    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/06 18:05:28 by kiroussa          #+#    #+#              #
-#    Updated: 2025/04/14 13:12:32 by kiroussa         ###   ########.fr        #
+#    Updated: 2025/05/09 17:08:35 by kiroussa         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ SRCS := $(addprefix $(SRC_DIR)/,$(SRCS))
 OBJS := $(addprefix $(OBJ_DIR)/,$(OBJS))
 
 CC = clang
-CFLAGS += -Wall -Wextra -Werror -Wpedantic -std=c11
+CFLAGS += -Wall -Wextra -Werror -std=c23
 CFLAGS += -I./include
 
 LIBFT_DIR = libft
