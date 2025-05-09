@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/03 17:47:37 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 12:27:30 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,14 +57,13 @@ typedef struct s_content_source
 		{
 			int			fd;
 			size_t		offset;
-			size_t		size;
 		}	s_file;
 		struct
 		{
 			const char	*data;
-			size_t		size;
 		}	s_memory;
 	};
+	size_t						size;
 	enum e_elfstream_error		(*write_fn)(struct s_content_source *self,
 			int fd);
 	struct s_content_source		*next;
@@ -74,13 +73,13 @@ t_content_source
 *elfstream_source_fd(int fd, size_t offset, size_t size);
 
 enum e_elfstream_error
-elfstream_write_source_fd(t_elfstream *self, int fd);
+elfstream_write_source_fd(t_content_source *self, int fd);
 
 t_content_source
 *elfstream_source_data(const char *data, size_t size);
 
 enum e_elfstream_error
-elfstream_write_source_data(t_elfstream *self, int fd);
+elfstream_write_source_data(t_content_source *self, int fd);
 
 /**
  *

@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/03 17:17:56 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/03 18:07:11 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 12:25:19 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ enum e_elfstream_error	elfstream_write_source_data(
 	written = 0;
 	while (written < self->size)
 	{
-		last_write = write(fd, self->data + written, self->size - written);
+		last_write = write(fd, self->s_memory.data + written,
+				self->size - written);
 		if (last_write == -1)
 			return (ELFSTREAM_IO);
 		written += last_write;

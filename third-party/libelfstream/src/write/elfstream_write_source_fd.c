@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/03 17:17:56 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/03 20:07:42 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 12:26:40 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,21 +20,20 @@ static inline size_t	elfstream_source_fd_read(
 	size_t size
 ) {
 	ssize_t	last_read;
-	size_t	read;
+	size_t	nread;
 
-	read = 0;
-	while (read < size)
+	nread = 0;
+	while (nread < size)
 	{
-		last_read = read(self->fd, buffer + read, size - read);
+		last_read = read(self->s_file.fd, buffer + nread, size - nread);
 		if (last_read == -1)
 			return ((size_t) - 1);
-		read += last_read;
+		nread += last_read;
 	}
-	return (read);
+	return (nread);
 }
 
 static inline int	elfstream_source_fd_write(
-	t_content_source *self,
 	int fd,
 	char *buffer,
 	size_t size
@@ -60,11 +59,11 @@ enum e_elfstream_error	elfstream_write_source_fd(
 	char	buffer[BUF_SIZE];
 	size_t	nread;
 
-	lseek(fd, self->offset, SEEK_SET);
+	lseek(fd, self->s_file.offset, SEEK_SET);
 	nread = elfstream_source_fd_read(self, buffer, BUF_SIZE);
 	if (nread == (size_t) -1)
 		return (ELFSTREAM_IO);
-	if (elfstream_source_fd_write(self, fd, buffer, nread) == -1)
+	if (elfstream_source_fd_write(fd, buffer, nread) == -1)
 		return (ELFSTREAM_IO);
 	return (ELFSTREAM_OK);
 }

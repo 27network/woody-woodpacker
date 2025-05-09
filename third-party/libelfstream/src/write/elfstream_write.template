@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/04 01:43:33 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 14:33:27 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,71 +20,106 @@
 #define Elf(n) APPEND(APPEND(APPEND(Elf, ELF_BITNESS), _), n)
 #define Func(n) APPEND(APPEND(n, _x), ELF_BITNESS)
 
-static inline enum e_elfstream_error
+enum e_elfstream_error
 Func(elfstream_write_header)(t_elfstream *self, int fd)
 {
-	const ssize_t			to_write = sizeof(Elf(Ehdr)));
-	Elf(Ehdr)				*hdr = (Elf(Ehdr) *) &self->ehdr32;
+	const ssize_t	to_write = sizeof(Elf(Ehdr));
+	Elf(Ehdr)		*hdr;
 
+	hdr = (Elf(Ehdr) *) &self->ehdr32;
 	if (lseek(fd, 0, SEEK_SET) == -1)
 		return (ELFSTREAM_IO);
+	hdr->e_phnum = self->segment_count;
+	hdr->e_shnum = self->section_count;
+	//TODO: shstrndx
 	if (write(fd, hdr, to_write) != to_write)
 		return (ELFSTREAM_IO);
 	return (ELFSTREAM_OK);
 }
 
 static inline enum e_elfstream_error
-Func(elfstream_write_segments)(t_elfstream *self, int fd)
+Func(elfstream_write_segment)(t_elf_segment *self, int fd)
 {
-	t_content_source	*content;
+	const ssize_t			to_write = sizeof(Elf(Phdr));
+	Elf(Phdr)				*phdr = (Elf(Phdr) *) &self->phdr32;
 
-	content = self->segments;
+	//TODO: fix sizes
+	if (write(fd, phdr, to_write) != to_write)
+		return (ELFSTREAM_IO);
 	return (ELFSTREAM_OK);
 }
 
-// static inline enum e_elfstream_error	elfstream_write_header(
-// 					t_elfstream *self, int fd)
-// {
-// 	size_t				i;
-//
-// 	lseek(fd, 0, SEEK_SET);
-// 	if (self->bitness == ELFSTREAM_32
-// 		&& write(fd, &self->ehdr32, sizeof(Elf32_Ehdr)) != sizeof(Elf32_Ehdr))
-// 		return (ELFSTREAM_IO);
-// 	if (self->bitness == ELFSTREAM_64
-// 		&& write(fd, &self->ehdr64, sizeof(Elf64_Ehdr)) != sizeof(Elf64_Ehdr))
-// 		return (ELFSTREAM_IO);
-// 	return (ELFSTREAM_OK);
-// }
-//
-// static inline enum e_elfstream_error	elfstream_write_segments(
-// 					t_elfstream *self, int fd)
-// {
-// 	size_t				i;
-// 	const ssize_t		to_write = pick(self, sizeof(Elf32_Phdr),
-// 			sizeof(Elf64_Phdr));
-//
-// 	i = 0;
-// 	while (i < self->segment_count)
-// 	{
-// 		if (write(fd, &self->segments[i].phdr32, to_write) != to_write)
-// 			return (ELFSTREAM_IO);
-// 		i++;
-// 	}
-// 	i = 0;
-// 	while (i < self->segment_count)
-// 	{
-// 		if (!elfstream_write_segment(self->segments + i))
-// 			return (ELFSTREAM_ERROR);
-// 		i++;
-// 	}
-// }
-//
-// static inline enum e_elfstream_error	elfstream_write_x32(
-// 					t_elfstream *self, int fd)
-// {
-// 	size_t				i;
-// }
+static inline enum e_elfstream_error
+Func(elfstream_write_content)(t_content_source *content, int fd)
+{
+	enum e_elfstream_error	error;
+	const off_t				curr = lseek(fd, 0, SEEK_CUR);
+
+	error = ELFSTREAM_OK;
+	while (content)
+	{
+		error = content->write_fn(content, fd);
+		if (error)
+			break;
+		lseek(fd, curr + content->size, SEEK_SET);
+		content = content->next;
+	}
+	return (error);
+}
+
+enum e_elfstream_error
+Func(elfstream_write_segments)(t_elfstream *self, int fd)
+{
+	t_elf_segment			*segments;
+	size_t					i;
+	const Elf(Ehdr)			*hdr = (Elf(Ehdr) *) &self->ehdr32;
+	enum e_elfstream_error	error;
+
+	lseek(fd, hdr->e_phoff, SEEK_SET);
+	segments = self->segments;
+	i = 0;
+	error = ELFSTREAM_OK;
+	while (i < self->segment_count && !error)
+	{
+		error = Func(elfstream_write_segment)(segments + i, fd);
+		if (!error)
+			error = Func(elfstream_write_content)(segments[i].content, fd);
+		i++;
+	}
+	return (error);
+}
+
+static inline enum e_elfstream_error
+Func(elfstream_write_section)(t_elf_section *self, int fd)
+{
+	const ssize_t			to_write = sizeof(Elf(Shdr));
+	Elf(Shdr)				*shdr = (Elf(Shdr) *) &self->shdr32;
+
+	//TODO: fix sizes
+	if (write(fd, shdr, to_write) != to_write)
+		return (ELFSTREAM_IO);
+	return (ELFSTREAM_OK);
+}
+
+enum e_elfstream_error
+Func(elfstream_write_sections)(t_elfstream *self, int fd)
+{
+	t_elf_section			*sections;
+	size_t					i;
+	const Elf(Ehdr)			*hdr = (Elf(Ehdr) *) &self->ehdr32;
+	enum e_elfstream_error	error;
+
+	lseek(fd, hdr->e_shoff, SEEK_SET);
+	sections = self->sections;
+	i = 0;
+	error = ELFSTREAM_OK;
+	while (i < hdr->e_shnum && !error)
+	{
+		error = Func(elfstream_write_section)(sections + i, fd);
+		i++;
+	}
+	return (error);
+}
 
 #undef ELF_BITNESS
 

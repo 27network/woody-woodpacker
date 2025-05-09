@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 17:03:05 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/04 01:44:19 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 12:14:26 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,6 @@ t_content_source	*elfstream_source_data(const char *data, size_t size)
 	self->type = CONTENT_SOURCE_MEMORY;
 	self->write_fn = elfstream_write_source_data;
 	self->s_memory.data = data;
-	self->s_memory.size = size;
+	self->size = size;
 	return (self);
 }

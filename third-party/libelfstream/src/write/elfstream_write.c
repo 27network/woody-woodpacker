@@ -6,11 +6,12 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 07:38:33 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/02 16:30:01 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 14:33:54 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <elfstream.h>
+#include <sys/types.h>
 #define ELF_BITNESS 32
 #include "elfstream_write.template"
 #define ELF_BITNESS 64

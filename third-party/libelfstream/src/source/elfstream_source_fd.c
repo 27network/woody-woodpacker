@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:51:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/04 01:44:29 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 12:14:32 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,6 @@ t_content_source	*elfstream_source_fd(int fd, size_t offset, size_t size)
 	self->write_fn = elfstream_write_source_fd;
 	self->s_file.fd = fd;
 	self->s_file.offset = offset;
-	self->s_file.size = size;
+	self->size = size;
 	return (self);
 }
