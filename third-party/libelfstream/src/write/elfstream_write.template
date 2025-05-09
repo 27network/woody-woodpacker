@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/09 17:08:49 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 17:10:32 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,6 @@
 
 #define Elf(n) APPEND(APPEND(APPEND(Elf, ELF_BITNESS), _), n)
 #define Func(n) APPEND(APPEND(n, _x), ELF_BITNESS)
-
-#include <stdio.h>
-#define DBG(msg, ...) fprintf(stderr, "DEBUG: %s: " msg "\n", __func__ __VA_OPT__(,) ##__VA_ARGS__)
 
 enum e_elfstream_error
 Func(elfstream_write_header)(t_elfstream *self, int fd)

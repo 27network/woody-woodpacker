@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/09 12:27:30 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 17:10:42 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,13 @@
 # include <stdint.h>
 # include <stdlib.h>
 # include <unistd.h>
+
+# if 1
+#  include <stdio.h>
+#  define DBG(msg, ...) fprintf(stderr, "DEBUG: %s: " msg "\n", __func__ __VA_OPT__(,) ##__VA_ARGS__)
+# else
+#  define DBG(msg, ...)
+# endif
 
 enum e_elfstream_error
 {
