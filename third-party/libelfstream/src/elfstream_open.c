@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:30:37 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/17 10:40:03 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 21:39:29 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,16 @@ static inline bool	elfstream_segments_fill(t_elfstream *self, int fd)
 		if (read(fd, &self->segments[i].phdr32, to_read) != to_read)
 			return (false);
 		data = (char *) &self->segments[i].phdr32;
-		self->segments[i].content = elfstream_source_fd(fd,
-				*((size_t *)(data + offset_offset)),
-				*((size_t *)(data + filesz_offset)));
+		printf("j'ai un segment %zu\n", i);
+		printf("offset: %#lx\n", self->segments[i].phdr64.p_offset);
+		printf("filesz: %#lx\n", self->segments[i].phdr64.p_filesz);
+		// printf("offset_offset: %zu\n", offset_offset);
+		// printf("filesz_offset: %zu\n", filesz_offset);
+		// printf("offset (data): %zu\n", *((Elf64_Off *)(data + offset_offset)));
+		// printf("filesz (data): %zu\n", *((Elf64_Off *)(data + filesz_offset)));
+		self->segments[i].content = elfstream_source_fd(self, fd,
+				*((Elf64_Off *)(data + offset_offset)),
+				*((Elf64_Off *)(data + filesz_offset)));
 		i++;
 	}
 	return (true);

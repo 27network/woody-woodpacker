@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/09 17:10:42 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 22:56:51 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,9 @@
 #  define DBG(msg, ...)
 # endif
 
+/**
+ *
+ */
 enum e_elfstream_error
 {
 	ELFSTREAM_OK = 0,
@@ -38,9 +41,15 @@ enum e_elfstream_error
 	_ELFSTREAM_ERROR_MAX,
 };
 
+/**
+ *
+ */
 const char
 *elfstream_strerror(enum e_elfstream_error error);
 
+/**
+ *
+ */
 enum e_elfstream_bitness
 {
 	ELFSTREAM_32 = 32,
@@ -49,12 +58,19 @@ enum e_elfstream_bitness
 
 typedef struct s_elfstream	t_elfstream;
 
+/**
+ *
+ */
 enum e_content_source_type
 {
-	CONTENT_SOURCE_FILE = 0,
+	CONTENT_SOURCE_UNKNOWN = 0,
+	CONTENT_SOURCE_FILE,
 	CONTENT_SOURCE_MEMORY,
 };
 
+/**
+ *
+ */
 typedef struct s_content_source
 {
 	enum e_content_source_type	type;
@@ -76,15 +92,33 @@ typedef struct s_content_source
 	struct s_content_source		*next;
 }	t_content_source;
 
-t_content_source
-*elfstream_source_fd(int fd, size_t offset, size_t size);
+/**
+ *
+ */
+size_t
+elfstream_content_size(t_content_source *content);
 
+/**
+ *
+ */
+t_content_source
+*elfstream_source_fd(t_elfstream *stream, int fd, size_t offset, size_t size);
+
+/**
+ *
+ */
 enum e_elfstream_error
 elfstream_write_source_fd(t_content_source *self, int fd);
 
+/**
+ *
+ */
 t_content_source
 *elfstream_source_data(const char *data, size_t size);
 
+/**
+ *
+ */
 enum e_elfstream_error
 elfstream_write_source_data(t_content_source *self, int fd);
 

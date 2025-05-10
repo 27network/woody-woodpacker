@@ -1,28 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   elfstream_source_data.c                            :+:      :+:    :+:   */
+/*   elfstream_content_size.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/13 17:03:05 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/09 17:36:32 by kiroussa         ###   ########.fr       */
+/*   Created: 2025/05/09 22:56:01 by kiroussa          #+#    #+#             */
+/*   Updated: 2025/05/09 22:56:26 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <elfstream.h>
-#include <ft/mem.h>
 
-t_content_source	*elfstream_source_data(const char *data, size_t size)
+size_t	elfstream_content_size(t_content_source *content)
 {
-	t_content_source	*self;
+	size_t				size;
 
-	self = ft_calloc(1, sizeof(t_content_source));
-	if (!self)
-		return (NULL);
-	self->type = CONTENT_SOURCE_MEMORY;
-	self->write_fn = elfstream_write_source_data;
-	self->s_memory.data = data;
-	self->size = size;
-	return (self);
+	size = 0;
+	while (content)
+	{
+		size += content->size;
+		content = content->next;
+	}
+	return (size);
 }

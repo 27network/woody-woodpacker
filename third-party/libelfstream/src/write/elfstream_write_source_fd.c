@@ -6,13 +6,12 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/03 17:17:56 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/09 17:13:49 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/09 17:51:41 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <elfstream.h>
-
-#define BUF_SIZE 65536
+#include <ft/mem.h>
 
 static inline size_t	elfstream_source_fd_read(
 	t_content_source *self,
@@ -30,6 +29,9 @@ static inline size_t	elfstream_source_fd_read(
 	while (nread < size)
 	{
 		last_read = read(self->s_file.fd, buffer + nread, size - nread);
+		DBG("read %zd bytes", last_read);
+		if (last_read == 0)
+			break ;
 		if (last_read == -1)
 		{
 			DBG("read error: %m");
@@ -37,7 +39,7 @@ static inline size_t	elfstream_source_fd_read(
 		}
 		nread += last_read;
 	}
-	DBG("read %zu bytes", nread);
+	DBG("read %zu/%zu bytes", nread, size);
 	return (nread);
 }
 
@@ -68,15 +70,21 @@ enum e_elfstream_error	elfstream_write_source_fd(
 	t_content_source *self,
 	int fd
 ) {
-	char	buffer[BUF_SIZE];
 	size_t	nread;
+	char	*buffer;
 
+	DBG("write_source_fd %d, off: %zu, size: %zu", fd,
+		self->s_file.offset, self->size);
+	buffer = ft_calloc(self->size, sizeof(char));
+	if (!buffer)
+		return (ELFSTREAM_ALLOC);
 	DBG("reading from fd %d", self->s_file.fd);
-	nread = elfstream_source_fd_read(self, buffer, BUF_SIZE);
+	nread = elfstream_source_fd_read(self, buffer, self->size);
 	if (nread == (size_t) -1)
 		return (ELFSTREAM_IO);
 	if (elfstream_source_fd_write(fd, buffer, nread) == -1)
 		return (ELFSTREAM_IO);
 	DBG("wrote required bytes");
+	free(buffer);
 	return (ELFSTREAM_OK);
 }

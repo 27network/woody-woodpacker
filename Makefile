@@ -77,6 +77,14 @@ test:
 	clang -g3 -o test-dyna testing/test.c
 	nix-shell -p pkgs.glibc.static --command "clang -static -g3 -o test-static testing/test.c"
 
+test-run-dyna: test $(NAME)
+	rm -rf woody
+	./$(NAME) test-dyna
+
+test-diff-dyna: # test-run-dyna
+	nix-shell -p busybox --command 'xxd test-dyna > dyna.hex && xxd woody > woody.hex' && nvim -d dyna.hex woody.hex
+
+
 oclean:
 	rm -rf $(BUILD_DIR) $(SHBINS)
 
