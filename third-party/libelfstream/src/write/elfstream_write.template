@@ -6,13 +6,15 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/09 20:46:14 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/11 11:21:28 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ELF_BITNESS
 # error "ELF_BITNESS not defined"
 #endif
+
+#include <limits.h>
 
 #define _APPEND(x, y) x##y
 #define APPEND(x, y) _APPEND(x, y)
@@ -62,11 +64,13 @@ Func(elfstream_write_segment)(t_elf_segment *self, int fd)
 }
 
 static inline enum e_elfstream_error
-Func(elfstream_write_content)(t_content_source *content, int fd)
+Func(elfstream_write_content)(off_t offset, t_content_source *content, int fd)
 {
 	enum e_elfstream_error	error;
 	// const off_t				curr = lseek(fd, 0, SEEK_CUR);
 
+	DBG("seeking to %#lx", offset);
+	lseek(fd, offset, SEEK_SET);
 	DBG("writing content");
 	error = ELFSTREAM_OK;
 	while (content)
@@ -81,6 +85,87 @@ Func(elfstream_write_content)(t_content_source *content, int fd)
 	}
 	DBG("wrote content");
 	return (error);
+}
+
+// Find the lowest segment in the stream and return its index
+static inline int
+Func(elfstream_segment_lowest)(t_elf_segment *segments, size_t count)
+{
+	int			i;
+	size_t		lowest;
+	int			lowest_index;
+	Elf(Phdr)	*tmp;
+
+	lowest = SIZE_MAX;
+	lowest_index = -1;
+	DBG("looking for lowest segment");
+	i = 0;
+	while (i < (int) count)
+	{
+		tmp = (Elf(Phdr) *) &segments[i].phdr32;
+		DBG("segment %zu: offset %#lx", i, tmp->p_offset);
+		if (tmp->p_offset < lowest)
+		{
+			DBG("lowest now!");
+			lowest = tmp->p_offset;
+			lowest_index = i;
+		}
+		i++;
+	}
+	DBG("lowest segment is %d", lowest_index);
+	return (lowest_index);
+}
+
+static inline void
+Func(elfstream_segment_coerce)(t_elf_segment *segment, size_t bound)
+{
+	Elf(Phdr)	*phdr;
+	size_t		difference;
+
+	phdr = (Elf(Phdr) *) &segment->phdr32;
+	if (phdr->p_offset < bound)
+	{
+		difference = bound - phdr->p_offset;
+		//TODO: no, this needs to be done on the content
+		// phdr->p_offset += difference;
+		// phdr->p_filesz -= difference;
+	}
+}
+
+static inline enum e_elfstream_error
+Func(elfstream_write_segments_round)(t_elfstream *self, int fd)
+{
+	size_t			small_bound;
+	t_elf_segment	*segment;
+	size_t			i;
+	int				smallest;
+	off_t			offset;
+
+	small_bound = sizeof(Elf(Ehdr)) + (self->segment_count * sizeof(Elf(Phdr)));
+	i = 0;
+	smallest = INT_MAX;
+	while (i < self->segment_count)
+	{
+		smallest = Func(elfstream_segment_lowest)(self->segments, self->segment_count);
+		if (smallest < 0)
+		{
+			printf("error: lowest segment is not in bounds\n");
+			break ; // TODO: error?
+		}
+		DBG("coercing segment #%zu", smallest);
+		Func(elfstream_segment_coerce)(self->segments + smallest, small_bound);
+		DBG("writing segment #%zu", smallest);
+		segment = &self->segments[smallest];
+		offset = ((Elf(Phdr) *) &segment->phdr32)->p_offset;
+		Func(elfstream_write_content)(offset, segment->content, fd);
+		DBG("wrote segment header at %#lx", offset);
+		i++;
+		DBG("written %zu/%zu segments", i, self->segment_count);
+		small_bound = offset + elfstream_content_size(segment->content);
+		fsync(fd);
+		getchar();
+	}
+	return (ELFSTREAM_OK);
 }
 
 enum e_elfstream_error
@@ -105,16 +190,8 @@ Func(elfstream_write_segments)(t_elfstream *self, int fd)
 		getchar();
 		i++;
 	}
-	i = 0;
-	while (i < self->segment_count && !error)
-	{
-		DBG("writing segment content %zu/%zu", i + 1, self->segment_count);
-		error = Func(elfstream_write_content)(segments[i].content, fd);
-		fsync(fd);
-		DBG("wrote segment content %zu", i + 1);
-		getchar();
-		i++;
-	}
+	if (!error)
+		error = Func(elfstream_write_segments_round)(self, fd);
 	DBG("wrote segments (error? %d)", (int) error);
 	return (error);
 }
