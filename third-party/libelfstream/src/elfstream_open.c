@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:30:37 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/09 21:39:29 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/11 20:16:09 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ static inline size_t	pick(t_elfstream *self, size_t off_32, size_t off_64)
 	return (off_64);
 }
 
-static inline bool	elfstream_segments_fill(t_elfstream *self, int fd)
+static inline bool	elfstream_segments_fill(t_elfstream *self, int fd, size_t off)
 {
 	size_t			i;
 	const ssize_t	to_read = pick(self, sizeof(Elf32_Phdr),
@@ -61,6 +61,7 @@ static inline bool	elfstream_segments_fill(t_elfstream *self, int fd)
 	char			*data;
 
 	i = 0;
+	lseek(fd, off, SEEK_SET);
 	while (i < self->segment_count)
 	{
 		self->segments[i].stream = self;
@@ -70,13 +71,9 @@ static inline bool	elfstream_segments_fill(t_elfstream *self, int fd)
 		printf("j'ai un segment %zu\n", i);
 		printf("offset: %#lx\n", self->segments[i].phdr64.p_offset);
 		printf("filesz: %#lx\n", self->segments[i].phdr64.p_filesz);
-		// printf("offset_offset: %zu\n", offset_offset);
-		// printf("filesz_offset: %zu\n", filesz_offset);
-		// printf("offset (data): %zu\n", *((Elf64_Off *)(data + offset_offset)));
-		// printf("filesz (data): %zu\n", *((Elf64_Off *)(data + filesz_offset)));
 		self->segments[i].content = elfstream_source_fd(self, fd,
 				*((Elf64_Off *)(data + offset_offset)),
-				*((Elf64_Off *)(data + filesz_offset)));
+				*((Elf64_Off *)(data + filesz_offset))); //TODO: fix this for 32bit
 		i++;
 	}
 	return (true);
@@ -87,13 +84,21 @@ static inline bool	elfstream_sections_fill(t_elfstream *self, int fd)
 	size_t			i;
 	const ssize_t	to_read = pick(self, sizeof(Elf32_Shdr),
 			sizeof(Elf64_Shdr));
+	size_t			read_offset = pick(self, self->ehdr32.e_shoff,
+			self->ehdr64.e_shoff);
 
 	i = 0;
+	DBG("starting at %#lx (should read %#lx)", read_offset, to_read);
+	lseek(fd, read_offset, SEEK_SET);
 	while (i < self->section_count)
 	{
+		DBG("reading section %zu", i);
 		self->sections[i].stream = self;
-		if (read(fd, &self->sections[i].shdr32, to_read) != to_read)
+		ssize_t nread = read(fd, &self->sections[i].shdr32, to_read);
+		DBG("we have read %zu bytes", nread);
+		if (nread != to_read)
 			return (false);
+		DBG("read section %zu (loc: %p)", i, &self->sections[i].shdr32);
 		i++;
 	}
 	return (true);
@@ -101,6 +106,8 @@ static inline bool	elfstream_sections_fill(t_elfstream *self, int fd)
 
 enum e_elfstream_error	elfstream_open(t_elfstream *self, int fd)
 {
+	size_t		offset;
+
 	if (!elfstream_validate(self, fd))
 		return (ELFSTREAM_INVALID);
 	self->segments = ft_calloc(self->segment_count, sizeof(t_elf_segment));
@@ -110,7 +117,8 @@ enum e_elfstream_error	elfstream_open(t_elfstream *self, int fd)
 		elfstream_close(self);
 		return (ELFSTREAM_ALLOC);
 	}
-	if (!elfstream_segments_fill(self, fd))
+	offset = pick(self, self->ehdr32.e_phoff, self->ehdr64.e_phoff);
+	if (!elfstream_segments_fill(self, fd, offset))
 	{
 		elfstream_close(self);
 		return (ELFSTREAM_ERROR);

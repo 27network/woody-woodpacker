@@ -7,7 +7,7 @@ VERSION = 0.3.0
 MAKE = make --no-print-directory
 
 CC = clang
-CFLAGS = -Wall -Wextra -Werror -Wpedantic -std=c23
+CFLAGS = -Wall -Wextra -Werror -Wpedantic -std=c23 -O1
 LDFLAGS = 
 NASM = nasm
 NASMFLAGS = -f elf64

@@ -10,6 +10,8 @@ in
     nasm
     valgrind
     python312Packages.pyelftools
+    strace
+    ltrace
   ];
 }
 

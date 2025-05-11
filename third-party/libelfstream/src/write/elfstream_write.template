@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/11 11:21:28 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/11 20:16:24 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ static inline enum e_elfstream_error
 Func(elfstream_write_content)(off_t offset, t_content_source *content, int fd)
 {
 	enum e_elfstream_error	error;
-	// const off_t				curr = lseek(fd, 0, SEEK_CUR);
 
 	DBG("seeking to %#lx", offset);
 	lseek(fd, offset, SEEK_SET);
@@ -80,7 +79,8 @@ Func(elfstream_write_content)(off_t offset, t_content_source *content, int fd)
 			error = content->write_fn(content, fd);
 		if (error)
 			break;
-		// lseek(fd, curr + content->size, SEEK_SET);
+		DBG("wrote %#lx content bytes", content->size);
+		lseek(fd, offset + content->size, SEEK_SET);
 		content = content->next;
 	}
 	DBG("wrote content");
@@ -103,7 +103,12 @@ Func(elfstream_segment_lowest)(t_elf_segment *segments, size_t count)
 	while (i < (int) count)
 	{
 		tmp = (Elf(Phdr) *) &segments[i].phdr32;
-		DBG("segment %zu: offset %#lx", i, tmp->p_offset);
+		if (tmp->p_offset == ((Elf(Off)) -1))
+		{
+			i++;
+			continue;
+		}
+		DBG("segment %zu: offset %#lx, size: %#lx", i, tmp->p_offset, tmp->p_filesz);
 		if (tmp->p_offset < lowest)
 		{
 			DBG("lowest now!");
@@ -119,16 +124,44 @@ Func(elfstream_segment_lowest)(t_elf_segment *segments, size_t count)
 static inline void
 Func(elfstream_segment_coerce)(t_elf_segment *segment, size_t bound)
 {
-	Elf(Phdr)	*phdr;
-	size_t		difference;
+	Elf(Phdr)			*phdr;
+	size_t				difference;
+	t_content_source	*tmp;
 
 	phdr = (Elf(Phdr) *) &segment->phdr32;
 	if (phdr->p_offset < bound)
 	{
+		DBG("shrinking to hold in bound %#lx", bound);
 		difference = bound - phdr->p_offset;
-		//TODO: no, this needs to be done on the content
-		// phdr->p_offset += difference;
-		// phdr->p_filesz -= difference;
+		phdr->p_offset += difference;
+		if (phdr->p_filesz < difference)
+			phdr->p_filesz = 0;
+		else
+			phdr->p_filesz -= difference;
+		if (phdr->p_memsz < difference)
+			phdr->p_memsz = 0;
+		else
+			phdr->p_memsz -= difference;
+		tmp = segment->content;
+		while (tmp)
+		{
+			if (difference >= tmp->size)
+			{
+				DBG("removing content source as its too small (%#lx)", tmp->size);
+				tmp->size = 0;
+				difference -= tmp->size;
+			}
+			else
+			{
+				DBG("shrinking content source by %#lx", difference);
+				if (tmp->type == CONTENT_SOURCE_FILE)
+					tmp->s_file.offset += difference;
+				tmp->size -= difference;
+				difference = 0;
+			}
+			tmp = tmp->next;
+		}
+		DBG("new segment size: %#lx", phdr->p_filesz);
 	}
 }
 
@@ -140,6 +173,7 @@ Func(elfstream_write_segments_round)(t_elfstream *self, int fd)
 	size_t			i;
 	int				smallest;
 	off_t			offset;
+	Elf(Phdr)		*phdr;
 
 	small_bound = sizeof(Elf(Ehdr)) + (self->segment_count * sizeof(Elf(Phdr)));
 	i = 0;
@@ -156,14 +190,16 @@ Func(elfstream_write_segments_round)(t_elfstream *self, int fd)
 		Func(elfstream_segment_coerce)(self->segments + smallest, small_bound);
 		DBG("writing segment #%zu", smallest);
 		segment = &self->segments[smallest];
-		offset = ((Elf(Phdr) *) &segment->phdr32)->p_offset;
+		phdr = ((Elf(Phdr) *) &segment->phdr32);
+		offset = phdr->p_offset;
 		Func(elfstream_write_content)(offset, segment->content, fd);
-		DBG("wrote segment header at %#lx", offset);
+		DBG("wrote segment content at %#lx", offset);
 		i++;
 		DBG("written %zu/%zu segments", i, self->segment_count);
 		small_bound = offset + elfstream_content_size(segment->content);
-		fsync(fd);
-		getchar();
+		phdr->p_offset = ((Elf(Off)) -1);
+		// fsync(fd);
+		// getchar();
 	}
 	return (ELFSTREAM_OK);
 }
@@ -185,9 +221,9 @@ Func(elfstream_write_segments)(t_elfstream *self, int fd)
 	{
 		DBG("writing segment header %zu/%zu", i + 1, self->segment_count);
 		error = Func(elfstream_write_segment)(segments + i, fd);
-		fsync(fd);
+		// fsync(fd);
 		DBG("wrote segment header %zu", i + 1);
-		getchar();
+		// getchar();
 		i++;
 	}
 	if (!error)
@@ -196,7 +232,7 @@ Func(elfstream_write_segments)(t_elfstream *self, int fd)
 	return (error);
 }
 
-static inline enum e_elfstream_error
+/*static inline*/ enum e_elfstream_error
 Func(elfstream_write_section)(t_elf_section *self, int fd)
 {
 	const ssize_t			to_write = sizeof(Elf(Shdr));
@@ -204,6 +240,12 @@ Func(elfstream_write_section)(t_elf_section *self, int fd)
 
 	//TODO: fix sizes
 	DBG("writing section header");
+	// __asm__("int3");
+	DBG("sh_name (index): %d", shdr->sh_name);
+	DBG("sh_type: %d", shdr->sh_type);
+	DBG("sh_offset: %#lx", shdr->sh_offset);
+	DBG("sh_size: %#lx", shdr->sh_size);
+	DBG("sh_entsize: %#lx", shdr->sh_entsize);
 	if (write(fd, shdr, to_write) != to_write)
 		return (ELFSTREAM_IO);
 	DBG("wrote section header");
@@ -213,24 +255,22 @@ Func(elfstream_write_section)(t_elf_section *self, int fd)
 enum e_elfstream_error
 Func(elfstream_write_sections)(t_elfstream *self, int fd)
 {
-	t_elf_section			*sections;
 	size_t					i;
 	const Elf(Ehdr)			*hdr = (Elf(Ehdr) *) &self->ehdr32;
 	enum e_elfstream_error	error;
 
 	DBG("writing sections at %#lx", hdr->e_shoff);
-	lseek(fd, hdr->e_shoff, SEEK_SET);
-	sections = self->sections;
+	lseek(fd, hdr->e_shoff, SEEK_SET); //TODO: change e_shoff
 	i = 0;
 	error = ELFSTREAM_OK;
-	while (i < hdr->e_shnum && !error)
+	while (i < self->section_count && !error)
 	{
 		DBG("writing section %zu", i);
-		error = Func(elfstream_write_section)(sections + i, fd);
+		error = Func(elfstream_write_section)(self->sections + i, fd);
 		DBG("wrote section %zu", i);
 		i++;
 	}
-	DBG("wrote sections");
+	DBG("wrote sections (error? %d)", (int) error);
 	return (error);
 }
 
