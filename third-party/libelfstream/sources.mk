@@ -5,6 +5,7 @@ SRCS += elfstream_open.c
 SRCS += elfstream_strerror.c
 SRCS += source/elfstream_source_data.c
 SRCS += source/elfstream_source_fd.c
+SRCS += write/elfstream_content_free.c
 SRCS += write/elfstream_content_size.c
 SRCS += write/elfstream_write.c
 SRCS += write/elfstream_write_source_data.c

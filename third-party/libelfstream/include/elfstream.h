@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/11 11:16:49 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/11 23:36:23 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,12 @@ elfstream_content_size(t_content_source *content);
 /**
  *
  */
+void
+elfstream_content_free(t_content_source *content);
+
+/**
+ *
+ */
 t_content_source
 *elfstream_source_fd(t_elfstream *stream, int fd, size_t offset, size_t size);
 
@@ -147,6 +153,7 @@ typedef struct s_elf_section
 		Elf32_Shdr	shdr32;
 		Elf64_Shdr	shdr64;
 	};
+	t_content_source			*content;
 }	t_elf_section;
 
 /**

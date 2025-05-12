@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/11 20:16:24 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/11 23:36:46 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ Func(elfstream_write_segment)(t_elf_segment *self, int fd)
 	if (phdr->p_type == PT_PHDR)
 	{
 		DBG("(re)writing PT_PHDR segment");
+		elfstream_content_free(self->content);
 		self->content = NULL;
 		phdr->p_filesz = ehdr->e_phentsize * self->stream->segment_count;
 		phdr->p_memsz = phdr->p_filesz;
@@ -240,7 +241,6 @@ Func(elfstream_write_section)(t_elf_section *self, int fd)
 
 	//TODO: fix sizes
 	DBG("writing section header");
-	// __asm__("int3");
 	DBG("sh_name (index): %d", shdr->sh_name);
 	DBG("sh_type: %d", shdr->sh_type);
 	DBG("sh_offset: %#lx", shdr->sh_offset);
