@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 22:39:25 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/17 10:27:06 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/12 20:19:41 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ t_ww_error	ww_bin_elf_write(t_ww_elf_handler *self, t_ww_binary *bin)
 	int						fd;
 
 	ww_debug("ww_bin_elf_write(handler=%p)\n", (void *)self);
-	fd = open(bin->output, O_WRONLY | O_CREAT, 0644);
+	fd = open(bin->output, O_WRONLY | O_CREAT, 0755);
 	if (fd == -1)
 		return (ww_err_fmt(ERROR_IO, "failed to open output file '%s': %m\n",
 				bin->output));

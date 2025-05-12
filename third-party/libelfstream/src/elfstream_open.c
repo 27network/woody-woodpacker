@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:30:37 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/11 23:34:39 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/12 17:13:16 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,18 +42,18 @@ static inline bool	elfstream_validate(t_elfstream *self, int fd)
 	return (true);
 }
 
-static inline size_t	pick(t_elfstream *self, size_t off_32, size_t off_64)
+static inline size_t	p(t_elfstream *self, size_t off_32, size_t off_64)
 {
 	if (self->bitness == ELFSTREAM_32)
 		return (off_32);
 	return (off_64);
 }
 
-static inline bool	elfstream_segments_fill(t_elfstream *self, int fd, size_t off)
+static inline bool	elfstream_segments_fill(t_elfstream *self, int fd,
+						size_t off)
 {
 	size_t			i;
-	const ssize_t	to_read = pick(self, sizeof(Elf32_Phdr),
-			sizeof(Elf64_Phdr));
+	const ssize_t	to_read = p(self, sizeof(Elf32_Phdr), sizeof(Elf64_Phdr));
 	t_elf_segment	*segment;
 
 	i = 0;
@@ -68,8 +68,8 @@ static inline bool	elfstream_segments_fill(t_elfstream *self, int fd, size_t off
 		DBG("offset: %#lx", segment->phdr64.p_offset);
 		DBG("filesz: %#lx", segment->phdr64.p_filesz);
 		segment->content = elfstream_source_fd(self, fd,
-				pick(self, segment->phdr32.p_offset, segment->phdr64.p_offset),
-				pick(self, segment->phdr32.p_filesz, segment->phdr64.p_filesz));
+				p(self, segment->phdr32.p_offset, segment->phdr64.p_offset),
+				p(self, segment->phdr32.p_filesz, segment->phdr64.p_filesz));
 		i++;
 	}
 	return (true);
@@ -77,14 +77,14 @@ static inline bool	elfstream_segments_fill(t_elfstream *self, int fd, size_t off
 
 static inline bool	elfstream_sections_fill(t_elfstream *self, int fd)
 {
-	const ssize_t	to_read = pick(self, sizeof(Elf32_Shdr), sizeof(Elf64_Shdr));
-	const size_t	read_offset = pick(self, self->ehdr32.e_shoff, self->ehdr64.e_shoff);
+	const ssize_t	to_read = p(self, sizeof(Elf32_Shdr), sizeof(Elf64_Shdr));
+	const size_t	off = p(self, self->ehdr32.e_shoff, self->ehdr64.e_shoff);
 	t_elf_section	*section;
 	size_t			i;
 
 	i = 0;
-	DBG("starting at %#lx (should read %#lx)", read_offset, to_read);
-	lseek(fd, read_offset, SEEK_SET);
+	DBG("starting at %#lx (should read %#lx)", off, to_read);
+	lseek(fd, off, SEEK_SET);
 	while (i < self->section_count)
 	{
 		section = self->sections + i;
@@ -93,10 +93,10 @@ static inline bool	elfstream_sections_fill(t_elfstream *self, int fd)
 		if (read(fd, &section->shdr32, to_read) != to_read)
 			return (false);
 		DBG("section off=%#lx, size=%#lx", section->shdr64.sh_offset,
-				section->shdr64.sh_size);
+			section->shdr64.sh_size);
 		section->content = elfstream_source_fd(self, fd,
-				pick(self, section->shdr32.sh_offset, section->shdr64.sh_offset),
-				pick(self, section->shdr32.sh_size, section->shdr64.sh_size));
+				p(self, section->shdr32.sh_offset, section->shdr64.sh_offset),
+				p(self, section->shdr32.sh_size, section->shdr64.sh_size));
 		i++;
 	}
 	return (true);
@@ -115,7 +115,7 @@ enum e_elfstream_error	elfstream_open(t_elfstream *self, int fd)
 		elfstream_close(self);
 		return (ELFSTREAM_ALLOC);
 	}
-	offset = pick(self, self->ehdr32.e_phoff, self->ehdr64.e_phoff);
+	offset = p(self, self->ehdr32.e_phoff, self->ehdr64.e_phoff);
 	if (!elfstream_segments_fill(self, fd, offset))
 	{
 		elfstream_close(self);
