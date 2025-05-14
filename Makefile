@@ -7,7 +7,7 @@ VERSION = 0.3.0
 MAKE = make --no-print-directory
 
 CC = clang
-CFLAGS = -Wall -Wextra -Werror -Wpedantic -std=c23 -O1
+CFLAGS = -Wall -Wextra -Werror -Wpedantic -std=c23
 LDFLAGS = 
 NASM = nasm
 NASMFLAGS = -f elf64
@@ -71,7 +71,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s $(SHBINS)
 	$(NASM) $(NASMFLAGS) -o $@ $<
 
 $(SHSRC_DIR)/%.bin: $(SHSRC_DIR)/%.s
-	$(NASM) -f bin -o $@ $<
+ifeq ($(DEVELOPMENT),1)
+	cd $(SHSRC_DIR); $(NASM) -f elf64 -o ../../$@.elf ../../$<
+endif
+	cd $(SHSRC_DIR); $(NASM) -f bin -o ../../$@ ../../$<
 
 test:
 	clang -g3 -o test-dyna testing/test.c
@@ -105,8 +108,10 @@ fclean_libft:
 fclean_libelfstream:
 	$(MAKE) -C $(LIBELFSTREAM_DIR) fclean
 
-re: fclean all
+re: fclean
+	$(MAKE) -j$(shell nproc)
 
-remake: oclean all
+remake: oclean
+	$(MAKE) -j$(shell nproc)
 
 .PHONY: all oclean clean fclean re remake $(CLEAN_DEPS) $(FCLEAN_DEPS) test

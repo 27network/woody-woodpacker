@@ -2,6 +2,7 @@
 *.hex
 test*
 *.bin
+*.bin.elf
 *.out
 *.so
 *.a

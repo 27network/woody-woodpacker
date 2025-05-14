@@ -1,14 +1,16 @@
 ; **************************************************************************** ;
 ;                                                                              ;
 ;                                                         :::      ::::::::    ;
-;    entrypoint.s                                       :+:      :+:    :+:    ;
+;    variables.inc.s                                    :+:      :+:    :+:    ;
 ;                                                     +:+ +:+         +:+      ;
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
-;    Created: 2025/02/20 17:48:45 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/14 23:37:26 by kiroussa         ###   ########.fr        ;
+;    Created: 2025/05/14 21:06:17 by kiroussa          #+#    #+#              ;
+;    Updated: 2025/05/14 23:21:00 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
-%include "elf/x86_64/callconv.inc.s"
-%include "elf/common/entrypoint.inc.s"
+start_addr: DECLARE_SIZE 0x401690 ;0x42424242
+payload_size: DECLARE_SIZE 0x42424242
+loader_fork: db 1
+payload: db 0xc3

@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:51:46 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 10:51:20 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/14 19:40:30 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <ww/binary/elf.h>
 #include <ww/log.h>
 
-static inline const char	*ww_elf_strtype(Elf32_Half type)
+FASTCALL const char	*ww_elf_strtype(Elf32_Half type)
 {
 	static const char	*types[] = {
 	[ET_NONE] = "NONE",
@@ -32,11 +32,11 @@ static inline const char	*ww_elf_strtype(Elf32_Half type)
 
 t_ww_error	ww_bin_elf_identifier(t_ww_binary *bin, bool *identified)
 {
-	const size_t	read_size = sizeof(Elf32_Ehdr);
+	const ssize_t	read_size = sizeof(Elf32_Ehdr);
 	Elf32_Ehdr		tmp;
 
 	ft_memset(&tmp, 0, sizeof(Elf32_Ehdr));
-	if ((size_t)read(bin->input_fd, &tmp, read_size) != read_size)
+	if (read(bin->input_fd, &tmp, read_size) != read_size)
 		return (ww_err_str(ERROR_IO, "Invalid ELF header (read failed)"));
 	if (ft_memcmp(&tmp.e_ident, ELFMAG, SELFMAG) != 0)
 		return (ww_err_str(ERROR_IO, "Invalid ELF header (magic mismatch)"));

@@ -6,12 +6,13 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/14 17:26:24 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/14 19:37:30 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <elfstream_macros.h>
 #include <ft/mem.h>
+#include <ft/print.h>
 #include <limits.h>
 
 enum e_elfstream_error
@@ -176,7 +177,7 @@ Func(elfstream_write_segments_round)(t_elfstream *self, int fd)
 		smallest = Func(elfstream_segment_lowest)(self->segments, self->segment_count);
 		if (smallest < 0)
 		{
-			printf("error: lowest segment is not in bounds\n");
+			ft_dprintf(2, "error: lowest segment is not in bounds\n");
 			break ; // TODO: error?
 		}
 		DBG("coercing segment #%zu", smallest);
@@ -312,7 +313,7 @@ Func(elfstream_write_section_round)(t_elfstream *self, int fd, size_t small_boun
 		smallest = Func(elfstream_section_lowest)(self->sections, self->section_count);
 		if (smallest < 0)
 		{
-			printf("error: lowest section is not in bounds\n");
+			ft_dprintf(2, "error: lowest section is not in bounds\n");
 			break ; // TODO: error?
 		}
 		DBG("coercing section #%zu", smallest);
