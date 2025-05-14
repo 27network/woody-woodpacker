@@ -1,27 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   elfstream_content_free.c                           :+:      :+:    :+:   */
+/*   elfstream_macros.h                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/11 23:35:08 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/12 20:29:09 by kiroussa         ###   ########.fr       */
+/*   Created: 2025/05/13 13:31:34 by kiroussa          #+#    #+#             */
+/*   Updated: 2025/05/14 16:21:03 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <elfstream.h>
+#ifndef ELFSTREAM_MACROS_H
+# define ELFSTREAM_MACROS_H
 
-void	elfstream_content_free(t_content_source *content)
-{
-	t_content_source	*tmp;
+# ifndef ELF_BITNESS
+#  error "ELF_BITNESS not defined"
+# endif
 
-	while (content)
-	{
-		tmp = content;
-		content = content->next;
-		if (tmp->type == CONTENT_SOURCE_MEMORY && tmp->s_memory.allocated)
-			free((void *) tmp->s_memory.data);
-		free(tmp);
-	}
-}
+# define _APPEND(x, y) x##y
+# define APPEND(x, y) _APPEND(x, y)
+
+# define Elf(n) APPEND(APPEND(APPEND(Elf, ELF_BITNESS), _), n)
+# define Func(n) APPEND(APPEND(n, _x), ELF_BITNESS)
+
+#endif // ELFSTREAM_MACROS_H

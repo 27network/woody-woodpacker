@@ -2,6 +2,7 @@
 
 SRCS += elfstream_close.c
 SRCS += elfstream_open.c
+SRCS += elfstream_segment_append.c
 SRCS += elfstream_strerror.c
 SRCS += source/elfstream_source_data.c
 SRCS += source/elfstream_source_fd.c

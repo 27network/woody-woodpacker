@@ -6,30 +6,13 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/12 20:17:53 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/14 17:26:24 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ELF_BITNESS
-# error "ELF_BITNESS not defined"
-#endif
-
+#include <elfstream_macros.h>
 #include <ft/mem.h>
 #include <limits.h>
-
-#define _APPEND(x, y) x##y
-#define APPEND(x, y) _APPEND(x, y)
-
-#define Elf(n) APPEND(APPEND(APPEND(Elf, ELF_BITNESS), _), n)
-#define Func(n) APPEND(APPEND(n, _x), ELF_BITNESS)
-
-#ifndef FASTCALL
-# if ELFSTREAM_DEBUG 
-#  define FASTCALL
-# else
-#  define FASTCALL static inline 
-# endif
-#endif // FASTCALL
 
 enum e_elfstream_error
 Func(elfstream_write_header)(t_elfstream *self, int fd)
@@ -91,6 +74,7 @@ Func(elfstream_write_content)(off_t offset, t_content_source *content, int fd)
 			break;
 		DBG("wrote %#lx content bytes", content->size);
 		lseek(fd, offset + content->size, SEEK_SET);
+		offset += content->size;
 		content = content->next;
 	}
 	DBG("wrote content");
@@ -206,6 +190,8 @@ Func(elfstream_write_segments_round)(t_elfstream *self, int fd)
 		DBG("written %zu/%zu segments", i, self->segment_count);
 		small_bound = *offset + elfstream_content_size(segment->content);
 		*offset = ((Elf(Off)) -1);
+		// fsync(fd);
+		// getchar();
 	}
 	return (ELFSTREAM_OK);
 }

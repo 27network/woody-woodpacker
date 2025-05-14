@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/02 15:46:05 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/14 16:58:34 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,8 @@ typedef struct s_smlz_token
 	uint8_t		offset;
 }	t_smlz_token;
 
+// Return true si le contenu à (in->data + in->offset) peut être compressé,
+// et écrit le résultat compressé dans (out->data + out->offset)
 static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
 					t_smlz_buffer *out)
 {
@@ -159,13 +161,16 @@ static void	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
 	// Write out compressed/litterals sequentially until we
 	// get enough to fill the block
 	written = 0;
-	while (written < block_size)
+	while (written < block_size && in->offset < in->size)
 	{
 		if (smlz_compress_litteral(in, out))
 			block_header[written / SMLZ_BITS]
 				|= (1 << ((SMLZ_BITS - (written + 1)) % SMLZ_BITS));
 		else
-			smlz_write(out, in->data + in->offset, 1);
+		{
+			// Couldn't compress litteral, writing the character as is
+			in->offset += smlz_write(out, in->data + in->offset, 1);
+		}
 		written++;
 	}
 }

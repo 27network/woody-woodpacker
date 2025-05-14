@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/12 16:50:45 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/14 16:21:43 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,22 @@
 # include <stdlib.h>
 # include <unistd.h>
 
+# ifndef FASTCALL
+#  if ELFSTREAM_DEBUG 
+#   define FASTCALL
+#  else
+#   define FASTCALL static inline 
+#  endif
+# endif // FASTCALL
+
 # if ELFSTREAM_DEBUG
 #  include <stdio.h>
 #  define DBG(msg, ...) fprintf(stderr, "DEBUG: %s: " msg "\n", __func__ __VA_OPT__(,) ##__VA_ARGS__)
 # else
 #  define DBG(msg, ...)
 # endif
+
+typedef struct s_elfstream	t_elfstream;
 
 /**
  *
@@ -56,8 +66,6 @@ enum e_elfstream_bitness
 	ELFSTREAM_64 = 64,
 };
 
-typedef struct s_elfstream	t_elfstream;
-
 /**
  *
  */
@@ -84,6 +92,7 @@ typedef struct s_content_source
 		struct
 		{
 			const char	*data;
+			bool		allocated;
 		}	s_memory;
 	};
 	size_t						size;
@@ -120,7 +129,7 @@ elfstream_write_source_fd(t_content_source *self, int fd);
  *
  */
 t_content_source
-*elfstream_source_data(const char *data, size_t size);
+*elfstream_source_data(const char *data, size_t size, bool allocated);
 
 /**
  *
@@ -141,6 +150,10 @@ typedef struct s_elf_segment
 	};
 	t_content_source			*content;
 }	t_elf_segment;
+
+size_t
+elfstream_segment_append(t_elfstream *stream, t_elf_segment *segment,
+	t_content_source *content);
 
 /**
  *
