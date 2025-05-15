@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/14 16:58:34 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 13:50:55 by jsauvain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,14 @@ typedef struct s_smlz_token
 static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
 					t_smlz_buffer *out)
 {
+	t_smlz_token	token;
 
+	token.offset = find_longest_match((const uint8_t *)in->data, \
+											in->offset, in->size, &token.length);
+	if (!token.offset || token.length <= sizeof(token))
+		return false;
+	smlz_write(out, &token, sizeof(token));
+	return true;
 }
 
 static void	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
