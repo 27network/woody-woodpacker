@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:33:05 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/17 09:16:40 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 02:31:19 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ void	ww_cli_defaults(t_ww_args *args, char **envp)
 		ww_getenv(envp, "WW_ENCRYPTION_ALGO", WW_ENCRYPTION_DEFAULT));
 	verbosity = ww_getenv(envp, "WW_LOG_LEVEL", "INFO");
 	args->log_level = ww_parse_level(verbosity);
-	args->signature = ww_getenv(envp, "WW_SIGNATURE", WW_SIGNATURE_DEFAULT);
 	ww_cli_opt_compression(args,
 		ww_getenv(envp, "WW_COMPRESSION", NULL));
 	ww_cli_opt_payload(args,

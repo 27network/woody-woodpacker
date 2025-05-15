@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:53 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/17 09:20:31 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 02:31:58 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ static void	ww_dump_args(t_ww_args *args)
 		ww_encryption_algo_str(args->encryption_algo));
 	ww_trace("\tencryption_key: %s\n", args->encryption_key);
 	ww_trace("\tlog_level: %s\n", ww_log_level_str(args->log_level));
-	ww_trace("\tsignature: '%s'\n", args->signature);
 	ww_trace("\tcompression: %s\n",
 		ww_compression_algo_str(args->compression));
 	ww_trace("\tpayload_file: %s\n", args->payload_file);

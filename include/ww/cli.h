@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/09 17:33:24 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 02:31:19 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,11 @@
 #  include <ww/encrypt.h>
 #  include <ww/log.h>
 
-#  define WW_SIGNATURE_DEFAULT "....WOODY...."
 #  define WW_OUTPUT_DEFAULT "woody"
 #  define WW_ENCRYPTION_DEFAULT "xor"
 
 // The getopt-like options string
-#  define OPTSTRING "hVc:e:k:o:ap:s:v"
+#  define OPTSTRING "hVc:e:k:o:ap:v"
 
 enum e_ww_cli_status
 {
@@ -53,9 +52,6 @@ enum e_ww_cli_status
  * 							(optional, env: WW_ENCRYPTION_KEY)
  * @param	log_level		The log verbosity level (see `log.h`).
  *							(optional, default: INFO, env: WW_LOG_LEVEL)
- * @param	signature		The signature to use.
- * 							(optional, default: `WW_SIGNATURE_DEFAULT`,
- * 							env: WW_SIGNATURE)
  * @param	compression		The compression algorithm to use.
  * 							(optional, default: none, env: WW_COMPRESSION)
  * @param	payload_file	The payload file to use.
@@ -70,7 +66,6 @@ typedef struct s_ww_args
 	enum e_ww_encryption_algo	encryption_algo;
 	const char					*encryption_key;
 	enum e_ww_log_level			log_level;
-	const char					*signature;
 	enum e_ww_compression_algo	compression;
 	const char					*payload_file;
 	bool						payload_async;
@@ -171,17 +166,6 @@ ww_cli_opt_output(t_ww_args *args, const char *output);
  */
 int
 ww_cli_opt_payload(t_ww_args *args, const char *payload);
-
-/**
- * @brief	Handles the `-s` option, setting the signature to use.
- *
- * @param	args		The arguments.
- * @param	signature	The desired signature.
- *
- * @return	An `enum e_ww_cli_status` value.
- */
-int
-ww_cli_opt_signature(t_ww_args *args, const char *signature);
 
 /**
  * @brief	Handles the `-v` flag(s), increasing the log level by one

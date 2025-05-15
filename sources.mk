@@ -25,7 +25,6 @@ SRCS += cli/args/opt/ww_cli_opt_encryption_key.c
 SRCS += cli/args/opt/ww_cli_opt_help.c
 SRCS += cli/args/opt/ww_cli_opt_output.c
 SRCS += cli/args/opt/ww_cli_opt_payload.c
-SRCS += cli/args/opt/ww_cli_opt_signature.c
 SRCS += cli/args/opt/ww_cli_opt_verbose.c
 SRCS += cli/args/opt/ww_cli_opt_version.c
 SRCS += cli/args/ww_cli_defaults.c

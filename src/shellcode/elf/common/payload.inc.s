@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 23:12:35 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/14 23:40:26 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/05/15 02:28:39 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -27,7 +27,7 @@ _payload:
 	mov SYS_ARG2, message_len
 	SYSCALL
 
-	; The payload should always return
+	; The shellcode payload should always return
 	ret
 
 message: db "....WOODY....\n", 0

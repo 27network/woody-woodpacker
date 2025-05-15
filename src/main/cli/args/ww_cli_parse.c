@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:32:14 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/17 09:20:31 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 02:32:03 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,6 @@ static inline int	ww_cli_opt_handle(t_ww_args *args, int opt,
 		return (ww_cli_opt_encryption_key(args, opt_globals->optarg));
 	if (opt == 'o')
 		return (ww_cli_opt_output(args, opt_globals->optarg));
-	if (opt == 's')
-		return (ww_cli_opt_signature(args, opt_globals->optarg));
 	if (opt == 'p')
 		return (ww_cli_opt_payload(args, opt_globals->optarg));
 	if (opt == 'v')
