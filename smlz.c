@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 13:50:55 by jsauvain         ###   ########.fr       */
+/*   Updated: 2025/05/15 17:16:15 by jsauvain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,12 @@
 #define SMLZ_METADATA_MASK	0b01110000
 
 #define SMLZ_FLAG_V1		0b00000001
+
+const char bible[] = {
+//#embed "bible.txt"
+//#embed "smlz"
+#embed "test-dyna"
+};
 
 typedef struct s_smlz_header
 {
@@ -61,6 +67,13 @@ static inline size_t	max(size_t a, size_t b)
 	return (b);
 }
 
+#define PRINT 0
+#if PRINT
+#define D(msg, ...) fprintf(stderr, "DEBUG: %s: " msg "\n", __func__ __VA_OPT__(,) ##__VA_ARGS__)
+#else
+#define D(msg, ...)
+#endif
+
 static size_t	find_longest_match(
 	const uint8_t *data,
 	size_t pos,
@@ -94,6 +107,47 @@ static size_t	find_longest_match(
 	return (offset);
 }
 
+#define WINDOW_SIZE (4096*64)     // Size of the sliding window
+#define LOOKAHEAD_SIZE 4096    // Size of the lookahead buffer
+#define MIN_MATCH_LENGTH 3   // Minimum match length to encode
+
+static void find_longest_match2(
+    const uint8_t *data,
+    size_t data_len,
+    size_t current_pos,
+    uint16_t *offset,
+    uint8_t *length
+) {
+    *offset = 0;
+    *length = 0;
+
+    // If we don't have enough data for a minimum match, don't bother searching
+    if (current_pos + MIN_MATCH_LENGTH > data_len) {
+        return;
+    }
+
+    // Calculate the search boundaries
+    size_t window_start = (current_pos > WINDOW_SIZE) ? (current_pos - WINDOW_SIZE) : 0;
+    size_t max_look_ahead = (current_pos + LOOKAHEAD_SIZE < data_len) ? 
+                            LOOKAHEAD_SIZE : (data_len - current_pos);
+
+    // Search for the longest match in the window
+    for (size_t i = window_start; i < current_pos; i++) {
+        // Determine match length
+        size_t j = 0;
+        while (j < max_look_ahead && 
+               data[current_pos + j] == data[i + j]) {
+            j++;
+        }
+
+        // Update if we found a longer match
+        if (j >= MIN_MATCH_LENGTH && j > *length) {
+            *offset = (uint16_t)(current_pos - i);
+            *length = (j > 255) ? 255 : (uint8_t)j; // Limit length to 255 (8 bits)
+        }
+    }
+}
+
 [[nodiscard]]
 static size_t	smlz_write_direct(char *buf, size_t offset, void *data,
 					size_t len)
@@ -103,11 +157,27 @@ static size_t	smlz_write_direct(char *buf, size_t offset, void *data,
 	return (len);
 }
 
+static void hexdump(void *buf, size_t len)
+{
+	for (size_t i = 0; i < len; i++)
+	{
+			printf("%lx", *(size_t*)(buf + i));
+	}
+}
+
 static size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
 {
 	const size_t	ret_len
 		= smlz_write_direct(buf->data, buf->offset, data, len);
 
+#if PRINT
+	if (buf->data)
+	{
+		D("written:");
+		hexdump(buf->data + buf->offset, len);
+		printf("\n");
+	}
+#endif
 	buf->offset += ret_len;
 	return (ret_len);
 }
@@ -133,8 +203,8 @@ static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 
 typedef struct s_smlz_token
 {
-	uint16_t	length;
-	uint8_t		offset;
+	uint16_t	offset;
+	uint8_t		length;
 }	t_smlz_token;
 
 // Return true si le contenu à (in->data + in->offset) peut être compressé,
@@ -144,42 +214,55 @@ static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
 {
 	t_smlz_token	token;
 
-	token.offset = find_longest_match((const uint8_t *)in->data, \
-											in->offset, in->size, &token.length);
+//	token.offset = find_longest_match((const uint8_t *)in->data, \
+//											in->offset, in->size, &token.length);
+	find_longest_match2(in->data, in->size, in->offset, &token.offset, &token.length);
+	D("tkn: {off=%u,len=%u}", token.offset, token.length);
 	if (!token.offset || token.length <= sizeof(token))
-		return false;
+		return (false);
 	smlz_write(out, &token, sizeof(token));
-	return true;
+	in->offset += token.length;
+	return (true);
 }
 
-static void	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
+static size_t	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
 					t_smlz_buffer *out)
 {
 	const size_t	block_size = header->block_size;
 	char			*block_header;
-	char			*block_data;
 	size_t			written;
 
 	// Set the block header 
 	block_header = out->data + out->offset;
 	out->offset += block_size / SMLZ_BITS;
-	block_data = block_header + block_size / SMLZ_BITS;
 
 	// Write out compressed/litterals sequentially until we
 	// get enough to fill the block
 	written = 0;
+	D("writing block");
 	while (written < block_size && in->offset < in->size)
 	{
+		D("writing byte %zu/%zu", written, block_size);
 		if (smlz_compress_litteral(in, out))
-			block_header[written / SMLZ_BITS]
-				|= (1 << ((SMLZ_BITS - (written + 1)) % SMLZ_BITS));
+		{
+			D("was compressed, setting header bit");
+			if (out->data)
+			{
+				D("bit=%zu, bs=%zu, w=%zu", written / SMLZ_BITS, block_size, written);
+				block_header[written / SMLZ_BITS]
+					|= (1 << ((SMLZ_BITS - (written + 1)) % SMLZ_BITS));
+			}
+		}
 		else
 		{
+	//		D("wasn't compressable, writing litteral (%#x)", in->data[in->offset]);
 			// Couldn't compress litteral, writing the character as is
 			in->offset += smlz_write(out, in->data + in->offset, 1);
 		}
 		written++;
 	}
+	D("wrote %zu bytes", written);
+	return (written);
 }
 
 static void	smlz_compress_blocks(t_smlz_header *header, t_smlz_buffer *in,
@@ -280,13 +363,16 @@ void	try(char *buf, size_t len)
 
 	printf("Trying to compress %zu bytes\n", len);
 	printf("Data: '%s'\n", buf);
+	printf("Compressing once to get length:");
 	compressed_len = smlz_compress(buf, len, NULL);
 	if (compressed_len == (size_t)-1)
 		return ;
+	printf("%zu\n", compressed_len);
 	compressed = malloc(compressed_len);
 	decompressed = malloc(len + 1);
 	if (compressed && decompressed)
 	{
+		printf("compressing twice for real\n");
 		tmp = smlz_compress(buf, len, compressed);
 		if (tmp != compressed_len)
 			printf(COMPRESS_SIZE_ERROR, tmp, compressed_len);
@@ -317,6 +403,7 @@ void	try_str(char *str)
 int	main(void)
 {
 	// try_str("Hello, World!");
-	try_str("aaaabbbbccccaaaabbbbccccaaaacccc");
+	try_str("aaaaaaaabbbbbbbbccccccccaaaaaaaabbbbbbbbccccccccaaaaaaaacccccccc");
+	//try(bible, sizeof(bible));
 	return (0);
 }

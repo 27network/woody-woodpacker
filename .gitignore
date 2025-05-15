@@ -1,11 +1,16 @@
 *.o
 *.hex
+/bible.*
+/smlz
+/run_nix.sh
 test*
 *.bin
 *.bin.elf
 *.out
 *.so
 *.a
+*.swp
+.*.swp
 /.direnv/
 /woody_woodpacker
 /woody
