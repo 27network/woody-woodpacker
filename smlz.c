@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 17:16:15 by jsauvain         ###   ########.fr       */
+/*   Updated: 2025/05/15 18:44:19 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,8 @@ typedef struct s_smlz_header
 	uint8_t		flags;
 	uint16_t	nblocks;
 	uint16_t	block_size;
-	uint8_t		remaining;
-	uint8_t		reserved[2];
+	uint16_t	remaining;
+	uint8_t		reserved[1];
 }	t_smlz_header;
 
 typedef struct s_smlz_buffer

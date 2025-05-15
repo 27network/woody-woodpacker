@@ -6,9 +6,9 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 23:22:51 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/14 23:39:39 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/05/15 15:44:58 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
 %include "elf/x86_64/callconv.inc.s"
-%include "elf/common/payload.inc.s"
+%include "elf/common/payload/payload.inc.s"

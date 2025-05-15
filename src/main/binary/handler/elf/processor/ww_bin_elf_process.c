@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 02:49:30 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 18:10:44 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,11 +93,9 @@ t_content_source	*ww_bin_elf_payload(t_ww_elf_handler *self, t_elf_segment *segm
 		Elf32_Addr	start_addr = segment->phdr32.p_vaddr + offset;
 		Elf32_Addr	start_offset = self->stream.ehdr32.e_entry - start_addr;
 		ft_memcpy(payload, g_payload_x86, sizeof(g_payload_x86));
-		// 1 byte for payload (to be filled)
-		// 1 byte for loader_fork boolean
-		// 4 bytes for payload_size
-		// 4 bytes for start_addr [target]
-		ft_memcpy(payload + sizeof(g_payload_x86) - 2 - 4 - 4, &start_offset, sizeof(Elf32_Addr));
+#define SIZE sizeof(Elf32_Addr)
+		ft_memcpy(payload + sizeof(g_payload_x86) - 1 - 1 - SIZE - SIZE - SIZE - 1 - SIZE, &start_offset, SIZE);
+#undef SIZE
 	}
 	else
 	{
@@ -106,7 +104,9 @@ t_content_source	*ww_bin_elf_payload(t_ww_elf_handler *self, t_elf_segment *segm
 		ft_memcpy(payload, g_payload_x86_64, sizeof(g_payload_x86_64));
 		// Same but 8 bytes instead of 4 for Elf(Addr)
 		// TODO: Change this function to be a bitness-sensitive function
-		ft_memcpy(payload + sizeof(g_payload_x86_64) - 2 - 8 - 8, &start_offset, sizeof(Elf64_Addr));
+#define SIZE sizeof(Elf64_Addr)
+		ft_memcpy(payload + sizeof(g_payload_x86_64) - 1 - 1 - SIZE - SIZE - SIZE - 1 - SIZE, &start_offset, SIZE);
+#undef SIZE
 	}
 	payload_data = elfstream_source_data(payload, sizeof(g_payload_x86_64), true);
 	if (payload_data)
