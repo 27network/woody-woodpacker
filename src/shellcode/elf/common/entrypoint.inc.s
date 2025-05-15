@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/15 03:00:30 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/05/15 15:15:09 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -21,6 +21,7 @@ _woody_entry:
 	; call [rel _woody_loader]
 
 	; 2. call _woody_decrypt
+	; ??? = decrypt(pt_load_contents, pt_load_size)
 
 	; 3. call _woody_decompress
 	
@@ -28,7 +29,6 @@ _woody_entry:
 	mov RDI, [rel start_offset]
 	sub RDI, 16
 	call get_rip
-
 get_rip:
 	pop RAX
 	add RAX, RDI 
