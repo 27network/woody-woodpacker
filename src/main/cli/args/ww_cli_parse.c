@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:32:14 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 02:32:03 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 02:39:17 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,6 @@ static inline int	ww_cli_args_handle(t_ww_args *args,
 	const int	argc = opt_args->argc - opt_globals->optind;
 	const char	**argv = (const char **) opt_args->argv + opt_globals->optind;
 
-	if (ww_cli_opt_output(args, args->output) != CLI_SUCCESS)
-		return (CLI_EXIT_FAILURE);
 	ww_trace("Parsing arguments (argc: %d)\n", argc);
 	ww_trace("Parsing arguments (argv[0]: %s)\n", argv[0]);
 	if (argc != 1)
@@ -70,6 +68,8 @@ static inline int	ww_cli_args_handle(t_ww_args *args,
 			opt_args->argv[0]);
 		return (CLI_EXIT_FAILURE);
 	}
+	if (ww_cli_opt_output(args, args->output) != CLI_SUCCESS)
+		return (CLI_EXIT_FAILURE);
 	args->target = argv[0];
 	return (CLI_SUCCESS);
 }
