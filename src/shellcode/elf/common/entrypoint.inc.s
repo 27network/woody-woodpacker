@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/15 00:32:36 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/05/15 03:00:30 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -25,9 +25,16 @@ _woody_entry:
 	; 3. call _woody_decompress
 	
 	; 4. jump to _start
-	jmp [rel start_addr] ; yeet!
+	mov RDI, [rel start_offset]
+	sub RDI, 16
+	call get_rip
 
-%include "elf/common/loader.inc.s"
+get_rip:
+	pop RAX
+	add RAX, RDI 
+	jmp RAX ; yeet!
+
+; %include "elf/common/loader.inc.s"
 ; %include "decrypt.inc.s"
 ; %include "decompress.inc.s"
 

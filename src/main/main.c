@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:53 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 02:31:58 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 02:41:08 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,9 @@ static int	ww_process(t_ww_args *args)
 		err = ww_bin_write(&bin);
 	if (err.type)
 		ww_err_print(err);
+	else
+		ww_info("Successfully packed '%s' into '%s'\n", args->target,
+			args->output);
 	ww_err_release(err);
 	ww_bin_free(&bin);
 	return (!!err.type);

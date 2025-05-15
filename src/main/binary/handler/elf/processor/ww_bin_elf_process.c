@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 00:32:03 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 02:49:30 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ static const char	g_payload_x86_64[] = {
 
 #define START_OFFSET	
 
-t_content_source	*ww_bin_elf_payload(t_ww_elf_handler *self)
+t_content_source	*ww_bin_elf_payload(t_ww_elf_handler *self, t_elf_segment *segment, size_t offset)
 {
 	t_content_source	*payload_data;
 	char				*payload;
@@ -90,19 +90,23 @@ t_content_source	*ww_bin_elf_payload(t_ww_elf_handler *self)
 		return (NULL);
 	if (self->stream.bitness == ELFSTREAM_32)
 	{
+		Elf32_Addr	start_addr = segment->phdr32.p_vaddr + offset;
+		Elf32_Addr	start_offset = self->stream.ehdr32.e_entry - start_addr;
 		ft_memcpy(payload, g_payload_x86, sizeof(g_payload_x86));
 		// 1 byte for payload (to be filled)
 		// 1 byte for loader_fork boolean
 		// 4 bytes for payload_size
 		// 4 bytes for start_addr [target]
-		ft_memcpy(payload + sizeof(g_payload_x86) - 2 - 4 - 4, &self->stream.ehdr32.e_entry, sizeof(Elf32_Addr));
+		ft_memcpy(payload + sizeof(g_payload_x86) - 2 - 4 - 4, &start_offset, sizeof(Elf32_Addr));
 	}
 	else
 	{
+		Elf64_Addr	start_addr = segment->phdr64.p_vaddr + offset;
+		Elf64_Addr	start_offset = self->stream.ehdr64.e_entry - start_addr;
 		ft_memcpy(payload, g_payload_x86_64, sizeof(g_payload_x86_64));
 		// Same but 8 bytes instead of 4 for Elf(Addr)
 		// TODO: Change this function to be a bitness-sensitive function
-		ft_memcpy(payload + sizeof(g_payload_x86_64) - 2 - 8 - 8, &self->stream.ehdr64.e_entry, sizeof(Elf64_Addr));
+		ft_memcpy(payload + sizeof(g_payload_x86_64) - 2 - 8 - 8, &start_offset, sizeof(Elf64_Addr));
 	}
 	payload_data = elfstream_source_data(payload, sizeof(g_payload_x86_64), true);
 	if (payload_data)
@@ -115,18 +119,19 @@ t_ww_error	ww_bin_elf_process(t_ww_elf_handler *self, t_ww_binary *bin)
 {
 	t_content_source	*payload_data;
 	t_elf_segment		*target;
-	size_t				location;
+	size_t				offset;
 
 	(void) bin;
 	ww_trace("%s: Adding new binary data to ELF.\n", __func__);
 	target = ww_bin_elf_target_segment(self);
 	if (!target)
 		return (ww_err_fmt(ERROR_INTERNAL, "failed to find target segment"));
-	payload_data = ww_bin_elf_payload(self);
+	offset = elfstream_segment_append(&self->stream, target, NULL);
+	payload_data = ww_bin_elf_payload(self, target, offset);
 	if (!payload_data)
 		return (ww_err_fmt(ERROR_ALLOC, "failed to allocate payload data"));
-	location = elfstream_segment_append(&self->stream, target, payload_data);
-	ww_bin_elf_entry(&self->stream, target, location);
-	ww_info("Injected binary data at %#x\n", (unsigned int) location);
+	offset = elfstream_segment_append(&self->stream, target, payload_data);
+	ww_bin_elf_entry(&self->stream, target, offset);
+	// ww_info("Injected binary data at %#x+%#x\n(unsigned int) offset);
 	return (ww_ok());
 }

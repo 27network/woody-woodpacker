@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 20:30:25 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/14 17:40:33 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/15 02:46:33 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,14 +24,17 @@ size_t	elfstream_segment_append(t_elfstream *stream, t_elf_segment *segment,
 	t_content_source	*tmp;
 	const size_t		size = elfstream_content_size(content);
 
-	tmp = segment->content;
-	if (!tmp)
-		segment->content = content;
-	else
+	if (size > 0)
 	{
-		while (tmp->next)
-			tmp = tmp->next;
-		tmp->next = content;
+		tmp = segment->content;
+		if (!tmp)
+			segment->content = content;
+		else
+		{
+			while (tmp->next)
+				tmp = tmp->next;
+			tmp->next = content;
+		}
 	}
 	if (stream->bitness == ELFSTREAM_32)
 		return (update_stream_x32(stream, segment, size));
@@ -114,6 +117,8 @@ Func(update_stream)(t_elfstream *stream, t_elf_segment *segment, size_t size)
 	Elf(Ehdr)	*ehdr;
 
 	phdr = (Elf(Phdr) *) &segment->phdr32;
+	if (size == 0)
+		return (phdr->p_filesz);
 	DBG("size start: %#lx", phdr->p_filesz);
 	position = phdr->p_offset + phdr->p_filesz;
 	ehdr = (Elf(Ehdr) *) &stream->ehdr32;

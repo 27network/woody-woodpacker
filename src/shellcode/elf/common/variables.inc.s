@@ -6,11 +6,11 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 21:06:17 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/14 23:21:00 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/05/15 02:50:53 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
-start_addr: DECLARE_SIZE 0x401690 ;0x42424242
+start_offset: DECLARE_SIZE 0x42424242
 payload_size: DECLARE_SIZE 0x42424242
 loader_fork: db 1
 payload: db 0xc3
