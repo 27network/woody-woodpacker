@@ -6,13 +6,13 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 20:30:25 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 02:46:33 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/16 16:07:36 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <elfstream.h>
-
 #ifndef ELF_BITNESS
+# include <elfstream.h>
+
 # define ELF_BITNESS 32
 # include "elfstream_segment_append.c"
 # define ELF_BITNESS 64

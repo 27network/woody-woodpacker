@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 17:24:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 11:56:06 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/16 14:56:44 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,15 @@ int	ww_cli_opt_payload(t_ww_args *args, const char *payload_file)
 
 	if (!payload_file)
 		return (CLI_EXIT_FAILURE);
-	ww_trace("Checking payload file '%s'\n", payload_file);
+	if (ft_strcmp(payload_file, "none") == 0)
+		args->payload_file = NULL;
+	if (ft_strcmp(payload_file, "none") == 0)
+		return (CLI_SUCCESS);
 	fd = open(payload_file, O_RDONLY);
 	if (fd == -1)
-	{
 		ww_error("Could not open payload file '%s': %m\n", payload_file);
+	if (fd == -1)
 		return (CLI_EXIT_FAILURE);
-	}
 	nread = read(fd, buf, 4);
 	close(fd);
 	if (nread == -1)
