@@ -6,13 +6,14 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 17:24:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/16 14:56:44 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/21 17:52:34 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <elf.h>
 #include <fcntl.h>
 #include <ft/mem.h>
+#include <ft/string.h>
 #include <unistd.h>
 #define __WW_CLI_INTERNAL__
 #include <ww/cli.h>

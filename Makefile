@@ -93,6 +93,7 @@ oclean:
 
 clean: $(CLEAN_DEPS) oclean
 
+fclean: $(eval NOCLEAN := 1)
 fclean: $(FCLEAN_DEPS) oclean
 	rm -f $(NAME)
 

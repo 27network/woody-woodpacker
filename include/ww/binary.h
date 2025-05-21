@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:19:39 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/17 09:54:18 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/19 17:45:15 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ typedef struct s_ww_binary
 	int							input_fd;
 	char						*blob;
 	size_t						blob_size;
+	t_ww_args					*args;
 	struct s_ww_binary_handler	*handler;
 }	t_ww_binary;
 

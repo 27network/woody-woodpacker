@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:40:15 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 10:25:11 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/19 17:45:26 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ t_ww_error	ww_bin_init(t_ww_binary *bin, t_ww_args *args)
 	ft_memset(bin, 0, sizeof(t_ww_binary));
 	bin->input = args->target;
 	bin->output = args->output;
+	bin->args = args;
 	ww_trace("Opening input file '%s'\n", bin->input);
 	bin->input_fd = open(bin->input, O_RDONLY);
 	if (bin->input_fd == -1)
