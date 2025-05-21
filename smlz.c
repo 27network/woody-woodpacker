@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 18:44:19 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/21 19:18:01 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,9 @@ static inline size_t	max(size_t a, size_t b)
 	return (b);
 }
 
-#define PRINT 0
+#ifndef PRINT
+# define PRINT 0
+#endif
 #if PRINT
 #define D(msg, ...) fprintf(stderr, "DEBUG: %s: " msg "\n", __func__ __VA_OPT__(,) ##__VA_ARGS__)
 #else
@@ -159,10 +161,15 @@ static size_t	smlz_write_direct(char *buf, size_t offset, void *data,
 
 static void hexdump(void *buf, size_t len)
 {
+	char tmp[3];
+	tmp[2] = '\0';
 	for (size_t i = 0; i < len; i++)
 	{
-			printf("%lx", *(size_t*)(buf + i));
+		tmp[0] = "0123456789abcdef"[*(((uint8_t*)buf) + i) >> 4];
+		tmp[1] = "0123456789abcdef"[*(((uint8_t*)buf) + i) & 0xf];
+		printf("%s ", tmp);
 	}
+	printf("\n");
 }
 
 static size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
@@ -175,7 +182,6 @@ static size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
 	{
 		D("written:");
 		hexdump(buf->data + buf->offset, len);
-		printf("\n");
 	}
 #endif
 	buf->offset += ret_len;
@@ -241,9 +247,24 @@ static size_t	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
 	// get enough to fill the block
 	written = 0;
 	D("writing block");
-	while (written < block_size && in->offset < in->size)
+	while (true)
 	{
-		D("writing byte %zu/%zu", written, block_size);
+#if PRINT
+		write(1, in->data + in->offset, in->size - in->offset);
+		write(1, "\n", 1);
+#endif
+		if (written >= block_size)
+		{
+			D("written enough for block_size, exiting");
+			break ;
+		}
+		if (in->offset >= in->size)
+		{
+			D("no more data to write, exiting");
+			break ;
+		}
+
+		D("writing byte %zu/%zu", written + 1, block_size);
 		if (smlz_compress_litteral(in, out))
 		{
 			D("was compressed, setting header bit");
@@ -403,9 +424,9 @@ void	try_str(char *str)
 
 int	main(void)
 {
-	printf("%ld\n", sizeof(t_smlz_header));
+	// printf("%ld\n", sizeof(t_smlz_header));
 	// try_str("Hello, World!");
-	try_str("aaaaaaaabbbbbbbbccccccccaaaaaaaabbbbbbbbccccccccaaaaaaaacccccccc");
+	try_str("aaaaaaaabbbbbbbbccccccccaaaaaaaabbbbbbbbccccccccrrrrrrrrcccccccc");
 	//try(bible, sizeof(bible));
 	return (0);
 }
