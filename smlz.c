@@ -36,10 +36,10 @@ const char bible[] = {
 typedef struct s_smlz_header
 {
 	uint8_t		magic[4];
-	uint8_t		flags;
 	uint16_t	nblocks;
 	uint16_t	block_size;
 	uint16_t	remaining;
+	uint8_t		flags;
 	uint8_t		reserved[1];
 }	t_smlz_header;
 
