@@ -220,7 +220,8 @@ static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
 	D("tkn: {off=%u,len=%u}", token.offset, token.length);
 	if (!token.offset || token.length <= sizeof(token))
 		return (false);
-	smlz_write(out, &token, sizeof(token));
+	smlz_write(out, &token.offset, sizeof(uint16_t));
+	smlz_write(out, &token.length, sizeof(uint8_t));
 	in->offset += token.length;
 	return (true);
 }
@@ -402,6 +403,7 @@ void	try_str(char *str)
 
 int	main(void)
 {
+	printf("%ld\n", sizeof(t_smlz_header));
 	// try_str("Hello, World!");
 	try_str("aaaaaaaabbbbbbbbccccccccaaaaaaaabbbbbbbbccccccccaaaaaaaacccccccc");
 	//try(bible, sizeof(bible));
