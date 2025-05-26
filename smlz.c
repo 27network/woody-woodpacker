@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/21 19:18:01 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/26 15:03:14 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#define SMLZ_MAX_LENGTH		512			// The max lookahead check for flm
-#define SMLZ_MIN_LENGTH		3			// The min match length for flm
-#define SMLZ_WINDOW_SIZE	4096		// The window size for flm
+// #define SMLZ_MAX_LENGTH		65535		// The max lookahead check for flm
+// #define SMLZ_MIN_LENGTH		3			// The min match length for flm
+// #define SMLZ_WINDOW_SIZE	4096		// The window size for flm
 
 #define SMLZ_MAGIC			"SMLZ"
 #define SMLZ_VERSION_MASK	0b00001111
@@ -30,7 +30,8 @@
 const char bible[] = {
 //#embed "bible.txt"
 //#embed "smlz"
-#embed "test-dyna"
+// #embed "test-dyna"
+#embed "salut.txt"
 };
 
 typedef struct s_smlz_header
@@ -76,49 +77,16 @@ static inline size_t	max(size_t a, size_t b)
 #define D(msg, ...)
 #endif
 
-static size_t	find_longest_match(
-	const uint8_t *data,
-	size_t pos,
-	size_t data_size,
-	uint16_t *length
-) {
-	const size_t	max_match_length = min(data_size - pos, SMLZ_MAX_LENGTH);
-	size_t			current_length;
-	size_t			i;
-	size_t			offset;
-
-	*length = 0;
-	if (max_match_length < SMLZ_MIN_LENGTH)
-		return (0);
-	offset = 0;
-	i = max(pos - SMLZ_WINDOW_SIZE, 0);
-	while (i++ < pos)
-	{
-		current_length = 0;
-		while (current_length < max_match_length
-			&& data[(i - 1) + current_length] == data[pos + current_length])
-			current_length++;
-		if (current_length >= SMLZ_MIN_LENGTH && current_length > *length)
-		{
-			*length = current_length;
-			offset = pos - (i - 1);
-			if (current_length == SMLZ_MAX_LENGTH)
-				break ;
-		}
-	}
-	return (offset);
-}
-
 #define WINDOW_SIZE (4096*64)     // Size of the sliding window
-#define LOOKAHEAD_SIZE 4096    // Size of the lookahead buffer
-#define MIN_MATCH_LENGTH 3   // Minimum match length to encode
+#define LOOKAHEAD_SIZE 65535	// Size of the lookahead buffer
+#define MIN_MATCH_LENGTH 3		// Minimum match length to encode
 
 static void find_longest_match2(
     const uint8_t *data,
     size_t data_len,
     size_t current_pos,
     uint16_t *offset,
-    uint8_t *length
+    uint16_t *length
 ) {
     *offset = 0;
     *length = 0;
@@ -135,6 +103,8 @@ static void find_longest_match2(
 
     // Search for the longest match in the window
     for (size_t i = window_start; i < current_pos; i++) {
+		if (current_pos - i >= 65536)
+			continue ;
         // Determine match length
         size_t j = 0;
         while (j < max_look_ahead && 
@@ -145,7 +115,7 @@ static void find_longest_match2(
         // Update if we found a longer match
         if (j >= MIN_MATCH_LENGTH && j > *length) {
             *offset = (uint16_t)(current_pos - i);
-            *length = (j > 255) ? 255 : (uint8_t)j; // Limit length to 255 (8 bits)
+            *length = (j > 65535) ? 65535 : (uint16_t)j;
         }
     }
 }
@@ -207,10 +177,10 @@ static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 
 #define SMLZ_BITS 8  // I hope thats not changing soon :pray:
 
-typedef struct s_smlz_token
+typedef __attribute__((packed)) struct s_smlz_token
 {
 	uint16_t	offset;
-	uint8_t		length;
+	uint16_t	length;
 }	t_smlz_token;
 
 // Return true si le contenu à (in->data + in->offset) peut être compressé,
@@ -226,8 +196,7 @@ static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
 	D("tkn: {off=%u,len=%u}", token.offset, token.length);
 	if (!token.offset || token.length <= sizeof(token))
 		return (false);
-	smlz_write(out, &token.offset, sizeof(uint16_t));
-	smlz_write(out, &token.length, sizeof(uint8_t));
+	smlz_write(out, &token, sizeof(t_smlz_token));
 	in->offset += token.length;
 	return (true);
 }
@@ -426,7 +395,7 @@ int	main(void)
 {
 	// printf("%ld\n", sizeof(t_smlz_header));
 	// try_str("Hello, World!");
-	try_str("aaaaaaaabbbbbbbbccccccccaaaaaaaabbbbbbbbccccccccrrrrrrrrcccccccc");
-	//try(bible, sizeof(bible));
+	// try_str("aaaaaaaabbbbbbbbccccccccaaaaaaaabbbbbbbbccccccccrrrrrrrrcccccccc");
+	try(bible, sizeof(bible));
 	return (0);
 }
