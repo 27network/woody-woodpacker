@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/21 20:41:40 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/22 11:22:13 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,13 @@ static const char	Func(g_payload)[] = {
 };
 #undef PAYLOAD_FILE
 
+//TODO: Alloc entry payload with enough size to hold the `payload` and `segments_content`
 FASTCALL char	*Func(ww_bin_elf_payload_raw)(Elf(Word) *payload_size)
 {
+	char	*payload = ft_calloc();
+
+	if (!payload)
+		return (NULL);
 	*payload_size = sizeof(Func(g_payload));
 	return (Func(g_payload));
 }
