@@ -79,6 +79,8 @@ endif
 test:
 	clang -g3 -o test-dyna testing/test.c
 	nix-shell -p pkgs.glibc.static --command "clang -static -g3 -o test-static testing/test.c"
+	nix-shell -p pkgs.pkgsi686Linux.clang --command "clang -g3 -o test-dyna-32 testing/test.c"
+	nix-shell -p pkgs.pkgsi686Linux.clang pkgs.pkgsi686Linux.glibc.static --command "clang -m32 -g3 -static -o test-static-32 testing/test.c"
 
 test-run-dyna: test $(NAME)
 	rm -rf woody
