@@ -386,16 +386,40 @@ void	try(char *buf, size_t len)
 	free(decompressed);
 }
 
-void	try_str(char *str)
+void	try_file(int fd, off_t file_size)
 {
-	try(str, strlen(str));
+	char	buffer[file_size];
+
+	if (read(fd, buffer, file_size) == -1)
+	{
+		perror("read");
+		close(fd);
+		exit(1);
+	}
+	try(buffer, file_size);
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
+	int		fd;
+	off_t	file_size;
+
 	// printf("%ld\n", sizeof(t_smlz_header));
 	// try_str("Hello, World!");
-	// try_str("aaaaaaaabbbbbbbbccccccccaaaaaaaabbbbbbbbccccccccrrrrrrrrcccccccc");
-	try(bible, sizeof(bible));
+	if (argc != 2)
+	{
+		fprintf(stderr, "Usage: ./smlz file_to_compress");
+		return 1;
+	}
+	fd = open(argv[1], O_RDONLY);
+	if (fd == -1)
+	{
+		perror("open");
+		return 1;
+	}
+	file_size = lseek(fd, 0, SEEK_END);
+	lseek(fd, 0, SEEK_SET);
+	try_file(fd, file_size);
+	//try(bible, sizeof(bible));
 	return (0);
 }
