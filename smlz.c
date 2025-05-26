@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/mman.h>
 
 // #define SMLZ_MAX_LENGTH		65535		// The max lookahead check for flm
 // #define SMLZ_MIN_LENGTH		3			// The min match length for flm
@@ -388,14 +389,9 @@ void	try(char *buf, size_t len)
 
 void	try_file(int fd, off_t file_size)
 {
-	char	buffer[file_size];
+	void	*buffer;
 
-	if (read(fd, buffer, file_size) == -1)
-	{
-		perror("read");
-		close(fd);
-		exit(1);
-	}
+	buffer = mmap(0, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	try(buffer, file_size);
 }
 
