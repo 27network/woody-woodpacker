@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/21 19:43:47 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/26 19:02:04 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@
 // Wrapper function, see below for the actual implementation
 t_ww_error	ww_bin_elf_process(t_ww_elf_handler *self, t_ww_binary *bin)
 {
+	ww_warn("Segment compression is not implemented yet, disabling");
+	bin->args->compression = WW_COMPRESSION_NONE; //TODO: Implement
+
 	if (self->stream.bitness == ELFSTREAM_32)
 		return (ww_bin_elf_process_x32(self, bin));
 	return (ww_bin_elf_process_x64(self, bin));
@@ -46,7 +49,6 @@ t_ww_error	Func(ww_bin_elf_process)(t_ww_elf_handler *self, t_ww_binary *bin)
 	t_elf_segment		*target;
 	size_t				offset;
 
-	(void) bin;
 	target = Func(ww_bin_elf_find_target)(&self->stream);
 	if (!target)
 		return (ww_err_fmt(ERROR_INTERNAL, "failed to find target segment"));

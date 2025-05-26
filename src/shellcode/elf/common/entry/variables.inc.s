@@ -6,22 +6,30 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 21:06:17 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/26 18:12:37 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/05/26 21:04:43 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
 ; Offset from _woody_entry to _start, used when jumping to the original ELF entry
 start_offset: DECLARE_SIZE 0x42424242
 
-; Whether the loader should waitpid/wait4 for the forked payload
-loader_async: db 0
+; Offset from _woody_entry to the decryption routine
+decryption_routine_offset: DECLARE_SIZE 0x42424242
 
-; Size of the `payload` buffer
-payload_size: DECLARE_SIZE 0x42424242
+; Offset from _woody_entry to the decompression routine
+decompression_routine_offset: DECLARE_SIZE 0x42424242
 
-; 
+
+; The decryption key, if applicable
 encryption_key: times 0x16 db 0x42
 
+
+; Whether the loader should waitpid/wait4 for the forked payload.
+; This is only applicable when loading an ELF/executable file.
+loader_async: db 0
+
+; Size of the `user_payload` buffer
+user_payload_size: DECLARE_SIZE 0x42424242
 
 
 ; Size of the `segments_content` buffer
@@ -38,4 +46,4 @@ segments_content: DECLARE_SIZE 0x42424242
 
 ; The payload itself loaded by _woody_loader, user defined
 ; (note: filled at runtime by woody)
-payload: DECLARE_SIZE 0x42424242
+user_payload: DECLARE_SIZE 0x42424242

@@ -52,6 +52,7 @@ SRCS += util/ww_getenv.c
 SRCS += util/ww_strcmp_ignorecase.c
 SRCS += util/ww_strncmp_ignorecase.c
 
+SHSRCS += elf/common/decompress/smlz.s
 SHSRCS += elf/x86_64/entry/entrypoint.s
 SHSRCS += elf/x86_64/payload/payload.s
 SHSRCS += elf/x86/entry/entrypoint.s

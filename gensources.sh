@@ -19,7 +19,7 @@ done
 echo >> sources.mk
 
 for file in $(find $SHSRC_DIR -name '*.s' -print | sort); do
-	if [[ $file == *.inc.s ]]; then
+	if [[ $file == *.inc.s ]] || [[ $file == *.entry.s ]]; then
 		continue
 	fi
 	directory=${file%/*}

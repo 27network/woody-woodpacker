@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 02:31:19 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/26 21:07:37 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ enum e_ww_cli_status
  * @param	payload_file	The payload file to use.
  * 							(optional, default: <built-in>, env: WW_PAYLOAD_FILE)
  * @param	payload_async	Whether the payload should run asynchronously.
+ *							This is only applicable when loading an ELF/executable file.
  * 							(optional, default: false, env: WW_PAYLOAD_ASYNC)
  */
 typedef struct s_ww_args
@@ -66,7 +67,7 @@ typedef struct s_ww_args
 	enum e_ww_encryption_algo	encryption_algo;
 	const char					*encryption_key;
 	enum e_ww_log_level			log_level;
-	enum e_ww_compression_algo	compression;
+	enum e_ww_compression_algo	compression_algo;
 	const char					*payload_file;
 	bool						payload_async;
 }	t_ww_args;

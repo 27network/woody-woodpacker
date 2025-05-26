@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/26 15:03:14 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/05/26 18:51:05 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,8 @@ static inline size_t	max(size_t a, size_t b)
 #define D(msg, ...)
 #endif
 
-#define WINDOW_SIZE (4096*64)     // Size of the sliding window
-#define LOOKAHEAD_SIZE 65535	// Size of the lookahead buffer
+#define WINDOW_SIZE 65536     // Size of the sliding window
+#define LOOKAHEAD_SIZE 65536	// Size of the lookahead buffer
 #define MIN_MATCH_LENGTH 3		// Minimum match length to encode
 
 static void find_longest_match2(

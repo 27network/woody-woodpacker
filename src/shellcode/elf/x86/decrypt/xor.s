@@ -2,5 +2,5 @@
 ; GENERATED AUTOMATICALLY BY ./gen-arch-wrappers.sh
 
 %include "elf/x86/callconv.inc.s"
-%include "elf/common/entry/entrypoint.entry.s"
+%include "elf/common/decrypt/xor.entry.s"
 
