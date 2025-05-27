@@ -28,13 +28,6 @@
 
 #define SMLZ_FLAG_V1		0b00000001
 
-const char bible[] = {
-//#embed "bible.txt"
-//#embed "smlz"
-// #embed "test-dyna"
-#embed "salut.txt"
-};
-
 typedef struct s_smlz_header
 {
 	uint8_t		magic[4];
@@ -165,8 +158,6 @@ static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 
 	size = in->size;
 	header->flags = SMLZ_FLAG_V1;
-	if (in->size < 32)
-		return (false);
 	header->block_size = 8;
 	while (size >= 64 && header->block_size < 32768)
 	{
@@ -305,27 +296,6 @@ size_t	smlz_compress(char *in_buf, size_t in_len, char *out_buf)
 	return (output_buffer.offset);
 }
 
-static size_t	smlz_decompress0(t_smlz_buffer *in, t_smlz_buffer *out)
-{
-	(void)in;
-	(void)out;
-	return (0);
-}
-
-size_t	smlz_decompress(char *in_buf, size_t in_len, char *out_buf)
-{
-	t_smlz_buffer	input_buffer;
-	t_smlz_buffer	output_buffer;
-
-	memset(&input_buffer, 0, sizeof(t_smlz_buffer));
-	memset(&output_buffer, 0, sizeof(t_smlz_buffer));
-	input_buffer.data = in_buf;
-	input_buffer.size = in_len;
-	output_buffer.data = out_buf;
-	smlz_decompress0(&input_buffer, &output_buffer);
-	return (output_buffer.offset);
-}
-
 // --------------------------------------- TESTS --- //
 
 #define COMPRESS_SIZE_ERROR	"Compressed size is %zu, expected %zu\n"
@@ -350,7 +320,6 @@ void	try(char *buf, size_t len)
 {
 	char	*compressed;
 	size_t	compressed_len;
-	char	*decompressed;
 	size_t	tmp;
 
 	printf("Trying to compress %zu bytes\n", len);
@@ -360,9 +329,8 @@ void	try(char *buf, size_t len)
 	if (compressed_len == (size_t)-1)
 		return ;
 	printf("%zu\n", compressed_len);
-	compressed = malloc(compressed_len);
-	decompressed = malloc(len + 1);
-	if (compressed && decompressed)
+	compressed = calloc(compressed_len, 1);
+	if (compressed)
 	{
 		printf("compressing twice for real\n");
 		tmp = smlz_compress(buf, len, compressed);
@@ -376,23 +344,26 @@ void	try(char *buf, size_t len)
 			(void)!write(fd, compressed, tmp);
 			close(fd);
 		}
-		// else if (tmp != smlz_decompress(compressed, tmp, decompressed))
-		// 	printf("Decompressed size is %zu, expected %zu\n", tmp, len);
-		// else if (memcmp(buf, decompressed, len))
-		// 	printf("Decompressed data is different from original\n");
-		// else
-		// 	printf("Success\n");
 	}
 	free(compressed);
-	free(decompressed);
 }
 
 void	try_file(int fd, off_t file_size)
 {
 	void	*buffer;
 
+	if (file_size == 0) {
+		printf("special case 0 size moment\n");
+		try("", 0);
+		return;
+	}
 	buffer = mmap(0, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (buffer == MAP_FAILED) {
+		perror("mmap");
+		return ;
+	}
 	try(buffer, file_size);
+	munmap(buffer, file_size);
 }
 
 int	main(int argc, char **argv)
@@ -416,6 +387,5 @@ int	main(int argc, char **argv)
 	file_size = lseek(fd, 0, SEEK_END);
 	lseek(fd, 0, SEEK_SET);
 	try_file(fd, file_size);
-	//try(bible, sizeof(bible));
 	return (0);
 }
