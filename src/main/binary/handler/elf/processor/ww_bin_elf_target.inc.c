@@ -6,11 +6,14 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 19:57:26 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/21 17:54:27 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/04 13:01:35 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-t_elf_segment	*Func(ww_bin_elf_find_target)(t_elfstream *stream)
+/**
+ * This function finds the last (in virtual memory) PT_LOAD segment.
+ */
+FASTCALL t_elf_segment	*Func(ww_bin_elf_find_target)(t_elfstream *stream)
 {
 	t_elf_segment		*target;
 	t_elf_segment		*tmp;
