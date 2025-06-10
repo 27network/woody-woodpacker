@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/04 13:02:21 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/10 21:41:33 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,8 @@ t_content_source *Func(ww_bin_elf_payload)(
 	__attribute__((cleanup(ft_strdel)))
 	char 				*user_payload;
 	Elf(Off) 			user_payload_size = 0;
+	__attribute__((cleanup(ft_closep)))
+	int					user_payload_fd = -1;
 
 	char				*payload = NULL;
 	Elf(Off) 			orig_payload_size;
@@ -128,7 +130,7 @@ t_content_source *Func(ww_bin_elf_payload)(
 	segments_content = NULL; //TODO: Implement
 	if (!segments_content && segments_size != 0)
 		return (NULL);
-	user_payload = Func(ww_bin_elf_payload_user)(bin, &user_payload_size);
+	user_payload = Func(ww_bin_elf_payload_user)(bin, &user_payload_fd, &user_payload_size);
 	if (!user_payload && user_payload_size != 0)
 		return (NULL);
 

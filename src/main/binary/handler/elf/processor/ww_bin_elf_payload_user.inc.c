@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:26:24 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/31 15:33:18 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/10 21:41:01 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,9 @@ FASTCALL char	*Func(ww_bin_elf_payload_user_error)(
 
 FASTCALL char	*Func(ww_bin_elf_payload_user_file)(
 	t_ww_binary *bin,
+	int *user_payload_fd;
 	Elf(Off) *user_payload_size
 ) {
-	int user_payload_fd;
 	char *user_payload;
 	Elf(Off) size;
 
@@ -49,7 +49,7 @@ FASTCALL char	*Func(ww_bin_elf_payload_user_file)(
 
 FASTCALL char	*Func(ww_bin_elf_payload_user)(
 	t_ww_binary *bin,
-	int *user_payload_fd,
+	int user_payload_fd,
 	Elf(Off) *user_payload_size
 ) {
 	char *user_payload;
