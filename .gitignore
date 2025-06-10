@@ -17,3 +17,5 @@ test*
 /test
 /development.mk
 /build
+compile_commands.json
+/.cache

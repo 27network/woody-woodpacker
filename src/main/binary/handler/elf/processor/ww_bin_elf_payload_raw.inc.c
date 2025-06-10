@@ -16,7 +16,7 @@ FASTCALL char	*Func(ww_bin_elf_payload_raw)(
 	Elf(Off) segments_size,
 	Elf(Off) user_payload_size
 ) {
-	char		*payload;
+	//char		*payload;
 	Elf(Off)	payload_size;
 
 	payload_size = sizeof(Func(g_payload));

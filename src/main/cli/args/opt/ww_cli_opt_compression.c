@@ -16,7 +16,7 @@
 
 static void	ww_compressions_print(void)
 {
-	size_t			i;
+	size_t	i;
 
 	ww_info("Available compression algorithms:\n");
 	i = 0;
@@ -40,6 +40,6 @@ int	ww_cli_opt_compression(t_ww_args *args, const char *compression)
 		ww_compressions_print();
 		return (CLI_EXIT_FAILURE);
 	}
-	args->compression = algo;
+	args->compression_algo = algo;
 	return (CLI_SUCCESS);
 }

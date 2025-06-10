@@ -22,9 +22,9 @@ FASTCALL char	*Func(ww_bin_elf_payload_user_error)(
 
 FASTCALL char	*Func(ww_bin_elf_payload_user_file)(
 	t_ww_binary *bin,
-	int *user_payload_fd,
 	Elf(Off) *user_payload_size
 ) {
+	int user_payload_fd;
 	char *user_payload;
 	Elf(Off) size;
 

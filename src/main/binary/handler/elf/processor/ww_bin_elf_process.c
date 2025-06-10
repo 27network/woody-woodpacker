@@ -23,7 +23,7 @@
 t_ww_error	ww_bin_elf_process(t_ww_elf_handler *self, t_ww_binary *bin)
 {
 	ww_warn("Segment compression is not implemented yet, disabling");
-	bin->args->compression = WW_COMPRESSION_NONE; //TODO: Implement
+	bin->args->compression_algo = COMPRESSION_ALGO_NONE; //TODO: Implement
 
 	if (self->stream.bitness == ELFSTREAM_32)
 		return (ww_bin_elf_process_x32(self, bin));
@@ -61,4 +61,5 @@ t_ww_error	Func(ww_bin_elf_process)(t_ww_elf_handler *self, t_ww_binary *bin)
 }
 
 # undef ELF_BITNESS
+
 #endif

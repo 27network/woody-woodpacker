@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ww/log.h"
 #include <ww/binary.h>
 #include <ww/cli.h>
 #include <ww/consts.h>
@@ -25,7 +26,7 @@ static void	ww_dump_args(t_ww_args *args)
 	ww_trace("\tencryption_key: %s\n", args->encryption_key);
 	ww_trace("\tlog_level: %s\n", ww_log_level_str(args->log_level));
 	ww_trace("\tcompression: %s\n",
-		ww_compression_algo_str(args->compression));
+		ww_compression_algo_str(args->compression_algo));
 	ww_trace("\tpayload_file: %s\n", args->payload_file);
 	ww_trace("\tpayload_async: %d\n", args->payload_async);
 	ww_trace("}\n");

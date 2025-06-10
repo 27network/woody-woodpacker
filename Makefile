@@ -7,7 +7,7 @@ VERSION = 0.5.0
 MAKE = make --no-print-directory
 
 CC = clang
-CFLAGS = -Wall -Wextra -Werror -Wpedantic -std=c23
+CFLAGS = -Wall -Wextra -Wpedantic -std=c23
 LDFLAGS = 
 NASM = nasm
 NASMFLAGS = -f elf64
@@ -27,9 +27,14 @@ OBJ_DIR = $(BUILD_DIR)/obj
 
 ifeq ($(DEVELOPMENT),1)
 CFLAGS += -g3 -gdwarf-3 -ggdb -DWW_DEBUG=1
+USE_WARNINGS := 1
 _ := $(shell bash gensources.sh $(SRC_DIR) $(SHSRC_DIR))
 endif
 include sources.mk
+
+ifneq ($(USE_WARNINGS), 1)
+CFLAGS += -Werror 
+endif
 
 OBJS := $(addprefix $(OBJ_DIR)/,$(patsubst %.c,%.o,$(patsubst %.s,%.o,$(SRCS))))
 SRCS := $(addprefix $(SRC_DIR)/,$(SRCS))
@@ -116,5 +121,8 @@ re: fclean
 
 remake: oclean
 	$(MAKE) -j$(shell nproc)
+
+compile_commands.json: oclean
+	bear -- $(MAKE) USE_WARNINGS=1 $(OBJS) 
 
 .PHONY: all oclean clean fclean re remake $(CLEAN_DEPS) $(FCLEAN_DEPS) test
