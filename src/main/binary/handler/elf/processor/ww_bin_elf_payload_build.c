@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ww_bin_elf_payload.inc.c                           :+:      :+:    :+:   */
+/*   ww_bin_elf_payload_build.c                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/10 21:41:33 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/13 00:52:26 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 // skull.  I'm deeply and utterly sorry to anyone that should even consider
 // attempting to read this.
 
-#include "elfstream.h"
+#include <ww/binary/elf.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -30,52 +30,48 @@
 #include <ft/mem.h>
 #include <ft/string.h>
 
-#if ELF_BITNESS == 32
-#define PAYLOAD_FILE "src/shellcode/elf/x86/entry/entrypoint.bin"
-#define USER_PAYLOAD_FILE "src/shellcode/elf/x86/payload/payload.bin"
-#define DECRYPT_AES_FILE "src/shellcode/elf/x86/decrypt/aes.bin"
-#define DECRYPT_XOR_FILE "src/shellcode/elf/x86/decrypt/xor.bin"
-#define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86/decompress/smlz.bin"
-#elif ELF_BITNESS == 64
-#define PAYLOAD_FILE "src/shellcode/elf/x86_64/entry/entrypoint.bin"
-#define USER_PAYLOAD_FILE "src/shellcode/elf/x86_64/payload/payload.bin"
-#define DECRYPT_AES_FILE "src/shellcode/elf/x86_64/decrypt/aes.bin"
-#define DECRYPT_XOR_FILE "src/shellcode/elf/x86_64/decrypt/xor.bin"
-#define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86_64/decompress/smlz.bin"
-#else
-# error "Invalid ELF_BITNESS"
-#endif
+#ifndef ELF_BITNESS 
+# define ELF_BITNESS 32
+# include "ww_bin_elf_payload_build.c"
+# define ELF_BITNESS 64
+# include "ww_bin_elf_payload_build.c"
+#else // ELF_BITNESS
+# include <elfstream_macros.h>
 
-
-static const char	Func(g_payload)[] = {
-#embed PAYLOAD_FILE
-};
-
-static const char	Func(g_default_user_payload)[] = {
-#embed USER_PAYLOAD_FILE 
-};
-
-static const char	Func(g_decrypt_bincode_aes)[] = {
-#embed DECRYPT_AES_FILE
-};
-
-static const char	Func(g_decrypt_bincode_xor)[] = {
-#embed DECRYPT_XOR_FILE
-};
-
-static const char	Func(g_decompress_bincode_smlz)[] = {
-#embed DECOMPRESS_SMLZ_FILE
-};
-
-#undef DECOMPRESS_SMLZ_FILE
-#undef DECRYPT_XOR_FILE
-#undef DECRYPT_AES_FILE
-#undef USER_PAYLOAD_FILE
-#undef PAYLOAD_FILE
-#undef SRC_PREFIX
-
-#include "ww_bin_elf_payload_raw.inc.c"
-#include "ww_bin_elf_payload_user.inc.c"
+// # if ELF_BITNESS == 32
+// #  define PAYLOAD_FILE "src/shellcode/elf/x86/entry/entrypoint.bin"
+// #  define USER_PAYLOAD_FILE "src/shellcode/elf/x86/payload/payload.bin"
+// #  define DECRYPT_AES_FILE "src/shellcode/elf/x86/decrypt/aes.bin"
+// #  define DECRYPT_XOR_FILE "src/shellcode/elf/x86/decrypt/xor.bin"
+// #  define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86/decompress/smlz.bin"
+// # elif ELF_BITNESS == 64
+// #  define PAYLOAD_FILE "src/shellcode/elf/x86_64/entry/entrypoint.bin"
+// #  define DECRYPT_AES_FILE "src/shellcode/elf/x86_64/decrypt/aes.bin"
+// #  define DECRYPT_XOR_FILE "src/shellcode/elf/x86_64/decrypt/xor.bin"
+// #  define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86_64/decompress/smlz.bin"
+// # endif
+//
+// static const char	Func(g_payload)[] = {
+// # embed PAYLOAD_FILE
+// };
+//
+// static const char	Func(g_decrypt_bincode_aes)[] = {
+// # embed DECRYPT_AES_FILE
+// };
+//
+// static const char	Func(g_decrypt_bincode_xor)[] = {
+// # embed DECRYPT_XOR_FILE
+// };
+//
+// static const char	Func(g_decompress_bincode_smlz)[] = {
+// #embed DECOMPRESS_SMLZ_FILE
+// };
+//
+// # undef DECOMPRESS_SMLZ_FILE
+// # undef DECRYPT_XOR_FILE
+// # undef DECRYPT_AES_FILE
+// # undef PAYLOAD_FILE
+// # undef SRC_PREFIX
 
 /**
  * The structure that holds the payload features.
@@ -104,53 +100,45 @@ struct __attribute__((packed)) Func(s_payload_features)
  *   - + Variables à la fin
  */
 t_content_source *Func(ww_bin_elf_payload)(
-	t_ww_binary *bin,
-	t_ww_elf_handler *self,
-	t_elf_segment *segment,
-	size_t offset
+	[[maybe_unused]] t_ww_binary *bin,
+	[[maybe_unused]] t_ww_elf_handler *self,
+	[[maybe_unused]] t_elf_segment *segment,
+	[[maybe_unused]] size_t offset
 ) {
-	(void)self;
-	(void)segment;
-	(void)offset;
+	char				*payload = NULL;
+	Elf(Off) 			payload_size;
+
 	__attribute__((cleanup(ft_strdel)))
 	char 				*segments_content;
 	Elf(Off) 			segments_size = 0;
-
 	__attribute__((cleanup(ft_strdel)))
 	char 				*user_payload;
 	Elf(Off) 			user_payload_size = 0;
-	__attribute__((cleanup(ft_closep)))
-	int					user_payload_fd = -1;
-
-	char				*payload = NULL;
-	Elf(Off) 			orig_payload_size;
-	Elf(Off) 			payload_size;
 
 	// Setup our dynamic buffers (segments & user payload)
 	segments_content = NULL; //TODO: Implement
 	if (!segments_content && segments_size != 0)
 		return (NULL);
-	user_payload = Func(ww_bin_elf_payload_user)(bin, &user_payload_fd, &user_payload_size);
+	user_payload = Func(ww_bin_elf_payload_user)(bin, &user_payload_size);
 	if (!user_payload && user_payload_size != 0)
 		return (NULL);
 
-	// Figure out the bincode (decrypt & decompress)
-	char				*write_ptr = payload;
-	char 				*decrypt_bincode = NULL;
-	//Elf(Off) 			decrypt_bincode_size = 0;
-
-	if (!decrypt_bincode)
-		ww_warn("unimplemented encryption algorithm: %s\nwill not encrypt segments\n",
-			ww_encryption_algo_str(bin->args->encryption_algo));
-	char *decompress_bincode = NULL;
-	//Elf(Off) decompress_bincode_size = 0;
-	if (!decompress_bincode)
-		ww_warn("unimplemented compression algorithm: %s\nwill not compress segments\n",
-			ww_compression_algo_str(bin->args->compression_algo));
+	// // Figure out the bincode (decrypt & decompress)
+	// char				*write_ptr = payload;
+	// char 				*decrypt_bincode = NULL;
+	// //Elf(Off) 			decrypt_bincode_size = 0;
+	//
+	// if (!decrypt_bincode)
+	// 	ww_warn("unimplemented encryption algorithm: %s\nwill not encrypt segments\n",
+	// 		ww_encryption_algo_str(bin->args->encryption_algo));
+	// char *decompress_bincode = NULL;
+	// //Elf(Off) decompress_bincode_size = 0;
+	// if (!decompress_bincode)
+	// 	ww_warn("unimplemented compression algorithm: %s\nwill not compress segments\n",
+	// 		ww_compression_algo_str(bin->args->compression_algo));
 
 	// Allocate full payload
-	payload = Func(ww_bin_elf_payload_raw)(&payload_size, &orig_payload_size,
-			segments_size, user_payload_size);
+	payload = Func(ww_bin_elf_payload_raw)();
 	if (!payload)
 		return (NULL);
 
@@ -181,3 +169,6 @@ t_content_source *Func(ww_bin_elf_payload)(
 	}
 	return (source);
 }
+
+# undef ELF_BITNESS
+#endif

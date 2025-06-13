@@ -1,22 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ww_bin_elf_payload_raw.inc.c                       :+:      :+:    :+:   */
+/*   ww_bin_elf_payload_raw.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/31 15:25:39 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/12 17:15:13 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-FASTCALL char	*Func(ww_bin_elf_payload_raw)(
+#include <ft/mem.h>
+#include <ww/binary/elf.h>
+
+#ifndef ELF_BITNESS
+# define ELF_BITNESS 32
+# include "ww_bin_elf_payload_raw.c"
+# define ELF_BITNESS 64
+# include "ww_bin_elf_payload_raw.c"
+#else // ELF_BITNESS
+# include <elfstream_macros.h>
+
+char	*Func(ww_bin_elf_payload_raw)(
 	Elf(Off) *total_size,
-	Elf(Off) *orig_size,
-	Elf(Off) segments_size,
-	Elf(Off) user_payload_size
 ) {
-	//char		*payload;
+	char		*payload;
 	Elf(Off)	payload_size;
 
 	payload_size = sizeof(Func(g_payload));
@@ -33,5 +41,11 @@ FASTCALL char	*Func(ww_bin_elf_payload_raw)(
 	ww_trace("user_payload_size: %#x\n", (unsigned int)user_payload_size);
 
 	*total_size = payload_size;
-	return (ft_calloc(payload_size, 1));
+	payload = ft_calloc(payload_size, 1);
+	if (payload)
+		ft_memcpy(payload, Func(g_payload), sizeof(Func(g_payload)));
+	return (payload);
 }
+
+# undef ELF_BITNESS
+#endif
