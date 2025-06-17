@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/13 00:52:26 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/17 11:05:08 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,17 +79,28 @@
  * @note	This structure references the entry payload variables directly,
  * 			see `src/shellcode/elf/common/entry/variables.inc.s`.
  */
-struct __attribute__((packed)) Func(s_payload_features)
+struct Func(s_payload_features)
 {
 	Elf(Off)	start_offset;
 	Elf(Off)	decryption_routine_offset;
 	Elf(Off)	decompression_routine_offset;
+	Elf(Off)	_padding1;
 	char		encryption_key[16];
 	char		loader_async;
+	char		_padding2[7];
 	Elf(Off)	user_payload_size;
 	Elf(Off)	segments_offset;
 	Elf(Off)	segments_content_size;
 };
+
+#define SIZE_SIZE sizeof(Elf(Off))
+
+static_assert(sizeof(struct Func(s_payload_features)) == (4 * SIZE_SIZE) + 24 + (3 * SIZE_SIZE),
+	"struct Func(s_payload_features) is not what we expected");
+
+#undef SIZE_SIZE
+
+#define smartstr __attribute__((cleanup(ft_strdel))) char *
 
 /**
  * Cette fonction build le payload final selon:
@@ -105,22 +116,28 @@ t_content_source *Func(ww_bin_elf_payload)(
 	[[maybe_unused]] t_elf_segment *segment,
 	[[maybe_unused]] size_t offset
 ) {
-	char				*payload = NULL;
-	Elf(Off) 			payload_size;
+	struct Func(s_payload_features)	features;
+	ft_memset(&features, 0, sizeof(features));
 
-	__attribute__((cleanup(ft_strdel)))
-	char 				*segments_content;
-	Elf(Off) 			segments_size = 0;
-	__attribute__((cleanup(ft_strdel)))
-	char 				*user_payload;
-	Elf(Off) 			user_payload_size = 0;
+	smartstr segments_content = NULL;
+	smartstr user_payload = NULL;
 
 	// Setup our dynamic buffers (segments & user payload)
 	segments_content = NULL; //TODO: Implement
-	if (!segments_content && segments_size != 0)
+	if (!segments_content && features.segments_content_size != 0)
 		return (NULL);
-	user_payload = Func(ww_bin_elf_payload_user)(bin, &user_payload_size);
-	if (!user_payload && user_payload_size != 0)
+	user_payload = Func(ww_bin_elf_payload_user)(bin, &features.user_payload_size);
+	if (!user_payload && features.user_payload_size)
+		return (NULL);
+
+	// Setup our payload buffer
+	char *payload = NULL;
+	Elf(Off) payload_size = 0;
+	
+	// Allocate payload from the raw payload (inc decrypt/decompress routines + entry),
+	// and add user payload and segments content size.
+	payload = Func(ww_bin_elf_payload_raw)(&payload_size, features.user_payload_size + features.segments_content_size);
+	if (!payload)
 		return (NULL);
 
 	// // Figure out the bincode (decrypt & decompress)

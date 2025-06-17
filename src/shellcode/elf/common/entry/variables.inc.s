@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 21:06:17 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/26 21:04:43 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/06/17 10:39:48 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -19,6 +19,8 @@ decryption_routine_offset: DECLARE_SIZE 0x42424242
 ; Offset from _woody_entry to the decompression routine
 decompression_routine_offset: DECLARE_SIZE 0x42424242
 
+_padding1: DECLARE_SIZE 0x69696969 // Padding
+
 
 ; The decryption key, if applicable
 encryption_key: times 0x16 db 0x42
@@ -27,6 +29,8 @@ encryption_key: times 0x16 db 0x42
 ; Whether the loader should waitpid/wait4 for the forked payload.
 ; This is only applicable when loading an ELF/executable file.
 loader_async: db 0
+
+_padding2: DECLARE_SIZE 0x69696969 // Padding
 
 ; Size of the `user_payload` buffer
 user_payload_size: DECLARE_SIZE 0x42424242
