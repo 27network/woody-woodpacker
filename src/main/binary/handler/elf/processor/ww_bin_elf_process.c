@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/12 16:22:19 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/17 15:49:42 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,13 @@
 
 # define ELF_BITNESS 32
 # include "ww_bin_elf_process.c"
-# undef ELF_BITNESS
 # define ELF_BITNESS 64
 # include "ww_bin_elf_process.c"
-# undef ELF_BITNESS
 
 // Wrapper function, see below for the actual implementation
 t_ww_error	ww_bin_elf_process(t_ww_elf_handler *self, t_ww_binary *bin)
 {
-	ww_warn("Segment compression is not implemented yet, disabling");
+	ww_warn("Segment compression is not implemented yet, disabling\n");
 	bin->args->compression_algo = COMPRESSION_ALGO_NONE; //TODO: Implement
 
 	if (self->stream.bitness == ELFSTREAM_32)
@@ -47,16 +45,24 @@ t_ww_error	Func(ww_bin_elf_process)(t_ww_elf_handler *self, t_ww_binary *bin)
 	t_content_source	*payload;
 	t_elf_segment		*target;
 	size_t				offset;
+	Elf(Off)			woody_entry;
+	Elf(Off)			routines_offset = 0;
+	Elf(Ehdr)			*ehdr;
 
 	target = Func(ww_bin_elf_target)(&self->stream);
 	if (!target)
 		return (ww_err_fmt(ERROR_INTERNAL, "failed to find target segment"));
 	offset = elfstream_segment_append(&self->stream, target, NULL);
-	payload = Func(ww_bin_elf_payload_build)(bin, self, target, offset);
+	woody_entry = Func(ww_bin_elf_entry)(self, target, offset);
+	ww_trace("Injecting woody_entry @ %#lx\n", (size_t)woody_entry);
+	payload = Func(ww_bin_elf_payload_build)(bin, self, target, woody_entry, &routines_offset);
 	if (!payload)
 		return (ww_err_fmt(ERROR_ALLOC, "failed to allocate payload data"));
 	(void)elfstream_segment_append(&self->stream, target, payload);
+	ehdr = (Elf(Ehdr) *) &self->stream.ehdr32;
+	ehdr->e_entry = woody_entry + routines_offset;
 	return (ww_ok());
 }
 
+# undef ELF_BITNESS
 #endif

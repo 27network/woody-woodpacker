@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 23:23:16 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/14 23:39:12 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/06/17 17:11:07 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -21,6 +21,8 @@
 %define RDI rdi
 %define RSI rsi
 %define RDX rdx
+%define RBP rbp
+%define RSP rsp
 
 ; Syscall related registries
 %define SYS_NUM rax

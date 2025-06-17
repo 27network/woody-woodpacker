@@ -6,13 +6,16 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:49:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 11:11:16 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/17 12:39:03 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#define _POSIX_C_SOURCE 200809L
 #include <ft/mem.h>
 #include <ft/string.h>
 #include <ft/print.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <ww/log.h>
 
 // Some extra space next to the project name
@@ -80,5 +83,5 @@ void	ww_vlog(enum e_ww_log_level level, const char *fmt, va_list args)
 	if (*ww_log_level() < level)
 		return ;
 	ww_log_prefix(level);
-	ft_vdprintf(WW_LOG_TARGET_FD, fmt, args);
+	vdprintf(WW_LOG_TARGET_FD, fmt, args);
 }

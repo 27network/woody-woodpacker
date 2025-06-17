@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 14:24:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/12 16:54:43 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/17 15:45:47 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,13 @@
 
 #  include <elf.h>
 #  include <elfstream.h>
+#  include <ft/string.h>
+#  include <ft/io.h>
 #  include <stdbool.h>
 #  include <ww/binary.h>
+
+#  define smartstr __attribute__((cleanup(ft_strdel))) char *
+#  define smartfd __attribute__((cleanup(ft_closep))) int
 
 typedef struct s_ww_elf_handler
 {
@@ -39,19 +44,24 @@ t_elf_segment
 t_elf_segment
 *ww_bin_elf_target_x64(t_elfstream *stream);
 
+Elf32_Off
+ww_bin_elf_entry_x32(t_ww_elf_handler *self, t_elf_segment *orig, Elf32_Off offset);
+Elf64_Off
+ww_bin_elf_entry_x64(t_ww_elf_handler *self, t_elf_segment *orig, Elf64_Off offset);
+
 t_content_source
 *ww_bin_elf_payload_build_x32(t_ww_binary *bin, t_ww_elf_handler *self,
-						      t_elf_segment *target, size_t offset);
+						      t_elf_segment *target, Elf32_Off woody_entry,
+							  Elf32_Off *routines_offset);
 t_content_source
 *ww_bin_elf_payload_build_x64(t_ww_binary *bin, t_ww_elf_handler *self,
-							  t_elf_segment *target, size_t offset);
+							  t_elf_segment *target, Elf64_Off woody_entry,
+							  Elf64_Off *routines_offset);
 
 char
-*ww_bin_elf_payload_raw_x32(Elf32_Off *total_size, Elf32_Off *orig_size,
-							Elf32_Off segments_size, Elf32_Off user_payload_size);
+*ww_bin_elf_payload_raw_x32(t_ww_binary *bin, Elf32_Off *routines_offset, Elf32_Off *total_size, Elf32_Off offset);
 char
-*ww_bin_elf_payload_raw_x64(Elf64_Off *total_size, Elf64_Off *orig_size,
-							Elf64_Off segments_size, Elf64_Off user_payload_size);
+*ww_bin_elf_payload_raw_x64(t_ww_binary *bin, Elf64_Off *routines_offset, Elf64_Off *total_size, Elf64_Off offset);
 
 char
 *ww_bin_elf_payload_user_x32(t_ww_binary *bin, Elf32_Off *user_payload_size);

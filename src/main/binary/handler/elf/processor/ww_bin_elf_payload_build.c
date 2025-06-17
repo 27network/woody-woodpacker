@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 11:05:08 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/17 16:53:30 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,15 @@
 // skull.  I'm deeply and utterly sorry to anyone that should even consider
 // attempting to read this.
 
-#include <ww/binary/elf.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <elf.h>
 #include <fcntl.h>
 #include <ft/io.h>
 #include <ft/mem.h>
 #include <ft/string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <ww/binary/elf.h>
 
 #ifndef ELF_BITNESS 
 # define ELF_BITNESS 32
@@ -37,41 +37,6 @@
 # include "ww_bin_elf_payload_build.c"
 #else // ELF_BITNESS
 # include <elfstream_macros.h>
-
-// # if ELF_BITNESS == 32
-// #  define PAYLOAD_FILE "src/shellcode/elf/x86/entry/entrypoint.bin"
-// #  define USER_PAYLOAD_FILE "src/shellcode/elf/x86/payload/payload.bin"
-// #  define DECRYPT_AES_FILE "src/shellcode/elf/x86/decrypt/aes.bin"
-// #  define DECRYPT_XOR_FILE "src/shellcode/elf/x86/decrypt/xor.bin"
-// #  define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86/decompress/smlz.bin"
-// # elif ELF_BITNESS == 64
-// #  define PAYLOAD_FILE "src/shellcode/elf/x86_64/entry/entrypoint.bin"
-// #  define DECRYPT_AES_FILE "src/shellcode/elf/x86_64/decrypt/aes.bin"
-// #  define DECRYPT_XOR_FILE "src/shellcode/elf/x86_64/decrypt/xor.bin"
-// #  define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86_64/decompress/smlz.bin"
-// # endif
-//
-// static const char	Func(g_payload)[] = {
-// # embed PAYLOAD_FILE
-// };
-//
-// static const char	Func(g_decrypt_bincode_aes)[] = {
-// # embed DECRYPT_AES_FILE
-// };
-//
-// static const char	Func(g_decrypt_bincode_xor)[] = {
-// # embed DECRYPT_XOR_FILE
-// };
-//
-// static const char	Func(g_decompress_bincode_smlz)[] = {
-// #embed DECOMPRESS_SMLZ_FILE
-// };
-//
-// # undef DECOMPRESS_SMLZ_FILE
-// # undef DECRYPT_XOR_FILE
-// # undef DECRYPT_AES_FILE
-// # undef PAYLOAD_FILE
-// # undef SRC_PREFIX
 
 /**
  * The structure that holds the payload features.
@@ -84,23 +49,28 @@ struct Func(s_payload_features)
 	Elf(Off)	start_offset;
 	Elf(Off)	decryption_routine_offset;
 	Elf(Off)	decompression_routine_offset;
-	Elf(Off)	_padding1;
 	char		encryption_key[16];
 	char		loader_async;
 	char		_padding2[7];
 	Elf(Off)	user_payload_size;
-	Elf(Off)	segments_offset;
+	Elf(Off)	segments_write_offset;
 	Elf(Off)	segments_content_size;
 };
 
 #define SIZE_SIZE sizeof(Elf(Off))
 
-static_assert(sizeof(struct Func(s_payload_features)) == (4 * SIZE_SIZE) + 24 + (3 * SIZE_SIZE),
+static_assert(sizeof(struct Func(s_payload_features)) == (3 * SIZE_SIZE) + 24 + (3 * SIZE_SIZE),
 	"struct Func(s_payload_features) is not what we expected");
 
 #undef SIZE_SIZE
 
-#define smartstr __attribute__((cleanup(ft_strdel))) char *
+FASTCALL Elf(Off)	Func(ww_bin_elf_entry_offset)(t_ww_elf_handler *self, Elf(Off) woody_entry)
+{
+	Elf(Ehdr)	*ehdr;
+
+	ehdr = (Elf(Ehdr) *) &self->stream.ehdr32;
+	return (ehdr->e_entry - woody_entry);
+}
 
 /**
  * Cette fonction build le payload final selon:
@@ -110,80 +80,65 @@ static_assert(sizeof(struct Func(s_payload_features)) == (4 * SIZE_SIZE) + 24 + 
  *   - Contient tout (entry, call decompress, call decrypt, loader)
  *   - + Variables à la fin
  */
-t_content_source *Func(ww_bin_elf_payload)(
-	[[maybe_unused]] t_ww_binary *bin,
+t_content_source *Func(ww_bin_elf_payload_build)(
+	t_ww_binary *bin,
 	[[maybe_unused]] t_ww_elf_handler *self,
 	[[maybe_unused]] t_elf_segment *segment,
-	[[maybe_unused]] size_t offset
+	Elf(Off) woody_entry,
+	Elf(Off) *routines_offset
 ) {
 	struct Func(s_payload_features)	features;
 	ft_memset(&features, 0, sizeof(features));
+	features.loader_async = bin->args->payload_async;
 
 	smartstr segments_content = NULL;
 	smartstr user_payload = NULL;
 
 	// Setup our dynamic buffers (segments & user payload)
 	segments_content = NULL; //TODO: Implement
+	ww_trace("found segments content, size: %lu\n", features.segments_content_size);
 	if (!segments_content && features.segments_content_size != 0)
 		return (NULL);
 	user_payload = Func(ww_bin_elf_payload_user)(bin, &features.user_payload_size);
+	ww_trace("found user payload, size: %lu\n", features.user_payload_size);
 	if (!user_payload && features.user_payload_size)
 		return (NULL);
 
-	// Setup our payload buffer
-	char *payload = NULL;
+	// Note: This size is the size of the payload, minus the user-defined extra content (user_payload + segments_content)
 	Elf(Off) payload_size = 0;
-	
+	Elf(Off) user_content_size = features.user_payload_size + features.segments_content_size;
 	// Allocate payload from the raw payload (inc decrypt/decompress routines + entry),
 	// and add user payload and segments content size.
-	payload = Func(ww_bin_elf_payload_raw)(&payload_size, features.user_payload_size + features.segments_content_size);
+	char *payload = Func(ww_bin_elf_payload_raw)(bin, routines_offset, &payload_size, user_content_size);
 	if (!payload)
 		return (NULL);
+	woody_entry += *routines_offset;
 
-	// // Figure out the bincode (decrypt & decompress)
-	// char				*write_ptr = payload;
-	// char 				*decrypt_bincode = NULL;
-	// //Elf(Off) 			decrypt_bincode_size = 0;
-	//
-	// if (!decrypt_bincode)
-	// 	ww_warn("unimplemented encryption algorithm: %s\nwill not encrypt segments\n",
-	// 		ww_encryption_algo_str(bin->args->encryption_algo));
-	// char *decompress_bincode = NULL;
-	// //Elf(Off) decompress_bincode_size = 0;
-	// if (!decompress_bincode)
-	// 	ww_warn("unimplemented compression algorithm: %s\nwill not compress segments\n",
-	// 		ww_compression_algo_str(bin->args->compression_algo));
+	char *target = payload + payload_size - sizeof(features);
+	features.start_offset = Func(ww_bin_elf_entry_offset)(self, woody_entry);
+	features.decryption_routine_offset = 0x2222222222222222;
+	features.decompression_routine_offset = 0x3333333333333333;
+	ft_memcpy(features.encryption_key, "42424242424242424242424242424242", 16);
+	features.loader_async = bin->args->payload_async;
+	features.segments_write_offset = 0x5555555555555555;
+	ft_memcpy(target, &features, sizeof(features));
+	target = payload + payload_size;
+	ww_trace("writing segments content (%#lx bytes at %#lx)\n", (size_t)features.segments_content_size, (size_t)payload_size);
+	ft_memcpy(target, segments_content, features.segments_content_size);
+	target += features.segments_content_size;
+	ww_trace("writing user payload (%#lx bytes at %#lx)\n", (size_t)features.user_payload_size, (size_t)payload_size + features.segments_content_size);
+	ft_memcpy(target, user_payload, features.user_payload_size);
+	ww_trace("done writing payload\n");
 
-	// Allocate full payload
-	payload = Func(ww_bin_elf_payload_raw)();
-	if (!payload)
-		return (NULL);
+	// int fd = open("woody-payload.bin", O_WRONLY | O_CREAT, 0755);
+	// if (fd == -1)
+	// 	return (NULL);
+	// write(fd, payload, payload_size);
+	// close(fd);
 
-	// Write the bincode (TODO: implement)
-
-	// Setup our struct
-	struct Func(s_payload_features)	features = {0};
-	features.loader_async = bin->args->payload_async,
-	features.user_payload_size = user_payload_size;
-	features.segments_content_size = segments_size;
-
-	// Write the primary payload features at the end of the payload
-	write_ptr = payload + orig_payload_size - sizeof(features);
-	ft_memcpy(write_ptr, &features, sizeof(features));
-	write_ptr += sizeof(features);
-
-	// Write the dynamic buffers (`segments_content` and `payload`)
-	if (features.segments_content_size)
-		ft_memcpy(write_ptr, &segments_content, features.segments_content_size);
-	write_ptr += features.segments_content_size;
-	if (features.user_payload_size)
-		ft_memcpy(write_ptr, &user_payload, features.user_payload_size);
-	write_ptr += features.user_payload_size;
-
-	t_content_source *source = elfstream_source_data(payload, 0, true);
-	if (!source) {
+	t_content_source *source = elfstream_source_data(payload, payload_size + user_content_size, true);
+	if (!source)
 		free(payload);
-	}
 	return (source);
 }
 

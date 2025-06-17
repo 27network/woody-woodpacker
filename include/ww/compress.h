@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 10:14:05 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 10:15:17 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/17 12:40:54 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 enum e_ww_compression_algo
 {
 	COMPRESSION_ALGO_NONE = 0,
-	COMPRESSION_ALGO_SMZL,
+	COMPRESSION_ALGO_SMLZ,
 	_COMPRESSION_ALGO_SIZE,
 };
 

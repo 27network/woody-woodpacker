@@ -1,12 +1,12 @@
 ; **************************************************************************** ;
 ;                                                                              ;
 ;                                                         :::      ::::::::    ;
-;    entrypoint.inc.s                                   :+:      :+:    :+:    ;
+;    entrypoint.entry.s                                 :+:      :+:    :+:    ;
 ;                                                     +:+ +:+         +:+      ;
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/26 18:06:20 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/06/17 17:14:12 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -26,20 +26,16 @@ _woody_start:
 	; 2. call _woody_decompress
 
 	; 3. call _woody_loader to execute the provided payload
-	; call [rel _woody_loader]
+	call _woody_loader
 	
 	; 4. jump to _start
-	mov RDI, [rel start_offset]
-	sub RDI, 16
-	call get_rip
-get_rip:
-	pop RAX
-	add RAX, RDI 
-	jmp RAX ; yeet!
+	lea RAX, [rel _woody_start] ; get the address of _woody_start
+	mov RDI, [rel start_offset] ; get the offset to _start
+	add RAX, RDI ; add the offset to _start
+	jmp RAX ; jump to _start
 
-; %include "elf/common/loader.inc.s"
-; %include "decrypt.inc.s"
-; %include "decompress.inc.s"
+
+%include "elf/common/entry/loader.inc.s"
 
 ; This is where program-set variables are stored,
 ; i.e. where woody will store addresses, offsets, payloads, etc.

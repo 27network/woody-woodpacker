@@ -6,13 +6,12 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:26:24 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/12 17:13:44 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/17 16:47:46 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <fcntl.h>
 #include <ft/mem.h>
-#include <ft/string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -33,7 +32,6 @@
 static const char	Func(g_default_user_payload)[] = {
 # embed USER_PAYLOAD_FILE
 };
-# undef USER_PAYLOAD_FILE
 
 FASTCALL char	*Func(ww_bin_elf_payload_user_error)(
 	const char *type,
@@ -56,8 +54,7 @@ FASTCALL char	*Func(ww_bin_elf_payload_user_file)(
 	char *user_payload = NULL;
 	char *user_payload_map = NULL;
 	struct stat st;
-	__attribute__((cleanup(ft_closep)))
-	int user_payload_fd = -1;
+	smartfd user_payload_fd = -1;
 
 	if (stat(bin->args->payload_file, &st) != 0)
 		return (Func(ww_bin_elf_payload_user_error)("stat", NULL, user_payload_size));
@@ -71,13 +68,14 @@ FASTCALL char	*Func(ww_bin_elf_payload_user_file)(
 	user_payload_fd = open(bin->args->payload_file, O_RDONLY);
 	if (user_payload_fd == -1)
 		return (Func(ww_bin_elf_payload_user_error)("open", NULL, user_payload_size));
-	user_payload_map = mmap(NULL, size, PROT_READ, MAP_PRIVATE, *user_payload_fd, 0);
+	user_payload_map = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, user_payload_fd, 0);
 	if (user_payload_map == MAP_FAILED)
 		return (Func(ww_bin_elf_payload_user_error)("mmap", NULL, user_payload_size));
 	user_payload = ft_calloc(*user_payload_size, 1);
 	if (user_payload)
 		ft_memcpy(user_payload, user_payload_map, *user_payload_size);
 	munmap(user_payload_map, *user_payload_size);
+	ww_trace("Loaded custom user payload\n");
 	return (user_payload);
 }
 
@@ -89,6 +87,7 @@ char	*Func(ww_bin_elf_payload_user)(
 
 	if (bin->args->payload_file == NULL || ft_strcmp(bin->args->payload_file, "none") == 0)
 	{
+		ww_trace("Loaded empty user payload\n");
 		*user_payload_size = 0;
 		return (NULL);
 	}
@@ -99,10 +98,19 @@ char	*Func(ww_bin_elf_payload_user)(
 		if (user_payload)
 			ft_memcpy(user_payload, Func(g_default_user_payload),
 				*user_payload_size);
+		ww_trace("Loaded builtin user payload\n");
+
+		int fd = open("woody-user-payload.bin", O_WRONLY | O_CREAT, 0755);
+		if (fd == -1)
+			return (Func(ww_bin_elf_payload_user_error)("open", NULL, user_payload_size));
+		write(fd, user_payload, *user_payload_size);
+		close(fd);
+
 		return (user_payload);
 	}
 	return (Func(ww_bin_elf_payload_user_file)(bin, user_payload_size));
 }
 
+# undef USER_PAYLOAD_FILE
 # undef ELF_BITNESS
 #endif

@@ -84,19 +84,36 @@ ifeq ($(DEVELOPMENT),1)
 endif
 	cd $(SHSRC_DIR); $(NASM) -f bin -o ../../$@ ../../$<
 
-test:
+clean-tests:
+	rm -rf test-dyna test-static test-dyna-32 test-static-32
+
+test: clean-tests test-dyna test-static test-dyna-32 test-static-32
+
+test-dyna:
 	clang -g3 -o test-dyna testing/test.c
+
+test-static:
 	nix-shell -p pkgs.glibc.static --command "clang -static -g3 -o test-static testing/test.c"
+
+test-dyna-32:
 	nix-shell -p pkgs.pkgsi686Linux.clang --command "clang -g3 -o test-dyna-32 testing/test.c"
+
+test-static-32:
 	nix-shell -p pkgs.pkgsi686Linux.clang pkgs.pkgsi686Linux.glibc.static --command "clang -m32 -g3 -static -o test-static-32 testing/test.c"
 
-test-run-dyna: test $(NAME)
+test-run-dyna: test-dyna $(NAME)
 	rm -rf woody
 	./$(NAME) test-dyna
 
-test-diff-dyna: # test-run-dyna
+test-diff-dyna: test-run-dyna
 	nix-shell -p busybox --command 'xxd test-dyna > dyna.hex && xxd woody > woody.hex' && nvim -d dyna.hex woody.hex
 
+test-run-static: test-static $(NAME)
+	rm -rf woody
+	./$(NAME) test-static
+
+test-diff-static: test-run-static
+	nix-shell -p busybox --command 'xxd test-static > static.hex && xxd woody > woody.hex' && nvim -d static.hex woody.hex
 
 oclean:
 	rm -rf $(BUILD_DIR) $(SHBINS)

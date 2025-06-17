@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 20:30:25 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/16 16:07:36 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/17 14:40:40 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,7 @@ Func(update_stream)(t_elfstream *stream, t_elf_segment *segment, size_t size)
 {
 	Elf(Phdr)	*phdr;
 	size_t		position;
+	size_t		pos_virt;
 	Elf(Ehdr)	*ehdr;
 
 	phdr = (Elf(Phdr) *) &segment->phdr32;
@@ -124,7 +125,8 @@ Func(update_stream)(t_elfstream *stream, t_elf_segment *segment, size_t size)
 	ehdr = (Elf(Ehdr) *) &stream->ehdr32;
 	Func(update_segments)(stream, size, position);
 	ehdr->e_shoff += size;
-	if (position > ehdr->e_entry)
+	pos_virt = phdr->p_vaddr + phdr->p_memsz + size; 
+	if (pos_virt < ehdr->e_entry)
 		ehdr->e_entry += size;
 	Func(update_sections)(stream, size, position);
 	DBG("size end: %#lx", phdr->p_filesz);
