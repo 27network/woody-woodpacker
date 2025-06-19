@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 15:49:42 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/19 17:28:50 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,26 @@ t_ww_error	ww_bin_elf_process(t_ww_elf_handler *self, t_ww_binary *bin)
 #else // ELF_BITNESS
 # include <elfstream_macros.h>
 
+FASTCALL bool	Func(ww_bin_elf_target_normalize)(t_elfstream *stream, t_elf_segment *target)
+{
+	Elf(Phdr)			*phdr;
+	Elf(Off)			diff;
+	t_content_source	*blob;
+
+	phdr = (Elf(Phdr) *) &target->phdr32;
+	if (phdr->p_filesz < phdr->p_memsz)
+	{
+		diff = phdr->p_memsz - phdr->p_filesz;
+		blob = elfstream_source_data(NULL, diff, false);
+		if (!blob)
+			return (false);
+		ww_trace("normalizing target segment by adding %#lx null bytes\n", (size_t) diff);
+		phdr->p_memsz = phdr->p_filesz;
+		elfstream_segment_append(stream, target, blob);
+	}
+	return (true);
+}
+
 /**
  * This function should:
  *  - Identify the target segment
@@ -52,6 +72,8 @@ t_ww_error	Func(ww_bin_elf_process)(t_ww_elf_handler *self, t_ww_binary *bin)
 	target = Func(ww_bin_elf_target)(&self->stream);
 	if (!target)
 		return (ww_err_fmt(ERROR_INTERNAL, "failed to find target segment"));
+	if (!Func(ww_bin_elf_target_normalize)(&self->stream, target))
+		return (ww_err_fmt(ERROR_INTERNAL, "failed to normalize target segment"));
 	offset = elfstream_segment_append(&self->stream, target, NULL);
 	woody_entry = Func(ww_bin_elf_entry)(self, target, offset);
 	ww_trace("Injecting woody_entry @ %#lx\n", (size_t)woody_entry);

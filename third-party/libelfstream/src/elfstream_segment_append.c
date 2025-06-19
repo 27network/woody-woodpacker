@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 20:30:25 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 14:40:40 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/18 00:45:38 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,22 @@ size_t	elfstream_segment_append(t_elfstream *stream, t_elf_segment *segment,
 	return (update_stream_x64(stream, segment, size));
 }
 
+void elfstream_segment_offset(t_elfstream *stream, size_t size, size_t position)
+{
+	if (stream->bitness == ELFSTREAM_32)
+		elfstream_segment_offset_x32(stream, size, position);
+	else
+		elfstream_segment_offset_x64(stream, size, position);
+}
+
+void elfstream_section_offset(t_elfstream *stream, size_t size, size_t position)
+{
+	if (stream->bitness == ELFSTREAM_32)
+		elfstream_section_offset_x32(stream, size, position);
+	else
+		elfstream_section_offset_x64(stream, size, position);
+}
+
 #else
 # include <elfstream_macros.h>
 
@@ -49,7 +65,7 @@ size_t	elfstream_segment_append(t_elfstream *stream, t_elf_segment *segment,
  * ELF Segments relative to our injection content.
  */
 FASTCALL void
-Func(update_segments)(t_elfstream *stream, size_t size, size_t position)
+Func(elfstream_segment_offset)(t_elfstream *stream, size_t size, size_t position)
 {
 	size_t		i;
 	Elf(Phdr)	*phdr;
@@ -59,7 +75,7 @@ Func(update_segments)(t_elfstream *stream, size_t size, size_t position)
 	while (i < stream->segment_count)
 	{
 		phdr = (Elf(Phdr) *) &stream->segments[i].phdr32;
-		DBG("offsetting phdr[%d]: %p", i, phdr);
+		DBG("checking offsetting phdr[%d]: %p", i, phdr);
 		DBG("phdr[%d] offset: %#lx", i, phdr->p_offset);
 		DBG("phdr[%d] filesz: %#lx", i, phdr->p_filesz);
 		if (phdr->p_offset >= position)
@@ -80,7 +96,7 @@ Func(update_segments)(t_elfstream *stream, size_t size, size_t position)
 }
 
 FASTCALL void
-Func(update_sections)(t_elfstream *stream, size_t size, size_t position)
+Func(elfstream_section_offset)(t_elfstream *stream, size_t size, size_t position)
 {
 	size_t		i;
 	Elf(Shdr)	*shdr;
@@ -123,12 +139,12 @@ Func(update_stream)(t_elfstream *stream, t_elf_segment *segment, size_t size)
 	DBG("size start: %#lx", phdr->p_filesz);
 	position = phdr->p_offset + phdr->p_filesz;
 	ehdr = (Elf(Ehdr) *) &stream->ehdr32;
-	Func(update_segments)(stream, size, position);
+	Func(elfstream_segment_offset)(stream, size, position);
 	ehdr->e_shoff += size;
 	pos_virt = phdr->p_vaddr + phdr->p_memsz + size; 
 	if (pos_virt < ehdr->e_entry)
 		ehdr->e_entry += size;
-	Func(update_sections)(stream, size, position);
+	Func(elfstream_section_offset)(stream, size, position);
 	DBG("size end: %#lx", phdr->p_filesz);
 	// phdr->p_filesz += size;
 	// phdr->p_memsz += size;

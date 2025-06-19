@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 23:23:16 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/06/17 17:11:07 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/06/17 19:39:23 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -21,6 +21,9 @@
 %define RDI rdi
 %define RSI rsi
 %define RDX rdx
+%define RCX rcx
+%define RBX rbx
+
 %define RBP rbp
 %define RSP rsp
 

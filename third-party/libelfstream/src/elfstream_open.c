@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:30:37 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 14:45:16 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/19 17:31:16 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ static inline bool	elfstream_segments_fill(t_elfstream *self, int fd,
 	return (true);
 }
 
+[[maybe_unused]]
 static inline bool	elfstream_sections_fill(t_elfstream *self, int fd)
 {
 	const ssize_t	to_read = p(self, sizeof(Elf32_Shdr), sizeof(Elf64_Shdr));

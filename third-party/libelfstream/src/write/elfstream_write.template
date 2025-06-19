@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/14 19:37:30 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/19 17:20:18 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,8 @@ Func(elfstream_write_content)(off_t offset, t_content_source *content, int fd)
 		if (error)
 			break;
 		DBG("wrote %#lx content bytes", content->size);
-		lseek(fd, offset + content->size, SEEK_SET);
+		off_t res = lseek(fd, offset + content->size, SEEK_SET);
+		DBG("seek result: %#lx", res);
 		offset += content->size;
 		content = content->next;
 	}
@@ -174,6 +175,7 @@ Func(elfstream_write_segments_round)(t_elfstream *self, int fd)
 	smallest = INT_MAX;
 	while (i < self->segment_count)
 	{
+		DBG("writing segment pass #%zu", i);
 		smallest = Func(elfstream_segment_lowest)(self->segments, self->segment_count);
 		if (smallest < 0)
 		{

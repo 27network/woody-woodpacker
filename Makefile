@@ -103,14 +103,14 @@ test-static-32:
 
 test-run-dyna: test-dyna $(NAME)
 	rm -rf woody
-	./$(NAME) test-dyna
+	./$(NAME) -vv test-dyna
 
 test-diff-dyna: test-run-dyna
 	nix-shell -p busybox --command 'xxd test-dyna > dyna.hex && xxd woody > woody.hex' && nvim -d dyna.hex woody.hex
 
 test-run-static: test-static $(NAME)
 	rm -rf woody
-	./$(NAME) test-static
+	./$(NAME) -vv test-static
 
 test-diff-static: test-run-static
 	nix-shell -p busybox --command 'xxd test-static > static.hex && xxd woody > woody.hex' && nvim -d static.hex woody.hex
