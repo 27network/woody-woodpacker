@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/19 17:20:18 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 11:10:26 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ Func(elfstream_write_content)(off_t offset, t_content_source *content, int fd)
 		DBG("wrote %#lx content bytes", content->size);
 		off_t res = lseek(fd, offset + content->size, SEEK_SET);
 		DBG("seek result: %#lx", res);
+		(void)res;
 		offset += content->size;
 		content = content->next;
 	}

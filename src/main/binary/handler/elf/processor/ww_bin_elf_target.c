@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 19:57:26 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 15:14:12 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 11:20:00 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ t_elf_segment	*Func(ww_bin_elf_target)(t_elfstream *stream)
 	{
 		tmp = stream->segments + i++;
 		tmp_phdr = (Elf(Phdr) *) &tmp->phdr32;
-		if ((tmp_phdr->p_type & PT_LOAD) == PT_LOAD)
+		if (tmp_phdr->p_type == PT_LOAD)
 		{
 			if (phdr && tmp_phdr->p_vaddr < phdr->p_vaddr)
 				continue;

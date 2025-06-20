@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:26:24 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 16:47:46 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 11:53:40 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,13 +98,15 @@ char	*Func(ww_bin_elf_payload_user)(
 		if (user_payload)
 			ft_memcpy(user_payload, Func(g_default_user_payload),
 				*user_payload_size);
-		ww_trace("Loaded builtin user payload\n");
+		ww_trace("Loaded builtin user payload (%s)\n", USER_PAYLOAD_FILE);
 
+#ifdef WW_DEBUG 
 		int fd = open("woody-user-payload.bin", O_WRONLY | O_CREAT, 0755);
 		if (fd == -1)
 			return (Func(ww_bin_elf_payload_user_error)("open", NULL, user_payload_size));
 		write(fd, user_payload, *user_payload_size);
 		close(fd);
+#endif
 
 		return (user_payload);
 	}

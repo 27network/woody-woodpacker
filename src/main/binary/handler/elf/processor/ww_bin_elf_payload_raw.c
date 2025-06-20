@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 16:51:43 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 11:54:39 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,11 +135,13 @@ char	*Func(ww_bin_elf_payload_raw)(
 		ww_trace("done writing raw payload\n");
 	}
 
-	// int fd = open("woody-payload.raw.bin", O_WRONLY | O_CREAT, 0755);
-	// if (fd == -1)
-	// 	return (NULL);
-	// write(fd, payload, payload_size);
-	// close(fd);
+#ifdef WW_DEBUG
+	int fd = open("woody-payload.raw.bin", O_WRONLY | O_CREAT, 0755);
+	if (fd == -1)
+		return (NULL);
+	write(fd, payload, payload_size);
+	close(fd);
+#endif
 
 	return (payload);
 }

@@ -6,9 +6,23 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 21:06:17 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/06/17 15:41:45 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/06/20 14:23:29 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
+
+OFFSET_WOODY_START_BASE equ (_woody_start_base - _woody_start)
+OFFSET_START_OFFSET equ (start_offset - _woody_start)
+OFFSET_DECRYPTION_ROUTINE_OFFSET equ (decryption_routine_offset - _woody_start)
+OFFSET_DECOMPRESSION_ROUTINE_OFFSET equ (decompression_routine_offset - _woody_start)
+OFFSET_ENCRYPTION_KEY equ (encryption_key - _woody_start)
+OFFSET_LOADER_ASYNC equ (loader_async - _woody_start)
+OFFSET_USER_PAYLOAD_SIZE equ (user_payload_size - _woody_start)
+OFFSET_SEGMENTS_WRITE_OFFSET equ (segments_write_offset - _woody_start)
+OFFSET_SEGMENTS_CONTENT_SIZE equ (segments_content_size - _woody_start)
+OFFSET_SEGMENTS_CONTENT equ (segments_content - _woody_start)
+
+; **NOTE**: The variable layout (order and size) in this file is important,
+;           and is directly linked with `ww_bin_elf_payload_build`.
 
 ; Offset from _woody_entry to _start, used when jumping to the original ELF entry
 start_offset: DECLARE_SIZE 0x41414141

@@ -115,6 +115,20 @@ test-run-static: test-static $(NAME)
 test-diff-static: test-run-static
 	nix-shell -p busybox --command 'xxd test-static > static.hex && xxd woody > woody.hex' && nvim -d static.hex woody.hex
 
+test-run-dyna-32: test-dyna-32 $(NAME)
+	rm -rf woody
+	./$(NAME) -vv test-dyna-32
+
+test-diff-dyna-32: test-run-dyna-32
+	nix-shell -p busybox --command 'xxd test-dyna-32 > dyna-32.hex && xxd woody > woody.hex' && nvim -d dyna-32.hex woody.hex
+
+test-run-static-32: test-static-32 $(NAME)
+	rm -rf woody
+	./$(NAME) -vv test-static-32
+
+test-diff-static-32: test-run-static-32
+	nix-shell -p busybox --command 'xxd test-static-32 > static-32.hex && xxd woody > woody.hex' && nvim -d static-32.hex woody.hex
+
 oclean:
 	rm -rf $(BUILD_DIR) $(SHBINS)
 

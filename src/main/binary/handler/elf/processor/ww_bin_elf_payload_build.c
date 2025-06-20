@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 16:53:30 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 11:54:00 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,11 +130,13 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	ft_memcpy(target, user_payload, features.user_payload_size);
 	ww_trace("done writing payload\n");
 
-	// int fd = open("woody-payload.bin", O_WRONLY | O_CREAT, 0755);
-	// if (fd == -1)
-	// 	return (NULL);
-	// write(fd, payload, payload_size);
-	// close(fd);
+#ifdef WW_DEBUG
+	int fd = open("woody-payload.bin", O_WRONLY | O_CREAT, 0755);
+	if (fd == -1)
+		return (NULL);
+	write(fd, payload, payload_size);
+	close(fd);
+#endif
 
 	t_content_source *source = elfstream_source_data(payload, payload_size + user_content_size, true);
 	if (!source)
