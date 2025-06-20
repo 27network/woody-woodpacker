@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/26 21:07:37 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 21:05:51 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@
 #  include <ww/log.h>
 
 #  define WW_OUTPUT_DEFAULT "woody"
-#  define WW_ENCRYPTION_DEFAULT "xor"
+#  define WW_ENCRYPTION_DEFAULT "aes"
+#  define WW_COMPRESSION_DEFAULT "smlz"
 
 // The getopt-like options string
 #  define OPTSTRING "hVc:e:k:o:ap:v"
@@ -65,7 +66,8 @@ typedef struct s_ww_args
 	const char					*target;
 	const char					*output;
 	enum e_ww_encryption_algo	encryption_algo;
-	const char					*encryption_key;
+	char						*encryption_key;
+	bool						encryption_key_alloc;
 	enum e_ww_log_level			log_level;
 	enum e_ww_compression_algo	compression_algo;
 	const char					*payload_file;

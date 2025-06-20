@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:33:05 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/26 19:57:57 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 21:06:09 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,13 +41,13 @@ void	ww_cli_defaults(t_ww_args *args, char **envp)
 
 	ft_bzero(args, sizeof(t_ww_args));
 	args->output = ww_getenv(envp, "WW_OUTPUT", WW_OUTPUT_DEFAULT);
-	args->encryption_key = ww_getenv(envp, "WW_ENCRYPTION_KEY", NULL);
+	args->encryption_key = (char *) ww_getenv(envp, "WW_ENCRYPTION_KEY", NULL);
 	ww_cli_opt_encryption_algo(args,
 		ww_getenv(envp, "WW_ENCRYPTION_ALGO", WW_ENCRYPTION_DEFAULT));
 	verbosity = ww_getenv(envp, "WW_LOG_LEVEL", "INFO");
 	args->log_level = ww_parse_level(verbosity);
 	ww_cli_opt_compression(args,
-		ww_getenv(envp, "WW_COMPRESSION", NULL));
+		ww_getenv(envp, "WW_COMPRESSION", WW_COMPRESSION_DEFAULT));
 	ww_cli_opt_payload(args,
 		ww_getenv(envp, "WW_PAYLOAD_FILE", "<built-in>"));
 }

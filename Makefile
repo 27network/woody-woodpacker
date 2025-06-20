@@ -2,7 +2,7 @@
 # https://codeberg.org/xtrm/scaffold
 
 NAME = woody_woodpacker
-VERSION = 0.5.0
+VERSION = 0.8.0
 
 MAKE = make --no-print-directory
 

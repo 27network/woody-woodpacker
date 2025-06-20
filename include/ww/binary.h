@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:19:39 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/19 17:45:15 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 20:50:38 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 #  include <ww/cli.h>
 #  include <ww/error.h>
+#  include <ww/util.h>
 #  include <stdbool.h>
 
 #  define WW_BIN_HANDLERS_MAX 64

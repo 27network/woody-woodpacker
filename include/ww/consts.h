@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 22:35:35 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 02:36:57 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 21:06:25 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ A dead-simple packer.\n\
   -o <output>  Sets the output file (default: '%s').\n\
   -e <mode>    Sets the encryption mode to use (default: '%s').\n\
   -k <key>     Sets the encryption key (default: random).\n\
-  -c <comp>    Sets the compression algorithm to use (default: none).\n\
+  -c <comp>    Sets the compression algorithm to use (default: '%s').\n\
   -p <payload> Sets the payload file to use (default: builtin).\n\
   -a           Runs the payload asynchronously (default: false).\n\
   -v           Increses the verbosity level for each occurence.\n\

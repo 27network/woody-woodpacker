@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:26:24 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 11:53:40 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 20:19:41 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ char	*Func(ww_bin_elf_payload_user)(
 		int fd = open("woody-user-payload.bin", O_WRONLY | O_CREAT, 0755);
 		if (fd == -1)
 			return (Func(ww_bin_elf_payload_user_error)("open", NULL, user_payload_size));
-		write(fd, user_payload, *user_payload_size);
+		(void)!write(fd, user_payload, *user_payload_size);
 		close(fd);
 #endif
 

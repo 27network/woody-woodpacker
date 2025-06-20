@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 14:50:24 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 13:11:42 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 21:07:35 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,29 +21,11 @@
 #else // ELF_BITNESS
 # include <elfstream_macros.h>
 
-FASTCALL void	Func(ww_bin_elf_entry_section_adjust)(t_elf_segment *segment,
-														Elf(Off) offset)
-{
-	Elf(Shdr)	*shdr;
-	Elf(Shdr)	*target;
-	size_t		i;
-
-	target = NULL;
-	i = 0;
-	while (i < segment->stream->section_count)
-	{
-		shdr = (Elf(Shdr) *) &segment->stream->sections[i].shdr32;
-		if (shdr->sh_offset <= offset && shdr->sh_offset + shdr->sh_size > offset)
-			target = shdr;
-		i++;
-	}
-	if (target)
-		target->sh_flags |= SHF_WRITE | SHF_EXECINSTR;
-}
-
-Elf(Off)	Func(ww_bin_elf_entry)(t_ww_elf_handler *self, t_elf_segment *orig,
-							   Elf(Off) offset)
-{
+Elf(Off)	Func(ww_bin_elf_entry)(
+	[[maybe_unused]] t_ww_elf_handler *self,
+	t_elf_segment *orig,
+	Elf(Off) offset
+) {
 	Elf(Phdr)	*phdr;
 
 	phdr = (Elf(Phdr) *) &orig->phdr32;

@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 01:51:18 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 12:41:03 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 21:09:02 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 enum e_ww_compression_algo	ww_compression_algo(const char *algo)
 {
-	static const char	*algos[] = {"none", "smzl"};
+	static const char	*algos[] = {"none", "smlz"};
 	static const size_t	len = sizeof(algos) / sizeof(algos[0]);
 	size_t				i;
 

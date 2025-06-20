@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 11:54:00 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 21:07:48 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,11 +96,11 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 
 	// Setup our dynamic buffers (segments & user payload)
 	segments_content = NULL; //TODO: Implement
-	ww_trace("found segments content, size: %lu\n", features.segments_content_size);
+	ww_trace("found segments content, size: %lu\n", (size_t) features.segments_content_size);
 	if (!segments_content && features.segments_content_size != 0)
 		return (NULL);
 	user_payload = Func(ww_bin_elf_payload_user)(bin, &features.user_payload_size);
-	ww_trace("found user payload, size: %lu\n", features.user_payload_size);
+	ww_trace("found user payload, size: %lu\n", (size_t) features.user_payload_size);
 	if (!user_payload && features.user_payload_size)
 		return (NULL);
 
@@ -116,11 +116,11 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 
 	char *target = payload + payload_size - sizeof(features);
 	features.start_offset = Func(ww_bin_elf_entry_offset)(self, woody_entry);
-	features.decryption_routine_offset = 0x2222222222222222;
-	features.decompression_routine_offset = 0x3333333333333333;
+	// features.decryption_routine_offset = 0x2222222222222222;
+	// features.decompression_routine_offset = 0x3333333333333333;
 	ft_memcpy(features.encryption_key, "42424242424242424242424242424242", 16);
 	features.loader_async = bin->args->payload_async;
-	features.segments_write_offset = 0x5555555555555555;
+	// features.segments_write_offset = 0x5555555555555555;
 	ft_memcpy(target, &features, sizeof(features));
 	target = payload + payload_size;
 	ww_trace("writing segments content (%#lx bytes at %#lx)\n", (size_t)features.segments_content_size, (size_t)payload_size);
@@ -134,7 +134,7 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	int fd = open("woody-payload.bin", O_WRONLY | O_CREAT, 0755);
 	if (fd == -1)
 		return (NULL);
-	write(fd, payload, payload_size);
+	(void)!write(fd, payload, payload_size);
 	close(fd);
 #endif
 

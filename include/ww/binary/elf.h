@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 14:24:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/17 15:45:47 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/20 20:50:22 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,6 @@
 #  include <ft/io.h>
 #  include <stdbool.h>
 #  include <ww/binary.h>
-
-#  define smartstr __attribute__((cleanup(ft_strdel))) char *
-#  define smartfd __attribute__((cleanup(ft_closep))) int
 
 typedef struct s_ww_elf_handler
 {

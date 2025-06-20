@@ -10,10 +10,11 @@ in
     nasm
     valgrind
     python312Packages.pyelftools
-	bear
-	clang-tools
+    bear
+    clang-tools
     strace
     ltrace
+    cloc
   ];
   NIX_ENFORCE_NO_NATIVE=0;
 }
