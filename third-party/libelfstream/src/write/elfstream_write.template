@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 11:10:26 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/21 11:16:09 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ Func(elfstream_write_segment)(t_elf_segment *self, int fd)
 		self->content = NULL;
 		phdr->p_filesz = ehdr->e_phentsize * self->stream->segment_count;
 		phdr->p_memsz = phdr->p_filesz;
-		DBG("new size: %#lx", phdr->p_filesz);
+		DBG("new size: %#lx", (size_t) phdr->p_filesz);
 	}
 	if (write(fd, phdr, to_write) != to_write)
 		return (ELFSTREAM_IO);
@@ -105,7 +105,7 @@ Func(elfstream_segment_lowest)(t_elf_segment *segments, size_t count)
 			i++;
 			continue;
 		}
-		DBG("segment %zu: offset %#lx, size: %#lx", i, tmp->p_offset, tmp->p_filesz);
+		DBG("segment %d: offset %#lx, size: %#lx", i, tmp->p_offset, tmp->p_filesz);
 		if (tmp->p_offset < lowest)
 		{
 			DBG("lowest now!");
@@ -189,7 +189,7 @@ Func(elfstream_write_segments_round)(t_elfstream *self, int fd)
 		segment = &self->segments[smallest];
 		offset = &((Elf(Phdr) *) &segment->phdr32)->p_offset;
 		Func(elfstream_write_content)(*offset, segment->content, fd);
-		DBG("wrote segment content at %#lx", *offset);
+		DBG("wrote segment content at %#lx", (size_t) *offset);
 		i++;
 		DBG("written %zu/%zu segments", i, self->segment_count);
 		small_bound = *offset + elfstream_content_size(segment->content);
@@ -248,7 +248,7 @@ Func(elfstream_section_lowest)(t_elf_section *sections, size_t count)
 			i++;
 			continue;
 		}
-		DBG("section %zu: offset %#lx, size: %#lx", i, tmp->sh_offset, tmp->sh_size);
+		DBG("section %d: offset %#lx, size: %#lx", i, tmp->sh_offset, tmp->sh_size);
 		if (tmp->sh_offset < lowest)
 		{
 			DBG("lowest now!");
@@ -319,9 +319,9 @@ Func(elfstream_write_section_round)(t_elfstream *self, int fd, size_t small_boun
 			ft_dprintf(2, "error: lowest section is not in bounds\n");
 			break ; // TODO: error?
 		}
-		DBG("coercing section #%zu", smallest);
+		DBG("coercing section #%d", smallest);
 		Func(elfstream_section_coerce)(self->sections + smallest, small_bound);
-		DBG("writing section #%zu", smallest);
+		DBG("writing section #%d", smallest);
 		section = &self->sections[smallest];
 		offset = &((Elf(Shdr) *) &section->shdr32)->sh_offset;
 		Func(elfstream_write_content)(*offset, section->content, fd);
@@ -342,11 +342,11 @@ Func(elfstream_write_section)(t_elf_section *self, int fd)
 
 	//TODO: fix sizes
 	DBG("writing section header");
-	DBG("sh_name (index): %d", shdr->sh_name);
-	DBG("sh_type: %d", shdr->sh_type);
-	DBG("sh_offset: %#lx", shdr->sh_offset);
-	DBG("sh_size: %#lx", shdr->sh_size);
-	DBG("sh_entsize: %#lx", shdr->sh_entsize);
+	DBG("sh_name (index): %d", (int) shdr->sh_name);
+	DBG("sh_type: %d", (int) shdr->sh_type);
+	DBG("sh_offset: %#lx", (size_t) shdr->sh_offset);
+	DBG("sh_size: %#lx", (size_t) shdr->sh_size);
+	DBG("sh_entsize: %#lx", (size_t) shdr->sh_entsize);
 	if (write(fd, shdr, to_write) != to_write)
 		return (ELFSTREAM_IO);
 	DBG("wrote section header");
@@ -361,7 +361,7 @@ Func(elfstream_write_sections)(t_elfstream *self, int fd)
 	enum e_elfstream_error	error;
 	t_elf_section			*sections;
 
-	DBG("writing sections at %#lx", hdr->e_shoff);
+	DBG("writing sections at %#lx", (size_t) hdr->e_shoff);
 	sections = ft_calloc(self->section_count, sizeof(t_elf_section));
 	if (!sections)
 		return (ELFSTREAM_ALLOC);

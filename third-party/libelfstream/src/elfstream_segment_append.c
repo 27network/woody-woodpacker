@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 20:30:25 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/18 00:45:38 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/21 11:13:28 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,19 +75,19 @@ Func(elfstream_segment_offset)(t_elfstream *stream, size_t size, size_t position
 	while (i < stream->segment_count)
 	{
 		phdr = (Elf(Phdr) *) &stream->segments[i].phdr32;
-		DBG("checking offsetting phdr[%d]: %p", i, phdr);
-		DBG("phdr[%d] offset: %#lx", i, phdr->p_offset);
-		DBG("phdr[%d] filesz: %#lx", i, phdr->p_filesz);
+		DBG("checking offsetting phdr[%zu]: %p", i, phdr);
+		DBG("phdr[%zu] offset: %#lx", i, (size_t) phdr->p_offset);
+		DBG("phdr[%zu] filesz: %#lx", i, (size_t) phdr->p_filesz);
 		if (phdr->p_offset >= position)
 		{
-			DBG("phdr[%d] shifting by %zu since its after (%#lx)", i, size,
-				phdr->p_offset);
+			DBG("phdr[%zu] shifting by %zu since its after (%#lx)", i, size,
+				(size_t) phdr->p_offset);
 			phdr->p_offset += size;
 		}
 		else if (phdr->p_offset + phdr->p_filesz >= position)
 		{
-			DBG("phdr[%d] growing by %zu since its final pos is after (%#lx)", i, size,
-				position);
+			DBG("phdr[%zu] growing by %zu since its final pos is after (%#lx)", i, size,
+				(size_t) position);
 			phdr->p_filesz += size;
 			phdr->p_memsz += size;
 		}
@@ -106,9 +106,9 @@ Func(elfstream_section_offset)(t_elfstream *stream, size_t size, size_t position
 	while (i < stream->section_count)
 	{
 		shdr = (Elf(Shdr) *) &stream->sections[i].shdr32;
-		DBG("offsetting shdr[%d]: %p", i, shdr);
-		DBG("shdr[%d] offset: %#lx", i, shdr->sh_offset);
-		DBG("shdr[%d] size: %#lx", i, shdr->sh_size);
+		DBG("offsetting shdr[%zu]: %p", i, shdr);
+		DBG("shdr[%zu] offset: %#lx", i, (size_t) shdr->sh_offset);
+		DBG("shdr[%zu] size: %#lx", i, (size_t) shdr->sh_size);
 		if (shdr->sh_offset >= position)
 		{
 			DBG("shdr[%d] shifting by %zu since its after (%#lx)", i, size,
@@ -117,8 +117,8 @@ Func(elfstream_section_offset)(t_elfstream *stream, size_t size, size_t position
 		}
 		else if (shdr->sh_offset + shdr->sh_size >= position)
 		{
-			DBG("shdr[%d] growing by %zu since its final pos is after (%#lx)", i, size,
-				position);
+			DBG("shdr[%zu] growing by %zu since its final pos is after (%#lx)", i, size,
+				(size_t) position);
 			shdr->sh_size += size;
 		}
 		i++;
@@ -136,7 +136,7 @@ Func(update_stream)(t_elfstream *stream, t_elf_segment *segment, size_t size)
 	phdr = (Elf(Phdr) *) &segment->phdr32;
 	if (size == 0)
 		return (phdr->p_filesz);
-	DBG("size start: %#lx", phdr->p_filesz);
+	DBG("size start: %#lx", (size_t) phdr->p_filesz);
 	position = phdr->p_offset + phdr->p_filesz;
 	ehdr = (Elf(Ehdr) *) &stream->ehdr32;
 	Func(elfstream_segment_offset)(stream, size, position);
@@ -145,7 +145,7 @@ Func(update_stream)(t_elfstream *stream, t_elf_segment *segment, size_t size)
 	if (pos_virt < ehdr->e_entry)
 		ehdr->e_entry += size;
 	Func(elfstream_section_offset)(stream, size, position);
-	DBG("size end: %#lx", phdr->p_filesz);
+	DBG("size end: %#lx", (size_t) phdr->p_filesz);
 	// phdr->p_filesz += size;
 	// phdr->p_memsz += size;
 	return (phdr->p_filesz - size);
