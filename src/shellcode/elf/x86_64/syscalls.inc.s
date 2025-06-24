@@ -18,5 +18,5 @@
 %define SYS_MEMFD_CREATE 319
 
 %define SYS_FORK 57
-%define SYS_EXECVEAT 281
+%define SYS_EXECVEAT 322
 %define SYS_WAIT4 61
