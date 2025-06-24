@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/12 00:09:31 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/12 00:10:20 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,6 +238,8 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 
 	// smartstr segments_content_compressed = NULL;
 
+	//TODO: Compress & Encrypt
+	
 	// Setup our dynamic buffers (segments & user payload)
 	smartstr segments_content = Func(ww_bin_get_segments_content)(
 		&self->stream,
