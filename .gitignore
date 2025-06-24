@@ -4,6 +4,7 @@
 /smlz
 /run_nix.sh
 test*
+!/testing/
 *.bin
 *.bin.elf
 *.bin.elf32

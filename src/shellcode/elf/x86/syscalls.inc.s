@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 23:38:03 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/15 00:22:37 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/06/24 17:24:19 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -15,7 +15,7 @@
 
 %define SYS_EXIT 1
 
-%define SYS_MEMFD_CREATE 319
+%define SYS_MEMFD_CREATE 356
 
 %define SYS_FORK 2
 %define SYS_EXECVEAT 358
