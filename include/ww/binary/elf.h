@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 14:24:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 20:50:22 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/06/24 18:24:15 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,13 @@ t_content_source
 							  Elf64_Off *routines_offset);
 
 char
-*ww_bin_elf_payload_raw_x32(t_ww_binary *bin, Elf32_Off *routines_offset, Elf32_Off *total_size, Elf32_Off offset);
+*ww_bin_elf_payload_raw_x32(t_ww_binary *bin, Elf32_Off *routines_offset,
+							Elf32_Off *decryption_offset, Elf32_Off *decompression_offset,
+							Elf32_Off *total_size, Elf32_Off offset);
 char
-*ww_bin_elf_payload_raw_x64(t_ww_binary *bin, Elf64_Off *routines_offset, Elf64_Off *total_size, Elf64_Off offset);
+*ww_bin_elf_payload_raw_x64(t_ww_binary *bin, Elf64_Off *routines_offset,
+							Elf64_Off *decryption_offset, Elf64_Off *decompression_offset,
+							Elf64_Off *total_size, Elf64_Off offset);
 
 char
 *ww_bin_elf_payload_user_x32(t_ww_binary *bin, Elf32_Off *user_payload_size);
