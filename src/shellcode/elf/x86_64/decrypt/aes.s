@@ -2,5 +2,5 @@
 ; GENERATED AUTOMATICALLY BY ./gen-arch-wrappers.sh
 
 %include "elf/x86_64/callconv.inc.s"
-%include "elf/common/decrypt/aes_entry/aes.entry.s"
+%include "elf/common/decrypt/aes.entry.s"
 
