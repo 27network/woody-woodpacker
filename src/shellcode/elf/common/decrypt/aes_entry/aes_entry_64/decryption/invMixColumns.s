@@ -1,7 +1,7 @@
 ; Registers use:
 ;
 ; rdx = mixcolumns_matrix
-; rdi = plaintext
+; rdi = ciphertext
 
 invMixColumns:
 	call	update_plaintext_in_memory

@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/07/11 04:19:19 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/12 00:07:40 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -29,7 +29,6 @@ _woody_start:
 	; params are:
 	; - 
 	call RCX ; call the decryption routine
-
 
 	; 2. call _woody_decompress
 	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base

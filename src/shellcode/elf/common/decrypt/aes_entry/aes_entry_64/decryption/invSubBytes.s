@@ -21,7 +21,7 @@ invSubBytes:
 	paddb			xmm0, xmm6
 	pslldq			xmm0, 8
 
-	;insert last 8 subsitute bytes frm invSbox
+	;insert last 8 subsitute bytes from invSbox
 	vextracti128	xmm6, ymm4, 1	;extract higher part of ymm4 into xmm6
 	pshufb			xmm6, xmm1
 	pslldq			xmm6, 4

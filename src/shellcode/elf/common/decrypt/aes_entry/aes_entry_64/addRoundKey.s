@@ -1,6 +1,6 @@
 ; Registers use:
 
-; xmm0	-> Plaintext
+; xmm0	-> Ciphertext
 ; rsi	-> Key (expanded)
 ; rcx	-> Round number
 
