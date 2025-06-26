@@ -1,5 +1,4 @@
-%ifndef
-
+%define		irreducible_polynomial		0x11b
 %define		Nb							4	;number of columns - 32bytes-words
 %define		Nr							10	;number of rounds
 
@@ -24,5 +23,3 @@
 %define		inv_mix_columns_matrix_raw1	0x09, 0x0e, 0x0b, 0x0d
 %define		inv_mix_columns_matrix_raw2	0x0d, 0x09, 0x0e, 0x0b
 %define		inv_mix_columns_matrix_raw3	0x0b, 0x0d, 0x09, 0x0e
-
-%endif

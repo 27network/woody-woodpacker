@@ -6,9 +6,23 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/26 21:31:42 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/05/26 21:33:27 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/06/26 16:37:34 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
+
+bits BITS
+default rel
+
+; RDI = target
+; RSI = compressed content
+_woody_decompress_smlz:
+	; mov		RSI, [RAX + OFFSET_WOODY_START_BASE]
+	; mov		RDI, [RAX + OFFSET_SEGMENTS_WRITE_OFFSET]
+	; add		RDI, RSI
+
+	;lea	RSI, [rel g_code]
+	; mov		RSI, [RAX + OFFSET_SEGMENTS_CONTENT]
+	jmp _woody_decompress_smlz_entry
 
 get_bit_swap_LU:
 	call get_bit_swap_LU_callback
@@ -46,14 +60,9 @@ bit_swap_LU	db 0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0
 		   	db 0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF
 		   	db 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF
 
-_woody_decompress_smlz:
-	;lea	RDI, [rel g_target_start]
-	mov		RSI, [RAX + OFFSET_WOODY_START_BASE]
-	mov		RDI, [RAX + OFFSET_SEGMENTS_WRITE_OFFSET]
-	add		RDI, RSI
-
-	;lea	RSI, [rel g_code]
-	mov		RSI, [RAX + OFFSET_SEGMENTS_CONTENT]
+_woody_decompress_smlz_entry:
+	mov RSI, 0
+	mov RDI, 0
 
 	xor		RCX, RCX
 	call	get_block_infos
@@ -134,10 +143,10 @@ compressed_byte_case:
 compressed_byte_loop:
 	sub		RDI, RDX
 	add		RDI, RCX
-	movzx	RAX, byte [RDI]
+	mov		al, byte [RDI]
 	sub		RDI, RCX
 	add		RDI, RDX
-	mov		byte [RDI + RCX], RAX
+	mov		[RDI + RCX], al
 
 	inc		RCX
 	cmp		RCX, RBX
