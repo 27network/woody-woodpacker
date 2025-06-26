@@ -137,7 +137,7 @@ compressed_byte_loop:
 	movzx	RAX, byte [RDI]
 	sub		RDI, RCX
 	add		RDI, RDX
-	mov		[RDI + RCX], al
+	mov		byte [RDI + RCX], RAX
 
 	inc		RCX
 	cmp		RCX, RBX

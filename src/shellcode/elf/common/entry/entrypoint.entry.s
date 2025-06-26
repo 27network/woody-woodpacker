@@ -22,11 +22,11 @@ _woody_start:
 	;           as a temporary register to offset from.
 	pop RAX ; RAX = _woody_start
 
-	; 1. call _woody_decrypt
+	; 1. call _woody_decrypt_aes
 	; lea RDI, [rel segments_content]
 	; add RDI, [rel segments_write_offset]
 
-	; 2. call _woody_decompress
+	; 2. call _woody_decompress_smlz
 
 	; 3. call _woody_loader to execute the provided payload
 	call _woody_loader
