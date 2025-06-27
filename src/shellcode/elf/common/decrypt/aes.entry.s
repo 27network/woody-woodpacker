@@ -13,7 +13,24 @@
 bits BITS
 default rel
 
+
+; 64 BITS ARCHITECTURE
+%if BITS == 64
 _woody_decrypt_aes:
+	call _woody_decrypt_aes_x64
+
 	ret
 
-%include "elf/common/decrypt/aes/aes-128.inc.s"
+%include "elf/common/decrypt/aes_64/aes.entry_64.s"
+
+
+; 32 BITS ARCHITECTURE
+%else
+_woody_decrypt_aes:
+	call _woody_decrypt_aes_x86
+
+	ret
+
+%include "elf/common/decrypt/aes_32/aes.entry_32.s"
+
+%endif

@@ -1,6 +1,6 @@
 ; Registers use:
 ;
-; rdx = mixcolumns_matrix
+; rbx = mixcolumns_matrix
 ; rdi = ciphertext
 
 invMixColumns:
@@ -52,13 +52,13 @@ column_multiplication_loop:
 
 multiplication:
 	mov		al, [rdi + rcx]
-	cmp		byte [rdx + r9], 0x09
+	cmp		byte [rbx + r9], 0x09
 	je		multiplication_by_0x09
-	cmp		byte [rdx + r9], 0x0b
+	cmp		byte [rbx + r9], 0x0b
 	je		multiplication_by_0x0b
-	cmp		byte [rdx + r9], 0x0d
+	cmp		byte [rbx + r9], 0x0d
 	je		multiplication_by_0x0d
-	cmp		byte [rdx + r9], 0x0e
+	cmp		byte [rbx + r9], 0x0e
 	je		multiplication_by_0x0e
 
 multiplication_by_0x09:
@@ -108,7 +108,8 @@ multiplication_by_2:
 	ret
 
 modulo_reduction:
-	xor		al, irreducible_polynomial
+	mov		r10, irreducible_polynomial
+	xor		al, r10b
 	ret
 
 update_plaintext_in_memory:
