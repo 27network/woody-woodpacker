@@ -1,20 +1,18 @@
 ; Registers use:
 ;
-; xmm0 -> ciphertext
-; xmm1 -> vector_depacking_mask
-; xmm2 -> inv_shift_mask
-; rdi  -> pointer to ciphertext
-; rsi  -> encryption key (expanded)
-; rdx  -> inv_mixcolumns_matrix
+; xmm0				-> ciphertext
+; xmm1				-> vector_depacking_mask
+; xmm2				-> inv_shift_mask
+; rdi (argument) 	-> pointer to ciphertext
+; rsi (argument) 	-> encryption key (expanded)
+; rbx				-> inv_mixcolumns_matrix
 
 initialize_registers:
 	lea		rax, [rel vector_depacking_mask]
 	movdqa	xmm1, [rax]
 	lea		rax, [rel inv_shift_mask]
 	movdqa	xmm2, [rax]
-	lea		rsi, [rel OFFSET_ENCRYPTION_KEY]
-	lea		rdx, [rel inv_mixcolumns_matrix]
-	lea		rdi, [rel OFFSET_ENCRYPTED_CODE]
+	lea		rbx, [rel inv_mixcolumns_matrix]
 	test	rdi, 0xF
 	jz		get_aligned_memory
 	jmp		get_unaligned_memory
