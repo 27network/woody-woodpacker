@@ -10,7 +10,7 @@
 ;                                                                              ;
 ; **************************************************************************** ;
 
-bits BITS
+bits 32
 default rel
 
 %include "elf/common/decrypt/aes_32/aes-128.inc.s"
@@ -79,6 +79,18 @@ g_vector:
 	jl		expansion_loop
 	ret
 
+subBytes_32bits_words:
+        push    esi
+        push    ebx
+        push    ecx
+
+        xor             ecx, ecx
+        xor             esi, esi
+
+        mov             esi, eax
+        xor             eax, eax
+        jmp             loop
+
 shiftWord:
 	push	edx
 	mov		edx, eax
@@ -104,12 +116,12 @@ Rcon_loop:
 	mov		ebx, edx
 	shl		dl, 1
 	and		ebx, 0b10000000
-	jnz		modulo_reduction
+	jnz		.modulo_reduction
 
 	inc		ecx
 	jmp		Rcon_loop
 
-modulo_reduction:
+.modulo_reduction:
 	xor		edx, 0x1b
 
 	inc		ecx

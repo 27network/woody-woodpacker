@@ -57,6 +57,8 @@ SRCS += util/ww_getenv.c
 SRCS += util/ww_strcmp_ignorecase.c
 SRCS += util/ww_strncmp_ignorecase.c
 
+SHSRCS += elf/common/decrypt/aes_32/aes.entry_32.s
+SHSRCS += elf/common/decrypt/aes_64/aes.entry_64.s
 SHSRCS += elf/x86_64/decompress/none.s
 SHSRCS += elf/x86_64/decompress/smlz.s
 SHSRCS += elf/x86_64/decrypt/aes.s
