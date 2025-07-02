@@ -166,7 +166,8 @@ write_to_memory:
 	ret
 
 modulo_reduction:
-	xor		al, irreducible_polynomial
+	mov		edx, irreducible_polynomial
+	xor		al, dl
 	ret
 
 get_state_index:

@@ -10,7 +10,7 @@
 ;                                                                              ;
 ; **************************************************************************** ;
 
-bits BITS
+bits 64
 default rel
 
 %include "elf/common/decrypt/aes_64/aes-128.inc.s"
