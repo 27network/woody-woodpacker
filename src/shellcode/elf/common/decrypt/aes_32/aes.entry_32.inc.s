@@ -1,21 +1,18 @@
 ; **************************************************************************** ;
 ;                                                                              ;
 ;                                                         :::      ::::::::    ;
-;    aes.entry.s                                        :+:      :+:    :+:    ;
+;    aes.entry_32.inc.s                                 :+:      :+:    :+:    ;
 ;                                                     +:+ +:+         +:+      ;
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/26 21:32:28 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/06/26 16:40:26 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/04 17:39:59 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
-bits 32
-default rel
-
 %include "elf/common/decrypt/aes_32/aes-128.inc.s"
 
-_woody_decrypt_aes_x32:
+_woody_decrypt_aes_entry:
 	call	keyExpansion
 
 	mov		ecx, 0x10
@@ -80,16 +77,16 @@ g_vector:
 	ret
 
 subBytes_32bits_words:
-        push    esi
-        push    ebx
-        push    ecx
+	push    esi
+	push    ebx
+	push    ecx
 
-        xor             ecx, ecx
-        xor             esi, esi
+	xor             ecx, ecx
+	xor             esi, esi
 
-        mov             esi, eax
-        xor             eax, eax
-        jmp             loop
+	mov             esi, eax
+	xor             eax, eax
+	jmp             loop
 
 shiftWord:
 	push	edx

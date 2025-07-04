@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/06/20 14:23:31 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/04 19:03:40 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -37,6 +37,16 @@ _woody_start:
 	xor RDX, RDX
 	xor RCX, RCX
 	xor RBP, RBP
+%if BITS == 64
+	xor r8, r8
+	xor r9, r9
+	xor r10, r10
+	xor r11, r11
+	xor r12, r12
+	xor r13, r13
+	xor r14, r14
+	xor r15, r15
+%endif
 	xor SYS_ARG0, SYS_ARG0
 	xor SYS_ARG1, SYS_ARG1
 	xor SYS_ARG2, SYS_ARG2

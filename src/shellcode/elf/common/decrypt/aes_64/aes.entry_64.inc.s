@@ -1,21 +1,18 @@
 ; **************************************************************************** ;
 ;                                                                              ;
 ;                                                         :::      ::::::::    ;
-;    aes.entry.s                                        :+:      :+:    :+:    ;
+;    aes.entry_64.inc.s                                 :+:      :+:    :+:    ;
 ;                                                     +:+ +:+         +:+      ;
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/26 21:32:28 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/06/26 16:40:26 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/04 17:39:59 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
-bits 64
-default rel
-
 %include "elf/common/decrypt/aes_64/aes-128.inc.s"
 
-_woody_decrypt_aes_x64:
+_woody_decrypt_aes_entry:
 	call	keyExpansion
 	call	initialize_registers
 

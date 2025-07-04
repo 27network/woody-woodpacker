@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 16:29:50 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/18 00:44:37 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/04 20:49:45 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,11 +154,15 @@ size_t
 elfstream_segment_append(t_elfstream *stream, t_elf_segment *segment,
 	t_content_source *content);
 
-void
-elfstream_segment_offset(t_elfstream *stream, size_t size, size_t position);
+size_t
+elfstream_segment_shrink(t_elfstream *stream, t_elf_segment *segment,
+	t_content_source *content);
 
 void
-elfstream_section_offset(t_elfstream *stream, size_t size, size_t position);
+elfstream_segment_offset(t_elfstream *stream, int64_t size, size_t position);
+
+void
+elfstream_section_offset(t_elfstream *stream, int64_t size, size_t position);
 
 /**
  *

@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/21 11:16:09 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/04 17:54:29 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,8 +194,8 @@ Func(elfstream_write_segments_round)(t_elfstream *self, int fd)
 		DBG("written %zu/%zu segments", i, self->segment_count);
 		small_bound = *offset + elfstream_content_size(segment->content);
 		*offset = ((Elf(Off)) -1);
-		// fsync(fd);
-		// getchar();
+		fsync(fd);
+		getchar();
 	}
 	return (ELFSTREAM_OK);
 }
@@ -217,9 +217,9 @@ Func(elfstream_write_segments)(t_elfstream *self, int fd)
 	{
 		DBG("writing segment header %zu/%zu", i + 1, self->segment_count);
 		error = Func(elfstream_write_segment)(segments + i, fd);
-		// fsync(fd);
+		fsync(fd);
 		DBG("wrote segment header %zu", i + 1);
-		// getchar();
+		getchar();
 		i++;
 	}
 	if (!error)
