@@ -96,8 +96,7 @@ typedef struct s_content_source
 		}	s_memory;
 	};
 	size_t						size;
-	enum e_elfstream_error		(*write_fn)(struct s_content_source *self,
-			int fd);
+	enum e_elfstream_error		(*write_fn)(struct s_content_source *self, int fd);
 	struct s_content_source		*next;
 }	t_content_source;
 

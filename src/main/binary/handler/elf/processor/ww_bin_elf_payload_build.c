@@ -20,6 +20,7 @@
 // skull.  I'm deeply and utterly sorry to anyone that should even consider
 // attempting to read this.
 
+#include "elfstream.h"
 #include <elf.h>
 #include <fcntl.h>
 #include <ft/io.h>
@@ -70,6 +71,74 @@ FASTCALL Elf(Off)	Func(ww_bin_elf_entry_offset)(t_ww_elf_handler *self, Elf(Off)
 	return (ehdr->e_entry - woody_entry);
 }
 
+FASTCALL int	Func(ww_bin_read_content)(
+	t_content_source segment_content,
+	char *segments_content_offset,
+	size_t memsz
+) {
+	char	*buffer;
+
+	if (segment_content.type == CONTENT_SOURCE_FILE)
+	{
+		long	page_size = sysconf(_SC_PAGESIZE);
+		int		fd = segment_content.s_file.fd;
+		off_t	offset = segment_content.s_file.offset;
+		off_t	aligned_offset = offset & ~(page_size - 1);
+		off_t	diff_offset = offset - aligned_offset;
+
+		buffer = mmap(NULL, memsz + diff_offset, PROT_READ, MAP_PRIVATE, fd, aligned_offset);
+		if (buffer == MAP_FAILED)
+			return -1;
+		ft_memcpy(segments_content_offset, buffer + diff_offset, memsz);
+		munmap(buffer, memsz + diff_offset);
+	}
+	else if (segment_content.type == CONTENT_SOURCE_MEMORY)
+		ft_memcpy(segments_content_offset, segment_content.s_memory.data, memsz);
+	return 0;
+}
+
+FASTCALL char	*Func(ww_bin_get_segments_content)(
+	t_elfstream stream,
+	Elf(Off) *segments_write_offset,
+	Elf(Off) *segments_content_size,
+	Elf(Off) woody_entry
+) {
+	Elf(Phdr)		*phdr;
+	Elf(Phdr)		*tmp_phdr;
+	t_elf_segment	*segments = stream.segments;
+	size_t			i = stream.segment_count - 1;
+	Elf(Off)		start_address;
+	Elf(Off)		content_size = 0;
+	char			*segments_content = NULL;
+	Elf(Off)		offset = 0;
+
+	while (i)
+	{
+		phdr = (Elf(Phdr) *)&segments[i--].phdr32;
+		tmp_phdr = (Elf(Phdr) *)&segments[i].phdr32;
+
+		if (phdr->p_type != PT_LOAD)
+			continue;
+
+		start_address = phdr->p_vaddr;
+		content_size += phdr->p_memsz;
+
+		/* WRITE CONTENT TO SEGMENTS_CONTENT */
+		segments_content = realloc(segments_content, phdr->p_memsz);
+		if (Func(ww_bin_read_content)(*segments[i + 1].content, segments_content + offset, phdr->p_memsz) == -1)
+			return NULL;
+		offset += phdr->p_memsz;
+
+		/* CHECK IF SEGMENTS NOT CONTIGUOUS */
+		if (tmp_phdr->p_vaddr + tmp_phdr->p_memsz != phdr->p_vaddr)
+			break ;
+	}
+	*segments_write_offset = woody_entry - start_address;
+	*segments_content_size += content_size;
+
+	return segments_content;
+}
+
 /**
  * This function builds the final payload with:
  * - Decompression routine
@@ -90,10 +159,16 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	features.loader_async = bin->args->payload_async;
 
 	smartstr segments_content = NULL;
+	// smartstr segments_content_compressed = NULL;
 	smartstr user_payload = NULL;
 
 	// Setup our dynamic buffers (segments & user payload)
-	segments_content = NULL; //TODO: Implement
+	segments_content = Func(ww_bin_get_segments_content)(
+		self->stream,
+		&features.segments_write_offset,
+		&features.segments_content_size,
+		woody_entry
+	);
 	ww_trace("found segments content, size: %lu\n", (size_t) features.segments_content_size);
 	if (!segments_content && features.segments_content_size != 0)
 		return (NULL);
@@ -118,6 +193,8 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	if (!payload)
 		return (NULL);
 	woody_entry += *routines_offset;
+	// aes-128();
+	// smlz_compress(segments_content, features.segments_content_size, segments_content_compressed);
 
 	char *target = payload + payload_size - sizeof(features);
 	features.start_offset = Func(ww_bin_elf_entry_offset)(self, woody_entry);
