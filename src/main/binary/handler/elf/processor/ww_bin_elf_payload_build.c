@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/11 03:59:40 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/12 00:08:43 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,73 +71,150 @@ FASTCALL Elf(Off)	Func(ww_bin_elf_entry_offset)(t_ww_elf_handler *self, Elf(Off)
 	return (ehdr->e_entry - woody_entry);
 }
 
-FASTCALL int	Func(ww_bin_read_content)(
-	t_content_source segment_content,
-	char *segments_content_offset,
-	size_t memsz
+FASTCALL bool	Func(ww_bin_read_content)(
+	t_elf_segment *segment,
+	char *segment_buffer
 ) {
-	char	*buffer;
+	static long			page_size = 4096; // because fuck you, we dont have sysconf(3).
+	t_content_source	*content_source = segment->content;
 
-	if (segment_content.type == CONTENT_SOURCE_FILE)
+	while (content_source)
 	{
-		long	page_size = sysconf(_SC_PAGESIZE);
-		int		fd = segment_content.s_file.fd;
-		off_t	offset = segment_content.s_file.offset;
-		off_t	aligned_offset = offset & ~(page_size - 1);
-		off_t	diff_offset = offset - aligned_offset;
+		if (content_source->type == CONTENT_SOURCE_FILE)
+		{
+			int		fd = content_source->s_file.fd;
+			off_t	offset = content_source->s_file.offset;
+			off_t	aligned_offset = offset & ~(page_size - 1);
+			off_t	diff_offset = offset - aligned_offset;
+			off_t	map_size = content_source->size + diff_offset;
 
-		buffer = mmap(NULL, memsz + diff_offset, PROT_READ, MAP_PRIVATE, fd, aligned_offset);
-		if (buffer == MAP_FAILED)
-			return -1;
-		ft_memcpy(segments_content_offset, buffer + diff_offset, memsz);
-		munmap(buffer, memsz + diff_offset);
+			char	*buffer = mmap(NULL, map_size, PROT_READ, MAP_PRIVATE, fd, aligned_offset);
+			if (buffer == MAP_FAILED)
+				return (false);
+			ft_memcpy(segment_buffer, buffer + diff_offset, content_source->size);
+			munmap(buffer, map_size);
+		}
+		else if (content_source->type == CONTENT_SOURCE_MEMORY)
+			ft_memcpy(segment_buffer, content_source->s_memory.data, content_source->size);
+		content_source = content_source->next;
 	}
-	else if (segment_content.type == CONTENT_SOURCE_MEMORY)
-		ft_memcpy(segments_content_offset, segment_content.s_memory.data, memsz);
-	return 0;
+	elfstream_segment_shrink(stream, segment);
+	// elfstream_content_free(segment->content);
+	// segment->content = NULL;
+	// Elf(Phdr)	*phdr = (Elf(Phdr) *)&segment->phdr32;
+	// phdr->p_filesz = 0;
+	return (true);
 }
 
 FASTCALL char	*Func(ww_bin_get_segments_content)(
-	t_elfstream stream,
+	t_elfstream *stream,
 	Elf(Off) *segments_write_offset,
 	Elf(Off) *segments_content_size,
 	Elf(Off) woody_entry
 ) {
-	Elf(Phdr)		*phdr;
-	Elf(Phdr)		*tmp_phdr;
-	t_elf_segment	*segments = stream.segments;
-	size_t			i = stream.segment_count - 1;
-	Elf(Off)		start_address;
-	Elf(Off)		content_size = 0;
-	char			*segments_content = NULL;
-	Elf(Off)		offset = 0;
+	t_elf_segment	*target = NULL;
+	Elf(Phdr)		*phdr = NULL;
+	size_t			i;
 
-	while (i)
+	i = 0;
+	while (i < stream->segment_count)
 	{
-		phdr = (Elf(Phdr) *)&segments[i--].phdr32;
-		tmp_phdr = (Elf(Phdr) *)&segments[i].phdr32;
-
-		if (phdr->p_type != PT_LOAD)
-			continue;
-
-		start_address = phdr->p_vaddr;
-		content_size += phdr->p_memsz;
-
-		/* WRITE CONTENT TO SEGMENTS_CONTENT */
-		segments_content = realloc(segments_content, phdr->p_memsz);
-		if (Func(ww_bin_read_content)(*segments[i + 1].content, segments_content + offset, phdr->p_memsz) == -1)
-			return NULL;
-		offset += phdr->p_memsz;
-
-		/* CHECK IF SEGMENTS NOT CONTIGUOUS */
-		if (tmp_phdr->p_vaddr + tmp_phdr->p_memsz != phdr->p_vaddr)
+		t_elf_segment *tmp = &stream->segments[i];
+		phdr = (Elf(Phdr) *)&tmp->phdr32;
+		if (phdr->p_type == PT_LOAD && (phdr->p_flags & PF_X) == PF_X)
+		{
+			target = tmp;
 			break ;
+		}
+		i++;
 	}
-	*segments_write_offset = woody_entry - start_address;
-	*segments_content_size += content_size;
 
-	return segments_content;
+	if (!target)
+	{
+		ww_warn("No segments with PF_X found, no executable content???\n");
+		return (NULL);
+	}
+	size_t address = phdr->p_vaddr;
+	*segments_write_offset = woody_entry - address;
+
+	*segments_content_size = elfstream_content_size(target->content);
+	char *segments_content = ft_calloc(*segments_content_size, sizeof(char));
+	if (!segments_content)
+		return (NULL);
+	if (!Func(ww_bin_read_content)(target, segments_content))
+		ft_strdel(&segments_content);
+	return (segments_content);
 }
+
+// FASTCALL char	*Func(ww_bin_get_segments_content)(
+// 	t_elfstream *stream,
+// 	Elf(Off) *segments_write_offset,
+// 	Elf(Off) *segments_content_size,
+// 	Elf(Off) woody_entry
+// ) {
+// 	Elf(Phdr)		*phdr = NULL;
+// 	Elf(Phdr)		*last_phdr = NULL;
+// 	t_elf_segment	*segments = stream->segments;
+// 	t_elf_segment	*last_valid = NULL;
+// 	int				i = stream->segment_count - 1;
+// 	Elf(Off)		start_address = 0;
+//
+// 	while (i >= 0)
+// 	{
+// 		phdr = (Elf(Phdr) *)&segments[i].phdr32;
+// 		i--;
+//
+// 		ww_trace("considering segment %zu for contig check\n", i + 1);
+// 		if (phdr->p_type != PT_LOAD)
+// 			continue;
+// 		ww_trace("> is PT_LOAD\n");
+//
+// 		if (last_valid)
+// 		{
+// 			last_phdr = (Elf(Phdr) *) &last_valid->phdr32;
+// 			/* CHECK IF SEGMENTS NOT CONTIGUOUS */
+// 			if (phdr->p_vaddr + phdr->p_memsz != last_phdr->p_vaddr)
+// 			{
+// 				ww_trace("segment %zu is not contiguous with last\n", i + 1);
+// 				i += 2;
+// 				break ;
+// 			}
+// 			ww_trace("segment %zu is contiguous with last\n", i + 1);
+// 		}
+// 		
+// 		*segments_content_size += phdr->p_memsz;
+// 		start_address = phdr->p_vaddr;
+//
+// 		last_valid = &segments[i + 1];
+// 	}
+// 	if (i < 0)
+// 		i = 0;
+// 	ww_trace("start_address: %#lx\n", (size_t)start_address);
+// 	*segments_write_offset = woody_entry - start_address;
+// 	ww_trace("segments write offset: %#lx\n", (size_t) *segments_write_offset);
+// 	ww_trace("segments content size: %lu\n", (size_t) *segments_content_size);
+// 	
+// 	/* WRITE CONTENT TO SEGMENTS_CONTENT */
+// 	Elf(Off)	offset = 0;
+// 	bool		error = false;
+// 	char		*segments_content = ft_calloc(*segments_content_size, sizeof(char));
+// 	if (!segments_content)
+// 		return NULL;
+// 	while (i < stream->segment_count && !error)
+// 	{
+// 		last_valid = &segments[i];
+// 		phdr = (Elf(Phdr) *)&last_valid->phdr32;
+// 		if (phdr->p_type == PT_LOAD)
+// 		{
+// 			error |= !Func(ww_bin_read_content)(last_valid, segments_content + offset);
+// 			offset += phdr->p_memsz;
+// 		}
+// 		i++;
+// 	}
+// 	if (error)
+// 		ft_strdel(&segments_content);
+// 	return (segments_content);
+// }
 
 /**
  * This function builds the final payload with:
@@ -149,7 +226,7 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
  */
 t_content_source *Func(ww_bin_elf_payload_build)(
 	t_ww_binary *bin,
-	[[maybe_unused]] t_ww_elf_handler *self,
+	t_ww_elf_handler *self,
 	[[maybe_unused]] t_elf_segment *segment,
 	Elf(Off) woody_entry,
 	Elf(Off) *routines_offset
@@ -158,13 +235,11 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	ft_memset(&features, 0, sizeof(features));
 	features.loader_async = bin->args->payload_async;
 
-	smartstr segments_content = NULL;
 	// smartstr segments_content_compressed = NULL;
-	smartstr user_payload = NULL;
 
 	// Setup our dynamic buffers (segments & user payload)
-	segments_content = Func(ww_bin_get_segments_content)(
-		self->stream,
+	smartstr segments_content = Func(ww_bin_get_segments_content)(
+		&self->stream,
 		&features.segments_write_offset,
 		&features.segments_content_size,
 		woody_entry
@@ -172,7 +247,7 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	ww_trace("found segments content, size: %lu\n", (size_t) features.segments_content_size);
 	if (!segments_content && features.segments_content_size != 0)
 		return (NULL);
-	user_payload = Func(ww_bin_elf_payload_user)(bin, &features.user_payload_size);
+	smartstr user_payload = Func(ww_bin_elf_payload_user)(bin, &features.user_payload_size);
 	ww_trace("found user payload, size: %lu\n", (size_t) features.user_payload_size);
 	if (!user_payload && features.user_payload_size)
 		return (NULL);
@@ -180,6 +255,7 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	// Note: This size is the size of the payload, minus the user-defined extra content (user_payload + segments_content)
 	Elf(Off) payload_size = 0;
 	Elf(Off) user_content_size = features.user_payload_size + features.segments_content_size;
+	ww_trace("user content size: %lu\n", (size_t) user_content_size);
 	// Allocate payload from the raw payload (inc decrypt/decompress routines + entry),
 	// and add user payload and segments content size.
 	char *payload = Func(ww_bin_elf_payload_raw)(
@@ -214,7 +290,19 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	int fd = open("woody-payload.bin", O_WRONLY | O_CREAT, 0755);
 	if (fd == -1)
 		return (NULL);
-	(void)!write(fd, payload, payload_size);
+	size_t target_write = payload_size + user_content_size;
+	size_t write_offset = 0;
+	while (target_write)
+	{
+		ssize_t wrote = write(fd, payload + write_offset, target_write - write_offset);
+		if (wrote == -1)
+		{
+			ww_error("debug write error: %m\n");
+			break ;
+		}
+		target_write -= wrote;
+		write_offset += wrote;
+	}
 	close(fd);
 #endif
 
