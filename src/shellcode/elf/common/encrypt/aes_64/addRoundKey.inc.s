@@ -1,10 +1,3 @@
-BITS 64
-
-%include "includes/sections.s"
-
-global addRoundKey
-
-
 ; Registers use:
 
 ; xmm0	-> Plaintext
@@ -13,9 +6,9 @@ global addRoundKey
 
 
 addRoundKey:
-	shl		rcx, 4
+	shl	rcx, 4
 	movdqa	xmm3, [rsi + rcx]
 	pxor	xmm0, xmm3
-	shr		rcx, 4
+	shr	rcx, 4
 
 	ret

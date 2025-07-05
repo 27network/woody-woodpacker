@@ -1,20 +1,7 @@
-BITS 32
-
-%include "includes/defines.s"
-
-global	first_round_transformation
-global	middle_round_transformations
-global	last_round_transformations
-
-extern addRoundKey
-extern subBytes
-extern shiftRows
-extern mixColumns
-
 first_round_transformation:
-	xor		ecx, ecx
+	xor	ecx, ecx
 	call	addRoundKey
-	inc		ecx
+	inc	ecx
 
 	ret
 
@@ -24,9 +11,9 @@ middle_round_transformations:
 	call	mixColumns
 	call	addRoundKey
 
-	inc		ecx
-	cmp		ecx, Nr
-	jl		middle_round_transformations
+	inc	ecx
+	cmp	ecx, Nr
+	jl	middle_round_transformations
 
 	ret
 

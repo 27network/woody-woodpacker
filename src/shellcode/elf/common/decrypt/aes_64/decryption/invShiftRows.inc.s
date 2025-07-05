@@ -1,3 +1,3 @@
 invShiftRows:
-	pshufb			xmm0, xmm2
+	pshufb	xmm0, xmm2
 	ret
