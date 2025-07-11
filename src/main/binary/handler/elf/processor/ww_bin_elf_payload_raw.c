@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 20:19:54 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/12 00:09:48 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # define ELF_BITNESS 32
 # define DECOMPRESS_NONE_FILE "src/shellcode/elf/x86/decompress/none.bin"
 # define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86/decompress/smlz.bin"
-# define DECRYPT_AES_FILE "src/shellcode/elf/x86/decrypt/aes.bin"
+# define DECRYPT_AES_FILE "src/shellcode/elf/x86/decrypt/aes128.bin"
 # define DECRYPT_NONE_FILE "src/shellcode/elf/x86/decrypt/none.bin"
 # define DECRYPT_XOR_FILE "src/shellcode/elf/x86/decrypt/xor.bin"
 # define PAYLOAD_FILE "src/shellcode/elf/x86/entry/entrypoint.bin"
@@ -30,7 +30,7 @@
 # define ELF_BITNESS 64
 # define DECOMPRESS_NONE_FILE "src/shellcode/elf/x86_64/decompress/none.bin"
 # define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86_64/decompress/smlz.bin"
-# define DECRYPT_AES_FILE "src/shellcode/elf/x86_64/decrypt/aes.bin"
+# define DECRYPT_AES_FILE "src/shellcode/elf/x86_64/decrypt/aes128.bin"
 # define DECRYPT_NONE_FILE "src/shellcode/elf/x86_64/decrypt/none.bin"
 # define DECRYPT_XOR_FILE "src/shellcode/elf/x86_64/decrypt/xor.bin"
 # define PAYLOAD_FILE "src/shellcode/elf/x86_64/entry/entrypoint.bin"
@@ -85,7 +85,7 @@ FASTCALL const char *Func(ww_bin_elf_payload_decrypt)(t_ww_binary *bin, Elf(Off)
 {
 	*size = 0;
 	ww_debug("encryption algo: %s\n", ww_encryption_algo_str(bin->args->encryption_algo));
-	if (bin->args->encryption_algo == ENCRYPTION_ALGO_AES)
+	if (bin->args->encryption_algo == ENCRYPTION_ALGO_AES128)
 	{
 		*size = sizeof(Func(g_decrypt_bincode_aes));
 		return (Func(g_decrypt_bincode_aes));
@@ -108,15 +108,21 @@ FASTCALL const char *Func(ww_bin_elf_payload_decrypt)(t_ww_binary *bin, Elf(Off)
 char	*Func(ww_bin_elf_payload_raw)(
 	t_ww_binary *bin,
 	Elf(Off) *routines_offset,
+	Elf(Off) *decryption_offset,
+	Elf(Off) *decompression_offset,
 	Elf(Off) *initial_size,
 	Elf(Off) offset
 ) {
 	Elf(Off) decrypt_size = 0;
 	const char *decrypt = Func(ww_bin_elf_payload_decrypt)(bin, &decrypt_size);
 	ww_trace("decrypt_size: %#lx\n", (size_t)decrypt_size);
+
 	Elf(Off) decompress_size = 0;
 	const char *decompress = Func(ww_bin_elf_payload_decompress)(bin, &decompress_size);
 	ww_trace("decompress_size: %#lx\n", (size_t)decompress_size);
+	
+	*decompression_offset = -decompress_size;
+	*decryption_offset = -(decrypt_size + decompress_size);
 	*routines_offset = decompress_size + decrypt_size;
 	ww_trace("routines_offset: %#lx\n", (size_t)*routines_offset);
 

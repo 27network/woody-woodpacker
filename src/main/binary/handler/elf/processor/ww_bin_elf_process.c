@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 13:14:37 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/11 03:59:01 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,9 @@ t_ww_error	Func(ww_bin_elf_process)(t_ww_elf_handler *self, t_ww_binary *bin)
 	size_t				offset;
 	Elf(Off)			woody_entry;
 	Elf(Off)			routines_offset = 0;
-	Elf(Ehdr)			*ehdr;
+	Elf(Ehdr)			*ehdr = (Elf(Ehdr) *) &self->stream.ehdr32;
 
+	ww_trace("Original entry point: %#lx\n", (size_t)ehdr->e_entry);
 	target = Func(ww_bin_elf_target)(&self->stream);
 	if (!target)
 		return (ww_err_fmt(ERROR_INTERNAL, "failed to find target segment"));
@@ -81,8 +82,9 @@ t_ww_error	Func(ww_bin_elf_process)(t_ww_elf_handler *self, t_ww_binary *bin)
 	if (!payload)
 		return (ww_err_fmt(ERROR_ALLOC, "failed to allocate payload data"));
 	(void)elfstream_segment_append(&self->stream, target, payload);
-	ehdr = (Elf(Ehdr) *) &self->stream.ehdr32;
 	ehdr->e_entry = woody_entry + routines_offset;
+	ww_trace("New entry point: %#lx\n", (size_t)ehdr->e_entry);
+	ww_debug("Done processing\n");
 	return (ww_ok());
 }
 

@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/06/20 14:23:31 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/12 00:25:21 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -22,11 +22,18 @@ _woody_start:
 	;           as a temporary register to offset from.
 	pop RAX ; RAX = _woody_start
 
-	; 1. call _woody_decrypt_aes
-	; lea RDI, [rel segments_content]
-	; add RDI, [rel segments_write_offset]
+	; 1. call _woody_decrypt
+	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
+	mov RSI, [RAX + OFFSET_DECRYPTION_ROUTINE_OFFSET] ; get the offset to decryption routine offset
+	add RCX, RSI ; add the offset
+	; params are:
+	; - 
+	call RCX ; call the decryption routine
 
-	; 2. call _woody_decompress_smlz
+	; 2. call _woody_decompress
+	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
+	mov RSI, [RAX + OFFSET_DECOMPRESSION_ROUTINE_OFFSET] ; get the offset to decompress routine offset
+	add RCX, RSI ; add the offset
 
 	; 3. call _woody_loader to execute the provided payload
 	call _woody_loader
@@ -37,6 +44,16 @@ _woody_start:
 	xor RDX, RDX
 	xor RCX, RCX
 	xor RBP, RBP
+%if BITS == 64
+	xor r8, r8
+	xor r9, r9
+	xor r10, r10
+	xor r11, r11
+	xor r12, r12
+	xor r13, r13
+	xor r14, r14
+	xor r15, r15
+%endif
 	xor SYS_ARG0, SYS_ARG0
 	xor SYS_ARG1, SYS_ARG1
 	xor SYS_ARG2, SYS_ARG2
@@ -45,7 +62,7 @@ _woody_start:
 	xor SYS_ARG5, SYS_ARG5
 
 	; 4. jump to _start
-	lea RSI, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start
+	lea RSI, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
 	mov RDI, [RAX + OFFSET_START_OFFSET] ; get the offset to _start
 	add RSI, RDI ; add the offset to _start
 	mov RAX, RSI ; overwrite RAX since we don't need it anymore

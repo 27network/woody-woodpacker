@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 20:30:25 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/21 11:13:28 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/04 17:56:49 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,8 +111,8 @@ Func(elfstream_section_offset)(t_elfstream *stream, size_t size, size_t position
 		DBG("shdr[%zu] size: %#lx", i, (size_t) shdr->sh_size);
 		if (shdr->sh_offset >= position)
 		{
-			DBG("shdr[%d] shifting by %zu since its after (%#lx)", i, size,
-				shdr->sh_offset);
+			DBG("shdr[%zu] shifting by %zu since its after (%#lx)", i, size,
+				(size_t) shdr->sh_offset);
 			shdr->sh_offset += size;
 		}
 		else if (shdr->sh_offset + shdr->sh_size >= position)

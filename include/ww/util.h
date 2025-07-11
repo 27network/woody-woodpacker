@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 14:35:54 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 20:50:56 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/04 17:45:06 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #  include <ft/string.h>
 #  include <stddef.h>
 
-#  define smartstr __attribute__((cleanup(ft_strdel))) char *
+#  define smartstr __attribute__((cleanup(ft_strdel))) char*
 #  define smartfd __attribute__((cleanup(ft_closep))) int
 
 /**

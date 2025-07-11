@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 10:14:45 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/04/06 10:15:13 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/11 23:05:39 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ enum e_ww_encryption_algo
 {
 	ENCRYPTION_ALGO_NONE = 0,
 	ENCRYPTION_ALGO_XOR,
-	ENCRYPTION_ALGO_AES, // jordan gros malade va
+	ENCRYPTION_ALGO_AES128, // jordan gros malade va
 	_ENCRYPTION_ALGO_SIZE,
 };
 
