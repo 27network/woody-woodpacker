@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/24 18:23:27 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/11 03:59:40 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,12 +57,10 @@ struct Func(s_payload_features)
 	Elf(Off)	segments_content_size;
 };
 
-#define SIZE_SIZE sizeof(Elf(Off))
-
-static_assert(sizeof(struct Func(s_payload_features)) == (3 * SIZE_SIZE) + 24 + (3 * SIZE_SIZE),
-	"struct Func(s_payload_features) is not what we expected");
-
-#undef SIZE_SIZE
+static_assert(
+	sizeof(struct Func(s_payload_features)) == (3 * sizeof(Elf(Off))) + 24 + (3 * sizeof(Elf(Off))),
+	"struct Func(s_payload_features) is not what we expected"
+);
 
 FASTCALL Elf(Off)	Func(ww_bin_elf_entry_offset)(t_ww_elf_handler *self, Elf(Off) woody_entry)
 {
@@ -73,12 +71,12 @@ FASTCALL Elf(Off)	Func(ww_bin_elf_entry_offset)(t_ww_elf_handler *self, Elf(Off)
 }
 
 /**
- * Cette fonction build le payload final selon:
- * - L'algo de décompression
- * - L'algo de décryption
- * - L'entrypoint (entrypoint.s)
- *   - Contient tout (entry, call decompress, call decrypt, loader)
- *   - + Variables à la fin
+ * This function builds the final payload with:
+ * - Decompression routine
+ * - Decryption routine
+ * - Woody entrypoint (entrypoint.s)
+ *   - Contains all (entry, call decompress, call decrypt, loader)
+ *     - w/ variables.inc.s at the end 
  */
 t_content_source *Func(ww_bin_elf_payload_build)(
 	t_ww_binary *bin,
@@ -111,9 +109,9 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	// and add user payload and segments content size.
 	char *payload = Func(ww_bin_elf_payload_raw)(
 		bin,
+		routines_offset,
 		&features.decryption_routine_offset,
 		&features.decompression_routine_offset,
-		routines_offset,
 		&payload_size,
 		user_content_size
 	);
@@ -123,8 +121,6 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 
 	char *target = payload + payload_size - sizeof(features);
 	features.start_offset = Func(ww_bin_elf_entry_offset)(self, woody_entry);
-	features.decryption_routine_offset = 0x2222222222222222; //TODO
-	features.decompression_routine_offset = 0x3333333333333333; //TODO
 	ft_memcpy(features.encryption_key, bin->args->encryption_key, 16);
 	features.loader_async = bin->args->payload_async;
 	// features.segments_write_offset = 0x5555555555555555; //TODO

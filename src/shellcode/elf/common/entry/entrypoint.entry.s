@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/06/24 18:35:43 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/11 04:19:19 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -23,10 +23,18 @@ _woody_start:
 	pop RAX ; RAX = _woody_start
 
 	; 1. call _woody_decrypt
-	; lea RDI, [rel segments_content]
-	; add RDI, [rel segments_write_offset]
+	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
+	mov RSI, [RAX + OFFSET_DECRYPTION_ROUTINE] ; get the offset to decryption routine 
+	add RCX, RSI ; add the offset
+	; params are:
+	; - 
+	call RCX ; call the decryption routine
+
 
 	; 2. call _woody_decompress
+	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
+	mov RSI, [RAX + OFFSET_DECOMPRESSION_ROUTINE] ; get the offset to decompress routine 
+	add RCX, RSI ; add the offset
 
 	; 3. call _woody_loader to execute the provided payload
 	call _woody_loader
@@ -55,7 +63,7 @@ _woody_start:
 	xor SYS_ARG5, SYS_ARG5
 
 	; 4. jump to _start
-	lea RSI, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start
+	lea RSI, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
 	mov RDI, [RAX + OFFSET_START_OFFSET] ; get the offset to _start
 	add RSI, RDI ; add the offset to _start
 	mov RAX, RSI ; overwrite RAX since we don't need it anymore

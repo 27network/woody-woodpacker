@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 20:19:54 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/11 02:42:22 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,15 +108,21 @@ FASTCALL const char *Func(ww_bin_elf_payload_decrypt)(t_ww_binary *bin, Elf(Off)
 char	*Func(ww_bin_elf_payload_raw)(
 	t_ww_binary *bin,
 	Elf(Off) *routines_offset,
+	Elf(Off) *decryption_offset,
+	Elf(Off) *decompression_offset,
 	Elf(Off) *initial_size,
 	Elf(Off) offset
 ) {
 	Elf(Off) decrypt_size = 0;
 	const char *decrypt = Func(ww_bin_elf_payload_decrypt)(bin, &decrypt_size);
 	ww_trace("decrypt_size: %#lx\n", (size_t)decrypt_size);
+
 	Elf(Off) decompress_size = 0;
 	const char *decompress = Func(ww_bin_elf_payload_decompress)(bin, &decompress_size);
 	ww_trace("decompress_size: %#lx\n", (size_t)decompress_size);
+	
+	*decompression_offset = -decompress_size;
+	*decryption_offset = -(decrypt_size + decompress_size);
 	*routines_offset = decompress_size + decrypt_size;
 	ww_trace("routines_offset: %#lx\n", (size_t)*routines_offset);
 
