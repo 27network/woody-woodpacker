@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/26 18:51:05 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/12 00:04:43 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,20 +48,6 @@ typedef struct s_smlz_buffer
 size_t	smlz_compress(char *in_buf, size_t in_len, char *out_buf);
 size_t	smlz_decompress(char *in_buf, size_t in_len, char *out_buf);
 
-static inline size_t	min(size_t a, size_t b)
-{
-	if (a < b)
-		return (a);
-	return (b);
-}
-
-static inline size_t	max(size_t a, size_t b)
-{
-	if (a > b)
-		return (a);
-	return (b);
-}
-
 #ifndef PRINT
 # define PRINT 0
 #endif
@@ -76,7 +62,7 @@ static inline size_t	max(size_t a, size_t b)
 #define MIN_MATCH_LENGTH 3		// Minimum match length to encode
 
 static void find_longest_match2(
-    const uint8_t *data,
+    const unsigned char *data,
     size_t data_len,
     size_t current_pos,
     uint16_t *offset,
@@ -85,28 +71,23 @@ static void find_longest_match2(
     *offset = 0;
     *length = 0;
 
-    // If we don't have enough data for a minimum match, don't bother searching
     if (current_pos + MIN_MATCH_LENGTH > data_len) {
         return;
     }
 
-    // Calculate the search boundaries
     size_t window_start = (current_pos > WINDOW_SIZE) ? (current_pos - WINDOW_SIZE) : 0;
     size_t max_look_ahead = (current_pos + LOOKAHEAD_SIZE < data_len) ? 
                             LOOKAHEAD_SIZE : (data_len - current_pos);
 
-    // Search for the longest match in the window
     for (size_t i = window_start; i < current_pos; i++) {
 		if (current_pos - i >= 65536)
 			continue ;
-        // Determine match length
         size_t j = 0;
         while (j < max_look_ahead && 
                data[current_pos + j] == data[i + j]) {
             j++;
         }
 
-        // Update if we found a longer match
         if (j >= MIN_MATCH_LENGTH && j > *length) {
             *offset = (uint16_t)(current_pos - i);
             *length = (j > 65535) ? 65535 : (uint16_t)j;
@@ -123,6 +104,7 @@ static size_t	smlz_write_direct(char *buf, size_t offset, void *data,
 	return (len);
 }
 
+#if PRINT
 static void hexdump(void *buf, size_t len)
 {
 	char tmp[3];
@@ -135,6 +117,7 @@ static void hexdump(void *buf, size_t len)
 	}
 	printf("\n");
 }
+#endif
 
 static size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
 {
@@ -169,7 +152,7 @@ static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 
 #define SMLZ_BITS 8  // I hope thats not changing soon :pray:
 
-typedef __attribute__((packed)) struct s_smlz_token
+typedef struct s_smlz_token
 {
 	uint16_t	offset;
 	uint16_t	length;
@@ -184,7 +167,7 @@ static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
 
 //	token.offset = find_longest_match((const uint8_t *)in->data, \
 //											in->offset, in->size, &token.length);
-	find_longest_match2(in->data, in->size, in->offset, &token.offset, &token.length);
+	find_longest_match2((unsigned char *) in->data, in->size, in->offset, &token.offset, &token.length);
 	D("tkn: {off=%u,len=%u}", token.offset, token.length);
 	if (!token.offset || token.length <= sizeof(token))
 		return (false);
@@ -295,3 +278,99 @@ size_t	smlz_compress(char *in_buf, size_t in_len, char *out_buf)
 	smlz_compress_init(&input_buffer, &output_buffer);
 	return (output_buffer.offset);
 }
+
+// --------------------------------------- TESTS --- //
+
+#if SMLZ_TEST
+#define COMPRESS_SIZE_ERROR	"Compressed size is %zu, expected %zu\n"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+void	print_hdr(t_smlz_header *hdr)
+{
+	printf(">>> SMLZ Header\n");
+	printf("magic: %s\n", hdr->magic);
+	// printf("flags: %d\n", hdr->flags);
+	printf("version: %d\n", hdr->flags & SMLZ_VERSION_MASK);
+	printf("metadata: %d\n", hdr->flags & SMLZ_METADATA_MASK);
+	printf("nblocks: %d\n", hdr->nblocks);
+	printf("block_size: %d\n", hdr->block_size);
+	printf("remaining: %d\n", hdr->remaining);
+}
+
+void	try(char *buf, size_t len)
+{
+	char	*compressed;
+	size_t	compressed_len;
+	size_t	tmp;
+
+	printf("Trying to compress %zu bytes\n", len);
+	printf("Data: '%s'\n", buf);
+	printf("Compressing once to get length:");
+	compressed_len = smlz_compress(buf, len, NULL);
+	if (compressed_len == (size_t)-1)
+		return ;
+	printf("%zu\n", compressed_len);
+	compressed = calloc(compressed_len, 1);
+	if (compressed)
+	{
+		printf("compressing twice for real\n");
+		tmp = smlz_compress(buf, len, compressed);
+		if (tmp != compressed_len)
+			printf(COMPRESS_SIZE_ERROR, tmp, compressed_len);
+		else
+		{
+			printf("Got %zu bytes\n", tmp);
+			print_hdr((t_smlz_header *)compressed);
+			int fd = open("test.bin", O_CREAT | O_WRONLY, 0644);
+			(void)!write(fd, compressed, tmp);
+			close(fd);
+		}
+	}
+	free(compressed);
+}
+
+void	try_file(int fd, off_t file_size)
+{
+	void	*buffer;
+
+	if (file_size == 0) {
+		printf("special case 0 size moment\n");
+		try("", 0);
+		return;
+	}
+	buffer = mmap(0, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (buffer == MAP_FAILED) {
+		perror("mmap");
+		return ;
+	}
+	try(buffer, file_size);
+	munmap(buffer, file_size);
+}
+
+int	main(int argc, char **argv)
+{
+	int		fd;
+	off_t	file_size;
+
+	// printf("%ld\n", sizeof(t_smlz_header));
+	// try_str("Hello, World!");
+	if (argc != 2)
+	{
+		fprintf(stderr, "Usage: ./smlz file_to_compress");
+		return 1;
+	}
+	fd = open(argv[1], O_RDONLY);
+	if (fd == -1)
+	{
+		perror("open");
+		return 1;
+	}
+	file_size = lseek(fd, 0, SEEK_END);
+	lseek(fd, 0, SEEK_SET);
+	try_file(fd, file_size);
+	return (0);
+}
+#endif

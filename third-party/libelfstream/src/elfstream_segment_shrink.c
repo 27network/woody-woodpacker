@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 17:57:20 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/04 21:46:53 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/12 00:00:53 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,14 @@ void	elfstream_segment_shrink(
 
 FASTCALL void Func(update_segment)(t_elf_segment *segment, size_t position)
 {
+	(void) segment;
+	(void) position;
 }
 
 FASTCALL void Func(update_section)(t_elf_section *section, size_t position)
 {
+	(void) section;
+	(void) position;
 }
 
 FASTCALL void Func(elfstream_segment_shrink)(t_elfstream *stream, t_elf_segment *segment)

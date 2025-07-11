@@ -1,6 +1,8 @@
 ; ymm1/masks	-> Lower part = shiftRows_Mask
 ;		-> Higher part = vector_depacking_Mask
 
+;TODO(jsauvain): Je sais pas comment passer la clé en param
+key db "aaaabbbbccccdddd", 0
 
 initialize_registers:
 	lea	rax, [rel vector_depacking_mask]
