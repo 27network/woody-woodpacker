@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 12:14:40 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/04 17:54:29 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/12 00:17:18 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <ft/mem.h>
 #include <ft/print.h>
 #include <limits.h>
+#include <stdio.h>
 
 enum e_elfstream_error
 Func(elfstream_write_header)(t_elfstream *self, int fd)

@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/07/12 00:10:30 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/12 00:18:16 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -24,7 +24,7 @@ _woody_start:
 
 	; 1. call _woody_decrypt
 	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
-	mov RSI, [RAX + OFFSET_DECRYPTION_ROUTINE] ; get the offset to decryption routine 
+	mov RSI, [RAX + OFFSET_DECRYPTION_ROUTINE_OFFSET] ; get the offset to decryption routine offset 
 	add RCX, RSI ; add the offset
 	; params are:
 	; - 
@@ -32,7 +32,7 @@ _woody_start:
 
 	; 2. call _woody_decompress
 	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
-	mov RSI, [RAX + OFFSET_DECOMPRESSION_ROUTINE] ; get the offset to decompress routine 
+	mov RSI, [RAX + OFFSET_DECOMPRESSION_ROUTINE_OFFSET] ; get the offset to decompress routine offset 
 	add RCX, RSI ; add the offset
 
 	; 3. call _woody_loader to execute the provided payload
