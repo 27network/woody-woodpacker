@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:52 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 21:05:51 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/11 23:06:20 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 #  include <ww/log.h>
 
 #  define WW_OUTPUT_DEFAULT "woody"
-#  define WW_ENCRYPTION_DEFAULT "aes"
+#  define WW_ENCRYPTION_DEFAULT "aes128"
 #  define WW_COMPRESSION_DEFAULT "smlz"
 
 // The getopt-like options string
@@ -48,7 +48,7 @@ enum e_ww_cli_status
  * @param	output			The output file.
  *							(optional, default: "woody", env: WW_OUTPUT)
  * @param	encryption_algo The encryption algorithm to use.
- * 							(optional, default: AES, env: WW_ENCRYPTION_ALGO)
+ * 							(optional, default: AES128, env: WW_ENCRYPTION_ALGO)
  * @param	encryption_key	The encryption key.
  * 							(optional, env: WW_ENCRYPTION_KEY)
  * @param	log_level		The log verbosity level (see `log.h`).

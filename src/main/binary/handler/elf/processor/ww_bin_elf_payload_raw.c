@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 20:19:54 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/11 23:08:50 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # define ELF_BITNESS 32
 # define DECOMPRESS_NONE_FILE "src/shellcode/elf/x86/decompress/none.bin"
 # define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86/decompress/smlz.bin"
-# define DECRYPT_AES_FILE "src/shellcode/elf/x86/decrypt/aes.bin"
+# define DECRYPT_AES_FILE "src/shellcode/elf/x86/decrypt/aes128.bin"
 # define DECRYPT_NONE_FILE "src/shellcode/elf/x86/decrypt/none.bin"
 # define DECRYPT_XOR_FILE "src/shellcode/elf/x86/decrypt/xor.bin"
 # define PAYLOAD_FILE "src/shellcode/elf/x86/entry/entrypoint.bin"
@@ -30,7 +30,7 @@
 # define ELF_BITNESS 64
 # define DECOMPRESS_NONE_FILE "src/shellcode/elf/x86_64/decompress/none.bin"
 # define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86_64/decompress/smlz.bin"
-# define DECRYPT_AES_FILE "src/shellcode/elf/x86_64/decrypt/aes.bin"
+# define DECRYPT_AES_FILE "src/shellcode/elf/x86_64/decrypt/aes128.bin"
 # define DECRYPT_NONE_FILE "src/shellcode/elf/x86_64/decrypt/none.bin"
 # define DECRYPT_XOR_FILE "src/shellcode/elf/x86_64/decrypt/xor.bin"
 # define PAYLOAD_FILE "src/shellcode/elf/x86_64/entry/entrypoint.bin"
@@ -85,7 +85,7 @@ FASTCALL const char *Func(ww_bin_elf_payload_decrypt)(t_ww_binary *bin, Elf(Off)
 {
 	*size = 0;
 	ww_debug("encryption algo: %s\n", ww_encryption_algo_str(bin->args->encryption_algo));
-	if (bin->args->encryption_algo == ENCRYPTION_ALGO_AES)
+	if (bin->args->encryption_algo == ENCRYPTION_ALGO_AES128)
 	{
 		*size = sizeof(Func(g_decrypt_bincode_aes));
 		return (Func(g_decrypt_bincode_aes));

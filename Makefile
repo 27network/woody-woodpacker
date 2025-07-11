@@ -76,7 +76,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(SHBINS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s $(SHBINS)
 	@mkdir -p $(dir $@)
-	$(NASM) $(NASMFLAGS) -o $@ $<
+	cd src/main; $(NASM) $(NASMFLAGS) -o ../../$@ ../../$<
 
 $(SHSRC_DIR)/%.bin: $(SHSRC_DIR)/%.s
 ifeq ($(DEVELOPMENT),1)

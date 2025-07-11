@@ -1,7 +1,14 @@
+global	first_round_transformation
+global	middle_round_transformations
+global	last_round_transformations
+
+extern shiftRows
+extern mixColumns
+
 first_round_transformation:
-	xor	ecx, ecx
+	xor		rcx, rcx
 	call	addRoundKey
-	inc	ecx
+	inc		rcx
 
 	ret
 
@@ -11,9 +18,9 @@ middle_round_transformations:
 	call	mixColumns
 	call	addRoundKey
 
-	inc	ecx
-	cmp	ecx, Nr
-	jl	middle_round_transformations
+	inc		rcx
+	cmp		rcx, Nr
+	jl		middle_round_transformations
 
 	ret
 
