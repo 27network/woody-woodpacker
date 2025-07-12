@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/07/12 00:35:11 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/12 14:25:43 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -22,22 +22,38 @@ _woody_start:
 	;           as a temporary register to offset from.
 	pop RAX ; RAX = _woody_start
 
-;	; 1. call _woody_decrypt
+
+	; 1. call _woody_decrypt
+;TODO(kiroussa): Work in progress, commented out for now
 ;	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
 ;	mov RSI, [RAX + OFFSET_DECRYPTION_ROUTINE_OFFSET] ; get the offset to decryption routine offset
 ;	add RCX, RSI ; add the offset
 ;	; params are:
-;	; - 
-;	call RCX ; call the decryption routine
+;	; - the key
+;	mov RDI, [RAX + OFFSET_ENCRYPTION_KEY]
+;	; - the target buffer
+;	mov RSI, [RAX + OFFSET_SEGMENTS_CONTENT]
+;	; - the target buffer size
+;	mov RDX, [RAX + OFFSET_SEGMENTS_CONTENT_SIZE]
 ;
-;	; 2. call _woody_decompress
+;	push RAX
+;	call RCX ; call the decryption routine
+;	pop RAX
+
+
+	; 2. call _woody_decompress
 ;	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
 ;	mov RSI, [RAX + OFFSET_DECOMPRESSION_ROUTINE_OFFSET] ; get the offset to decompress routine offset
 ;	add RCX, RSI ; add the offset
+	; params are:
+	; - the source buffer
+	; - the target buffer
+
 
 	; 3. call _woody_loader to execute the provided payload
 	call _woody_loader
 	
+
 	; A bit of cleanup (do NOT touch RAX, we still need it)
 	xor RDI, RDI
 	xor RSI, RSI
