@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/12 00:10:20 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/14 19:18:00 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <ww/binary/elf.h>
+#define _SMLZ_IMPL
+#include <ww/compress/smlz.h>
 
 #ifndef ELF_BITNESS 
 # define ELF_BITNESS 32
@@ -147,75 +149,68 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 	return (segments_content);
 }
 
-// FASTCALL char	*Func(ww_bin_get_segments_content)(
-// 	t_elfstream *stream,
-// 	Elf(Off) *segments_write_offset,
-// 	Elf(Off) *segments_content_size,
-// 	Elf(Off) woody_entry
-// ) {
-// 	Elf(Phdr)		*phdr = NULL;
-// 	Elf(Phdr)		*last_phdr = NULL;
-// 	t_elf_segment	*segments = stream->segments;
-// 	t_elf_segment	*last_valid = NULL;
-// 	int				i = stream->segment_count - 1;
-// 	Elf(Off)		start_address = 0;
-//
-// 	while (i >= 0)
-// 	{
-// 		phdr = (Elf(Phdr) *)&segments[i].phdr32;
-// 		i--;
-//
-// 		ww_trace("considering segment %zu for contig check\n", i + 1);
-// 		if (phdr->p_type != PT_LOAD)
-// 			continue;
-// 		ww_trace("> is PT_LOAD\n");
-//
-// 		if (last_valid)
-// 		{
-// 			last_phdr = (Elf(Phdr) *) &last_valid->phdr32;
-// 			/* CHECK IF SEGMENTS NOT CONTIGUOUS */
-// 			if (phdr->p_vaddr + phdr->p_memsz != last_phdr->p_vaddr)
-// 			{
-// 				ww_trace("segment %zu is not contiguous with last\n", i + 1);
-// 				i += 2;
-// 				break ;
-// 			}
-// 			ww_trace("segment %zu is contiguous with last\n", i + 1);
-// 		}
-// 		
-// 		*segments_content_size += phdr->p_memsz;
-// 		start_address = phdr->p_vaddr;
-//
-// 		last_valid = &segments[i + 1];
-// 	}
-// 	if (i < 0)
-// 		i = 0;
-// 	ww_trace("start_address: %#lx\n", (size_t)start_address);
-// 	*segments_write_offset = woody_entry - start_address;
-// 	ww_trace("segments write offset: %#lx\n", (size_t) *segments_write_offset);
-// 	ww_trace("segments content size: %lu\n", (size_t) *segments_content_size);
-// 	
-// 	/* WRITE CONTENT TO SEGMENTS_CONTENT */
-// 	Elf(Off)	offset = 0;
-// 	bool		error = false;
-// 	char		*segments_content = ft_calloc(*segments_content_size, sizeof(char));
-// 	if (!segments_content)
-// 		return NULL;
-// 	while (i < stream->segment_count && !error)
-// 	{
-// 		last_valid = &segments[i];
-// 		phdr = (Elf(Phdr) *)&last_valid->phdr32;
-// 		if (phdr->p_type == PT_LOAD)
-// 		{
-// 			error |= !Func(ww_bin_read_content)(last_valid, segments_content + offset);
-// 			offset += phdr->p_memsz;
-// 		}
-// 		i++;
-// 	}
-// 	if (error)
-// 		ft_strdel(&segments_content);
-// 	return (segments_content);
-// }
+FASTCALL bool	Func(ww_smlz_compress)(
+	char *source,
+	size_t source_size,
+	char *target
+) {
+	size_t block_size = 8;
+	size_t smallest_size = source_size;
+	size_t smallest_block_size = (size_t) -1;
+	
+	t_smlz_buffer input_buffer = (t_smlz_buffer){source, source_size, 0};
+
+	while (block_size <= source_size && block_size <= 65536)
+	{
+		t_smlz_buffer output_buffer = (t_smlz_buffer){NULL, 0, 0};
+		smlz_compress_impl(&input_buffer, &output_buffer, block_size);
+		if (output_buffer.offset < smallest_size)
+		{
+			smallest_size = output_buffer.offset;
+			smallest_block_size = block_size;
+		}
+		block_size *= 2;
+	}
+
+	return (false);
+}
+
+/**
+ *
+ */
+FASTCALL char	*Func(ww_bin_elf_payload_process)(
+	t_ww_binary *bin,
+	t_ww_elf_handler *self,
+	char *segments_content,
+	Elf(Off) *segments_content_size
+) {
+	if (!segments_content || *segments_content_size == 0)
+		return (NULL);
+
+	char *temp_buffer = ft_calloc(*segments_content_size, sizeof(char));
+	if (!temp_buffer)
+	{
+		ww_error("failed to allocate temp buffer for segments content processing\n");
+		return (NULL);
+	}
+	switch (bin->args->compression_algo)
+	{
+		case COMPRESSION_ALGO_SMLZ:
+			if (!Func(ww_smlz_compress)(segments_content, *segments_content_size, temp_buffer))
+			{
+				ww_warn("SMLZ compression failed, falling back to uncompressed\n");
+				bin->args->compression_algo = COMPRESSION_ALGO_NONE;
+				ft_memcpy(temp_buffer, segments_content, *segments_content_size);
+			}
+			break ;
+		case COMPRESSION_ALGO_NONE:
+		default:
+			ft_memcpy(temp_buffer, segments_content, *segments_content_size);
+			break ;
+	}
+	ft_strdel(&segments_content);
+	return (temp_buffer);
+}
 
 /**
  * This function builds the final payload with:
@@ -236,10 +231,6 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	ft_memset(&features, 0, sizeof(features));
 	features.loader_async = bin->args->payload_async;
 
-	// smartstr segments_content_compressed = NULL;
-
-	//TODO: Compress & Encrypt
-	
 	// Setup our dynamic buffers (segments & user payload)
 	smartstr segments_content = Func(ww_bin_get_segments_content)(
 		&self->stream,
@@ -248,6 +239,16 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 		woody_entry
 	);
 	ww_trace("found segments content, size: %lu\n", (size_t) features.segments_content_size);
+	if (features.segments_content_size > 0 && segments_content)
+	{
+		segments_content = Func(ww_bin_elf_payload_process)(
+			bin,
+			self,
+			segments_content,
+			&features.segments_content_size
+		);
+		ww_trace("processed segments content, new size: %lu\n", (size_t) features.segments_content_size);
+	}
 	if (!segments_content && features.segments_content_size != 0)
 		return (NULL);
 	smartstr user_payload = Func(ww_bin_elf_payload_user)(bin, &features.user_payload_size);
@@ -272,14 +273,11 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	if (!payload)
 		return (NULL);
 	woody_entry += *routines_offset;
-	// aes-128();
-	// smlz_compress(segments_content, features.segments_content_size, segments_content_compressed);
 
 	char *target = payload + payload_size - sizeof(features);
 	features.start_offset = Func(ww_bin_elf_entry_offset)(self, woody_entry);
 	ft_memcpy(features.encryption_key, bin->args->encryption_key, 16);
 	features.loader_async = bin->args->payload_async;
-	// features.segments_write_offset = 0x5555555555555555; //TODO
 	ft_memcpy(target, &features, sizeof(features));
 	target = payload + payload_size;
 	ww_trace("writing segments content (%#lx bytes at %#lx)\n", (size_t)features.segments_content_size, (size_t)payload_size);
@@ -317,3 +315,4 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 
 # undef ELF_BITNESS
 #endif
+

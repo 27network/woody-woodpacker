@@ -9,7 +9,6 @@
 %include "encrypt/aes128/encryption/subBytes.inc.s"
 
 aes128_encrypt:
-
 	call	initialize_registers
 	call	keyExpansion
 

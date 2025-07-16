@@ -6,47 +6,23 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/12 00:04:43 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/14 19:25:19 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <ft/mem.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/mman.h>
+#include <unistd.h>
+#include <ww/compress/smlz.h>
 
 // #define SMLZ_MAX_LENGTH		65535		// The max lookahead check for flm
 // #define SMLZ_MIN_LENGTH		3			// The min match length for flm
 // #define SMLZ_WINDOW_SIZE	4096		// The window size for flm
-
-#define SMLZ_MAGIC			"SMLZ"
-#define SMLZ_VERSION_MASK	0b00001111
-#define SMLZ_METADATA_MASK	0b01110000
-
-#define SMLZ_FLAG_V1		0b00000001
-
-typedef struct s_smlz_header
-{
-	uint8_t		magic[4];
-	uint16_t	nblocks;
-	uint16_t	block_size;
-	uint16_t	remaining;
-	uint8_t		flags;
-	uint8_t		reserved[1];
-}	t_smlz_header;
-
-typedef struct s_smlz_buffer
-{
-	char	*data;
-	size_t	size;
-	size_t	offset;
-}	t_smlz_buffer;
-
-size_t	smlz_compress(char *in_buf, size_t in_len, char *out_buf);
-size_t	smlz_decompress(char *in_buf, size_t in_len, char *out_buf);
 
 #ifndef PRINT
 # define PRINT 0
@@ -61,7 +37,7 @@ size_t	smlz_decompress(char *in_buf, size_t in_len, char *out_buf);
 #define LOOKAHEAD_SIZE 65536	// Size of the lookahead buffer
 #define MIN_MATCH_LENGTH 3		// Minimum match length to encode
 
-static void find_longest_match2(
+void smlz_find_longest_match(
     const unsigned char *data,
     size_t data_len,
     size_t current_pos,
@@ -96,11 +72,11 @@ static void find_longest_match2(
 }
 
 [[nodiscard]]
-static size_t	smlz_write_direct(char *buf, size_t offset, void *data,
+size_t	smlz_write_direct(char *buf, size_t offset, void *data,
 					size_t len)
 {
 	if (buf)
-		memcpy(buf + offset, data, len);
+		ft_memcpy(buf + offset, data, len);
 	return (len);
 }
 
@@ -119,7 +95,7 @@ static void hexdump(void *buf, size_t len)
 }
 #endif
 
-static size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
+size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
 {
 	const size_t	ret_len
 		= smlz_write_direct(buf->data, buf->offset, data, len);
@@ -135,7 +111,7 @@ static size_t	smlz_write(t_smlz_buffer *buf, void *data, size_t len)
 	return (ret_len);
 }
 
-static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
+bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 {
 	size_t	size;
 
@@ -150,24 +126,15 @@ static bool	smlz_header_init(t_smlz_header *header, t_smlz_buffer *in)
 	return (true);
 }
 
-#define SMLZ_BITS 8  // I hope thats not changing soon :pray:
-
-typedef struct s_smlz_token
-{
-	uint16_t	offset;
-	uint16_t	length;
-}	t_smlz_token;
-
 // Return true si le contenu à (in->data + in->offset) peut être compressé,
 // et écrit le résultat compressé dans (out->data + out->offset)
-static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
-					t_smlz_buffer *out)
+bool	smlz_compress_litteral(t_smlz_buffer *in, t_smlz_buffer *out)
 {
 	t_smlz_token	token;
 
 //	token.offset = find_longest_match((const uint8_t *)in->data, \
 //											in->offset, in->size, &token.length);
-	find_longest_match2((unsigned char *) in->data, in->size, in->offset, &token.offset, &token.length);
+	smlz_find_longest_match((unsigned char *) in->data, in->size, in->offset, &token.offset, &token.length);
 	D("tkn: {off=%u,len=%u}", token.offset, token.length);
 	if (!token.offset || token.length <= sizeof(token))
 		return (false);
@@ -176,7 +143,7 @@ static inline bool	smlz_compress_litteral(t_smlz_buffer *in,
 	return (true);
 }
 
-static size_t	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
+size_t	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
 					t_smlz_buffer *out)
 {
 	const size_t	block_size = header->block_size;
@@ -231,7 +198,7 @@ static size_t	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
 	return (written);
 }
 
-static void	smlz_compress_blocks(t_smlz_header *header, t_smlz_buffer *in,
+void	smlz_compress_blocks(t_smlz_header *header, t_smlz_buffer *in,
 					t_smlz_buffer *out)
 {
 	size_t	last_block_size;
@@ -247,19 +214,25 @@ static void	smlz_compress_blocks(t_smlz_header *header, t_smlz_buffer *in,
 		header->remaining = last_block_size;
 }
 
-static void	smlz_compress_init(t_smlz_buffer *in, t_smlz_buffer *out)
+void	smlz_compress_impl(t_smlz_buffer *in, t_smlz_buffer *out,
+					size_t block_size_override)
 {
 	t_smlz_header	header;
 
-	memset(&header, 0, sizeof(header));
+	ft_memset(&header, 0, sizeof(header));
 	out->offset = sizeof(t_smlz_header);
-	memcpy(&header.magic, SMLZ_MAGIC, sizeof(header.magic));
+	ft_memcpy(&header.magic, SMLZ_MAGIC, sizeof(header.magic));
 	if (!smlz_header_init(&header, in))
 	{
 		smlz_write(out, &header, sizeof(t_smlz_header));
 		header.remaining = in->size;
 		smlz_write(out, in->data, in->size);
 		return ;
+	}
+	if (block_size_override != (size_t) -1)
+	{
+		D("overriding block size to %zu\n", block_size_override);
+		header.block_size = block_size_override;
 	}
 	smlz_compress_blocks(&header, in, out);
 	(void)smlz_write_direct(out->data, 0, &header, sizeof(t_smlz_header));
@@ -270,12 +243,12 @@ size_t	smlz_compress(char *in_buf, size_t in_len, char *out_buf)
 	t_smlz_buffer	input_buffer;
 	t_smlz_buffer	output_buffer;
 
-	memset(&input_buffer, 0, sizeof(t_smlz_buffer));
-	memset(&output_buffer, 0, sizeof(t_smlz_buffer));
+	ft_memset(&input_buffer, 0, sizeof(t_smlz_buffer));
+	ft_memset(&output_buffer, 0, sizeof(t_smlz_buffer));
 	input_buffer.data = in_buf;
 	input_buffer.size = in_len;
 	output_buffer.data = out_buf;
-	smlz_compress_init(&input_buffer, &output_buffer);
+	smlz_compress_impl(&input_buffer, &output_buffer, (size_t) -1);
 	return (output_buffer.offset);
 }
 
