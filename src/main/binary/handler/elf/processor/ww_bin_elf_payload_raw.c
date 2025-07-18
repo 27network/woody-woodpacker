@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/12 00:09:48 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 12:06:48 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,11 +95,11 @@ FASTCALL const char *Func(ww_bin_elf_payload_decrypt)(t_ww_binary *bin, Elf(Off)
 		*size = sizeof(Func(g_decrypt_bincode_none));
 		return (Func(g_decrypt_bincode_none));
 	}
-	if (bin->args->encryption_algo == ENCRYPTION_ALGO_XOR)
-	{
-		*size = sizeof(Func(g_decrypt_bincode_xor));
-		return (Func(g_decrypt_bincode_xor));
-	}
+	// if (bin->args->encryption_algo == ENCRYPTION_ALGO_XOR)
+	// {
+	// 	*size = sizeof(Func(g_decrypt_bincode_xor));
+	// 	return (Func(g_decrypt_bincode_xor));
+	// }
 	ww_warn("unimplemented encryption algorithm: %s\nwill not encrypt segments\n",
 		ww_encryption_algo_str(bin->args->encryption_algo));
 	return (NULL);
