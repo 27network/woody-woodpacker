@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/26 21:31:42 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/07/18 13:15:19 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/18 15:18:30 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -17,7 +17,8 @@ default rel
 ; RSI = ignored
 ; RDX = compressed content
 _woody_decompress_smlz:
-	mov RSI, RDX
+	mov RSI, RDI
+	mov RDI, RDX
 	jmp	_woody_decompress_smlz_entry
 
 get_bit_swap_LU:

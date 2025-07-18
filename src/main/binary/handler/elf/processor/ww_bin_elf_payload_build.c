@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 14:40:57 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 15:08:09 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,6 +145,7 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 		return (NULL);
 	}
 	size_t address = phdr->p_vaddr;
+	ww_trace("Stealing shit from %p\n", (void *)address);
 	*segments_write_offset = address - woody_entry;
 
 	*segments_content_size = elfstream_content_size(target->content);
@@ -314,6 +315,7 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	if (!payload)
 		return (NULL);
 	woody_entry += *routines_offset;
+	features.segments_write_offset -= *routines_offset;
 
 	char *target = payload + payload_size - sizeof(features);
 	features.start_offset = Func(ww_bin_elf_entry_offset)(self, woody_entry);

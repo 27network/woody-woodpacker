@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/07/18 14:31:01 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/18 15:18:42 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -39,9 +39,6 @@ _woody_start:
 	call RCX ; call the decryption routine
 	pop RAX
 
-	; A bit of cleanup (do NOT touch RAX, we still need it)
-	call cleanup_regs
-
 
 	; 2. call _woody_decompress
 	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
@@ -61,9 +58,6 @@ _woody_start:
 	call RCX ; call the decompression routine
 	pop RAX
 
-	; A bit of cleanup (do NOT touch RAX, we still need it)
-	call cleanup_regs
-
 
 	; 3. call _woody_loader to execute the provided payload
 	call _woody_loader
@@ -71,6 +65,7 @@ _woody_start:
 
 	; A bit of cleanup (do NOT touch RAX, we still need it)
 	call cleanup_regs
+
 
 	; 4. jump to _start
 	lea RSI, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
