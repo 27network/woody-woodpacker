@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 12:54:41 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 13:39:12 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@
 # define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86/decompress/smlz.bin"
 # define DECRYPT_AES_FILE "src/shellcode/elf/x86/decrypt/aes128.bin"
 # define DECRYPT_NONE_FILE "src/shellcode/elf/x86/decrypt/none.bin"
-# define DECRYPT_XOR_FILE "src/shellcode/elf/x86/decrypt/xor.bin"
 # define PAYLOAD_FILE "src/shellcode/elf/x86/entry/entrypoint.bin"
 # include "ww_bin_elf_payload_raw.c"
 
@@ -32,7 +31,6 @@
 # define DECOMPRESS_SMLZ_FILE "src/shellcode/elf/x86_64/decompress/smlz.bin"
 # define DECRYPT_AES_FILE "src/shellcode/elf/x86_64/decrypt/aes128.bin"
 # define DECRYPT_NONE_FILE "src/shellcode/elf/x86_64/decrypt/none.bin"
-# define DECRYPT_XOR_FILE "src/shellcode/elf/x86_64/decrypt/xor.bin"
 # define PAYLOAD_FILE "src/shellcode/elf/x86_64/entry/entrypoint.bin"
 # include "ww_bin_elf_payload_raw.c"
 #else // ELF_BITNESS
@@ -56,10 +54,6 @@ static const char	Func(g_decrypt_bincode_aes)[] = {
 
 static const char	Func(g_decrypt_bincode_none)[] = {
 # embed DECRYPT_NONE_FILE
-};
-
-static const char	Func(g_decrypt_bincode_xor)[] = {
-# embed DECRYPT_XOR_FILE
 };
 
 FASTCALL const char	*Func(ww_bin_elf_payload_decompress)(t_ww_binary *bin, Elf(Off) *size)
@@ -95,11 +89,6 @@ FASTCALL const char *Func(ww_bin_elf_payload_decrypt)(t_ww_binary *bin, Elf(Off)
 		*size = sizeof(Func(g_decrypt_bincode_none));
 		return (Func(g_decrypt_bincode_none));
 	}
-	// if (bin->args->encryption_algo == ENCRYPTION_ALGO_XOR)
-	// {
-	// 	*size = sizeof(Func(g_decrypt_bincode_xor));
-	// 	return (Func(g_decrypt_bincode_xor));
-	// }
 	ww_warn("unimplemented encryption algorithm: %s\nwill not encrypt segments\n",
 		ww_encryption_algo_str(bin->args->encryption_algo));
 	return (NULL);
@@ -172,7 +161,6 @@ char	*Func(ww_bin_elf_payload_raw)(
 
 # undef DECOMPRESS_NONE_FILE
 # undef DECOMPRESS_SMLZ_FILE
-# undef DECRYPT_XOR_FILE
 # undef DECRYPT_NONE_FILE
 # undef DECRYPT_AES_FILE
 # undef PAYLOAD_FILE

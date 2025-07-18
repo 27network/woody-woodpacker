@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 13:07:18 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 14:40:57 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,7 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 		phdr = (Elf(Phdr) *)&tmp->phdr32;
 		if (phdr->p_type == PT_LOAD && (phdr->p_flags & PF_X) == PF_X)
 		{
+			phdr->p_flags |= PF_W;
 			target = tmp;
 			break ;
 		}

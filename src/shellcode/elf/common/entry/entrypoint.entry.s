@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/07/18 13:06:54 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/18 14:31:01 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -39,6 +39,9 @@ _woody_start:
 	call RCX ; call the decryption routine
 	pop RAX
 
+	; A bit of cleanup (do NOT touch RAX, we still need it)
+	call cleanup_regs
+
 
 	; 2. call _woody_decompress
 	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
@@ -47,16 +50,19 @@ _woody_start:
 	; params are:
 	; - the source buffer
 	lea RDI, [RAX + OFFSET_SEGMENTS_CONTENT]
-	; - source size
-	mov RSI, [RAX + OFFSET_SEGMENTS_CONTENT_SIZE]
 	; - the target buffer
 	lea RDX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
 	mov RSI, [RAX + OFFSET_SEGMENTS_WRITE_OFFSET] ; get the offset to segments write offset
 	add RDX, RSI ; add the offset
+	; - source size
+	mov RSI, [RAX + OFFSET_SEGMENTS_CONTENT_SIZE]
 
 	push RAX
 	call RCX ; call the decompression routine
 	pop RAX
+
+	; A bit of cleanup (do NOT touch RAX, we still need it)
+	call cleanup_regs
 
 
 	; 3. call _woody_loader to execute the provided payload
@@ -64,6 +70,19 @@ _woody_start:
 	
 
 	; A bit of cleanup (do NOT touch RAX, we still need it)
+	call cleanup_regs
+
+	; 4. jump to _start
+	lea RSI, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
+	mov RDI, [RAX + OFFSET_START_OFFSET] ; get the offset to _start
+	add RSI, RDI ; add the offset to _start
+	mov RAX, RSI ; overwrite RAX since we don't need it anymore
+	xor RDI, RDI ; cleanup last registers
+	xor RSI, RSI
+
+	jmp RAX ; yeet! 
+
+cleanup_regs:
 	xor RDI, RDI
 	xor RSI, RSI
 	xor RDX, RDX
@@ -85,16 +104,7 @@ _woody_start:
 	xor SYS_ARG3, SYS_ARG3
 	xor SYS_ARG4, SYS_ARG4
 	xor SYS_ARG5, SYS_ARG5
-
-	; 4. jump to _start
-	lea RSI, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
-	mov RDI, [RAX + OFFSET_START_OFFSET] ; get the offset to _start
-	add RSI, RDI ; add the offset to _start
-	mov RAX, RSI ; overwrite RAX since we don't need it anymore
-	xor RDI, RDI ; cleanup last registers
-	xor RSI, RSI
-
-	jmp RAX ; yeet! 
+	ret
 
 
 %include "elf/common/entry/loader.inc.s"
