@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 15:08:09 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 18:36:03 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,10 @@ FASTCALL bool	Func(ww_bin_read_content)(
 			ft_memcpy(segment_buffer, content_source->s_memory.data, content_source->size);
 		content_source = content_source->next;
 	}
+	size_t size = elfstream_content_size(segment->content);
+	elfstream_content_free(segment->content);
+	segment->content = elfstream_source_data(NULL, size, false);
+
 	//TODO: Shrinking
 	// elfstream_segment_shrink(stream, segment);
 	// elfstream_content_free(segment->content);
