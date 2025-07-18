@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 20:57:12 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/04 18:13:39 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 10:12:48 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ t_ww_error	ww_bin_elf_read(t_ww_binary_handler *self,
 t_ww_error	ww_bin_elf_write(t_ww_binary_handler *self,
 				t_ww_binary *bin);
 
-__attribute__((constructor))
+[[gnu::constructor]]
 static void	ww_bin_elf_handler_register(void)
 {
 	ww_bin_handler_register((t_ww_binary_handler){

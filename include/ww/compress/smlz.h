@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/14 18:54:45 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/14 19:24:46 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 10:05:36 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,10 @@ size_t	smlz_decompress(char *in_buf, size_t in_len, char *out_buf);
 # ifdef _SMLZ_IMPL
 
 #  define SMLZ_MAGIC			"SMLZ"
-#  define SMLZ_VERSION_MASK	0b00001111
+#  define SMLZ_VERSION_MASK		0b00001111
 #  define SMLZ_METADATA_MASK	0b01110000
 
-#  define SMLZ_FLAG_V1		0b00000001
+#  define SMLZ_FLAG_V1			0b00000001
 
 typedef struct s_smlz_header
 {

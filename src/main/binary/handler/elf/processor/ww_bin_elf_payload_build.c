@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/14 19:18:00 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 11:56:41 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,14 @@
 #include <ww/binary/elf.h>
 #define _SMLZ_IMPL
 #include <ww/compress/smlz.h>
+#include <ww/encrypt/aes128.h>
 
 #ifndef ELF_BITNESS 
+
+typedef struct {
+    uint64_t rbx, rcx, rdx, rsi, rdi, rbp, r8, r9, r10, r11, r12, r13, r14, r15;
+} register_state_t;
+
 # define ELF_BITNESS 32
 # include "ww_bin_elf_payload_build.c"
 # define ELF_BITNESS 64
@@ -151,28 +157,46 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 
 FASTCALL bool	Func(ww_smlz_compress)(
 	char *source,
-	size_t source_size,
-	char *target
+	Elf(Off) *source_size,
+	char **target
 ) {
-	size_t block_size = 8;
-	size_t smallest_size = source_size;
-	size_t smallest_block_size = (size_t) -1;
-	
-	t_smlz_buffer input_buffer = (t_smlz_buffer){source, source_size, 0};
-
-	while (block_size <= source_size && block_size <= 65536)
+	ww_trace("smlz compressing buffer (total: %lu)\n", (size_t) *source_size);
+	t_smlz_buffer input_buffer = (t_smlz_buffer){source, *source_size, 0};
+	t_smlz_buffer output_buffer = (t_smlz_buffer){NULL, 0, 0};
+	smlz_compress_impl(&input_buffer, &output_buffer, 8);
+	if (output_buffer.offset > *source_size)
 	{
-		t_smlz_buffer output_buffer = (t_smlz_buffer){NULL, 0, 0};
-		smlz_compress_impl(&input_buffer, &output_buffer, block_size);
-		if (output_buffer.offset < smallest_size)
-		{
-			smallest_size = output_buffer.offset;
-			smallest_block_size = block_size;
-		}
-		block_size *= 2;
+		ww_warn("Compressed size is greater than source size\n");
+		return (false);
 	}
+	input_buffer.offset = 0;
+	output_buffer.data = ft_calloc(output_buffer.offset + 10, sizeof(char));
+	if (!output_buffer.data)
+	{
+		ww_error("failed to allocate output buffer\n");
+		return (false);
+	}
+	smlz_compress_impl(&input_buffer, &output_buffer, 8);
+	ft_strdel(target);
+	*source_size = ((Elf(Off)) output_buffer.offset);
+	ww_trace("compressed via smlz (total: %lu)\n", (size_t) *source_size);
+	*target = output_buffer.data;
+	return (true);
+}
 
-	return (false);
+FASTCALL void	Func(ww_aesify)(
+	t_ww_binary *bin,
+	char *plaintext,
+	Elf(Off) plaintext_size
+) {
+	ww_trace("aesifying buffer (total: %lu)\n", (size_t) plaintext_size);
+	Elf(Off) done = 0;
+	while (done < plaintext_size && plaintext_size - done >= 16)
+	{
+		aes128_encrypt(plaintext + done, bin->args->encryption_key);
+		done += 16;
+	}
+	ww_trace("done aesifying buffer (wrote %lu bytes)\n", (size_t) done);
 }
 
 /**
@@ -180,36 +204,51 @@ FASTCALL bool	Func(ww_smlz_compress)(
  */
 FASTCALL char	*Func(ww_bin_elf_payload_process)(
 	t_ww_binary *bin,
-	t_ww_elf_handler *self,
+	[[maybe_unused]] t_ww_elf_handler *handler,
 	char *segments_content,
 	Elf(Off) *segments_content_size
 ) {
 	if (!segments_content || *segments_content_size == 0)
 		return (NULL);
 
-	char *temp_buffer = ft_calloc(*segments_content_size, sizeof(char));
+	char *temp_buffer = ft_calloc(*segments_content_size + 1, sizeof(char));
 	if (!temp_buffer)
 	{
 		ww_error("failed to allocate temp buffer for segments content processing\n");
 		return (NULL);
 	}
+	if (bin->args->compression_algo != COMPRESSION_ALGO_NONE)
+		ww_warn("Compressing ELF code, this may take a while...\n");
 	switch (bin->args->compression_algo)
 	{
 		case COMPRESSION_ALGO_SMLZ:
-			if (!Func(ww_smlz_compress)(segments_content, *segments_content_size, temp_buffer))
+			if (!Func(ww_smlz_compress)(segments_content, segments_content_size, &temp_buffer))
 			{
 				ww_warn("SMLZ compression failed, falling back to uncompressed\n");
 				bin->args->compression_algo = COMPRESSION_ALGO_NONE;
 				ft_memcpy(temp_buffer, segments_content, *segments_content_size);
 			}
 			break ;
-		case COMPRESSION_ALGO_NONE:
 		default:
 			ft_memcpy(temp_buffer, segments_content, *segments_content_size);
 			break ;
 	}
+
+	// Swap them
 	ft_strdel(&segments_content);
-	return (temp_buffer);
+	segments_content = temp_buffer;
+	temp_buffer = NULL;
+
+	switch (bin->args->encryption_algo)
+	{
+		case ENCRYPTION_ALGO_AES128:
+			Func(ww_aesify)(bin, segments_content, *segments_content_size);
+			break ;
+		default:
+			break ;
+	}
+
+	return (segments_content);
 }
 
 /**
@@ -251,6 +290,7 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	}
 	if (!segments_content && features.segments_content_size != 0)
 		return (NULL);
+	ww_trace("seeking user payload\n");
 	smartstr user_payload = Func(ww_bin_elf_payload_user)(bin, &features.user_payload_size);
 	ww_trace("found user payload, size: %lu\n", (size_t) features.user_payload_size);
 	if (!user_payload && features.user_payload_size)

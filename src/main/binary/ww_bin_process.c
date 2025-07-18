@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 22:37:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/20 21:30:29 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 11:44:14 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,7 +137,7 @@ static inline t_ww_error	ww_bin_keygen(t_ww_binary *bin)
 	if (bin->args->encryption_key_alloc)
 		ft_strdel(&bin->args->encryption_key);
 	bin->args->encryption_key_alloc = true;
-	bin->args->encryption_key = ft_calloc(17, 1);
+	bin->args->encryption_key = ft_calloc(16 + 240, 1);
 	if (!bin->args->encryption_key)
 		return (ww_err_fmt(ERROR_ALLOC, "failed to allocate post-op encryption key"));
 	ft_memcpy(bin->args->encryption_key, tmp, 17);

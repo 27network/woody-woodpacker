@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 18:45:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/14 19:25:19 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 10:06:00 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,8 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#define _SMLZ_IMPL
 #include <ww/compress/smlz.h>
-
-// #define SMLZ_MAX_LENGTH		65535		// The max lookahead check for flm
-// #define SMLZ_MIN_LENGTH		3			// The min match length for flm
-// #define SMLZ_WINDOW_SIZE	4096		// The window size for flm
 
 #ifndef PRINT
 # define PRINT 0
@@ -33,7 +30,7 @@
 #define D(msg, ...)
 #endif
 
-#define WINDOW_SIZE 65536     // Size of the sliding window
+#define WINDOW_SIZE 65536		// Size of the sliding window
 #define LOOKAHEAD_SIZE 65536	// Size of the lookahead buffer
 #define MIN_MATCH_LENGTH 3		// Minimum match length to encode
 
@@ -161,8 +158,8 @@ size_t	smlz_compress_block(t_smlz_header *header, t_smlz_buffer *in,
 	while (true)
 	{
 #if PRINT
-		write(1, in->data + in->offset, in->size - in->offset);
-		write(1, "\n", 1);
+		// write(1, in->data + in->offset, in->size - in->offset);
+		// write(1, "\n", 1);
 #endif
 		if (written >= block_size)
 		{

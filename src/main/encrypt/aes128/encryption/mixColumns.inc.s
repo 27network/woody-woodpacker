@@ -62,6 +62,8 @@ multiplication:
 	mov		al, [rdi + rcx]
 	ret
 
+; ---
+
 multiplication_by_2:
 	mov		al, [rdi + rcx]
 	mov		r10b, al
@@ -71,9 +73,11 @@ multiplication_by_2:
 	ret
 
 modulo_reduction:
-	; TODO(jsauvain): Ça met un warning, wat?
-	xor		al, irreducible_polynomial
+	mov		r10b, irreducible_polynomial
+	xor		al, r10b 
 	ret
+
+; ---
 
 multiplication_by_3:
 	mov		r10b, [rdi + rcx]

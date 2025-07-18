@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/11 03:59:01 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 09:43:43 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,6 @@
 // Wrapper function, see below for the actual implementation
 t_ww_error	ww_bin_elf_process(t_ww_elf_handler *self, t_ww_binary *bin)
 {
-	ww_warn("Segment compression is not implemented yet, disabling\n");
-	bin->args->compression_algo = COMPRESSION_ALGO_NONE; //TODO: Implement
-
 	if (self->stream.bitness == ELFSTREAM_32)
 		return (ww_bin_elf_process_x32(self, bin));
 	return (ww_bin_elf_process_x64(self, bin));

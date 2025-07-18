@@ -11,7 +11,7 @@ extern	Rcon
 ; rbx -> Rcon_table
 
 
-keyExpansion:
+keyExpansion: 
 	xor		rcx, rcx
 	add		rcx, 4
 	mov		eax, [rsi + 12]
