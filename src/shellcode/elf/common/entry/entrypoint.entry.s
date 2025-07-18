@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/03/30 15:34:44 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/07/12 14:25:43 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/18 13:06:54 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -24,30 +24,39 @@ _woody_start:
 
 
 	; 1. call _woody_decrypt
-;TODO(kiroussa): Work in progress, commented out for now
-;	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
-;	mov RSI, [RAX + OFFSET_DECRYPTION_ROUTINE_OFFSET] ; get the offset to decryption routine offset
-;	add RCX, RSI ; add the offset
-;	; params are:
-;	; - the key
-;	mov RDI, [RAX + OFFSET_ENCRYPTION_KEY]
-;	; - the target buffer
-;	mov RSI, [RAX + OFFSET_SEGMENTS_CONTENT]
-;	; - the target buffer size
-;	mov RDX, [RAX + OFFSET_SEGMENTS_CONTENT_SIZE]
-;
-;	push RAX
-;	call RCX ; call the decryption routine
-;	pop RAX
+	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
+	mov RSI, [RAX + OFFSET_DECRYPTION_ROUTINE_OFFSET] ; get the offset to decryption routine offset
+	add RCX, RSI ; add the offset
+	; params are:
+	; - the key
+	mov RDI, [RAX + OFFSET_ENCRYPTION_KEY]
+	; - the target buffer
+	mov RSI, [RAX + OFFSET_SEGMENTS_CONTENT]
+	; - the target buffer size
+	mov RDX, [RAX + OFFSET_SEGMENTS_CONTENT_SIZE]
+
+	push RAX
+	call RCX ; call the decryption routine
+	pop RAX
 
 
 	; 2. call _woody_decompress
-;	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
-;	mov RSI, [RAX + OFFSET_DECOMPRESSION_ROUTINE_OFFSET] ; get the offset to decompress routine offset
-;	add RCX, RSI ; add the offset
+	lea RCX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
+	mov RSI, [RAX + OFFSET_DECOMPRESSION_ROUTINE_OFFSET] ; get the offset to decompress routine offset
+	add RCX, RSI ; add the offset
 	; params are:
 	; - the source buffer
+	lea RDI, [RAX + OFFSET_SEGMENTS_CONTENT]
+	; - source size
+	mov RSI, [RAX + OFFSET_SEGMENTS_CONTENT_SIZE]
 	; - the target buffer
+	lea RDX, [RAX + OFFSET_WOODY_START_BASE] ; get the address of _woody_start_base
+	mov RSI, [RAX + OFFSET_SEGMENTS_WRITE_OFFSET] ; get the offset to segments write offset
+	add RDX, RSI ; add the offset
+
+	push RAX
+	call RCX ; call the decompression routine
+	pop RAX
 
 
 	; 3. call _woody_loader to execute the provided payload

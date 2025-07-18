@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 11:56:41 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 13:07:18 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 		return (NULL);
 	}
 	size_t address = phdr->p_vaddr;
-	*segments_write_offset = woody_entry - address;
+	*segments_write_offset = address - woody_entry;
 
 	*segments_content_size = elfstream_content_size(target->content);
 	char *segments_content = ft_calloc(*segments_content_size, sizeof(char));
@@ -163,6 +163,7 @@ FASTCALL bool	Func(ww_smlz_compress)(
 	ww_trace("smlz compressing buffer (total: %lu)\n", (size_t) *source_size);
 	t_smlz_buffer input_buffer = (t_smlz_buffer){source, *source_size, 0};
 	t_smlz_buffer output_buffer = (t_smlz_buffer){NULL, 0, 0};
+	ww_info("Compressing ELF code, this may take a while... (1/2)\n");
 	smlz_compress_impl(&input_buffer, &output_buffer, 8);
 	if (output_buffer.offset > *source_size)
 	{
@@ -176,6 +177,7 @@ FASTCALL bool	Func(ww_smlz_compress)(
 		ww_error("failed to allocate output buffer\n");
 		return (false);
 	}
+	ww_info("Compressing ELF code, this may take a while... (2/2)\n");
 	smlz_compress_impl(&input_buffer, &output_buffer, 8);
 	ft_strdel(target);
 	*source_size = ((Elf(Off)) output_buffer.offset);
@@ -217,8 +219,6 @@ FASTCALL char	*Func(ww_bin_elf_payload_process)(
 		ww_error("failed to allocate temp buffer for segments content processing\n");
 		return (NULL);
 	}
-	if (bin->args->compression_algo != COMPRESSION_ALGO_NONE)
-		ww_warn("Compressing ELF code, this may take a while...\n");
 	switch (bin->args->compression_algo)
 	{
 		case COMPRESSION_ALGO_SMLZ:

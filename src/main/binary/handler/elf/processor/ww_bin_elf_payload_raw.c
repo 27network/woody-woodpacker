@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 12:06:48 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/18 12:54:41 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,8 +121,10 @@ char	*Func(ww_bin_elf_payload_raw)(
 	const char *decompress = Func(ww_bin_elf_payload_decompress)(bin, &decompress_size);
 	ww_trace("decompress_size: %#lx\n", (size_t)decompress_size);
 	
-	*decompression_offset = -decompress_size;
 	*decryption_offset = -(decrypt_size + decompress_size);
+	ww_trace("decryption_offset: %#lx\n", (size_t)*decryption_offset);
+	*decompression_offset = -decompress_size;
+	ww_trace("decompression_offset: %#lx\n", (size_t)*decompression_offset);
 	*routines_offset = decompress_size + decrypt_size;
 	ww_trace("routines_offset: %#lx\n", (size_t)*routines_offset);
 

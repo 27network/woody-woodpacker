@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/26 21:31:42 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/07/12 00:24:56 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/07/18 13:15:19 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -14,14 +14,10 @@ bits BITS
 default rel
 
 ; RDI = target
-; RSI = compressed content
+; RSI = ignored
+; RDX = compressed content
 _woody_decompress_smlz:
-	; mov	RSI, [RAX + OFFSET_WOODY_START_BASE]
-	; mov	RDI, [RAX + OFFSET_SEGMENTS_WRITE_OFFSET]
-	; add	RDI, RSI
-
-	;lea	RSI, [rel g_code]
-	; mov	RSI, [RAX + OFFSET_SEGMENTS_CONTENT]
+	mov RSI, RDX
 	jmp	_woody_decompress_smlz_entry
 
 get_bit_swap_LU:
@@ -61,10 +57,7 @@ bit_swap_LU	db 0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0
 	   	db 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF
 
 _woody_decompress_smlz_entry:
-	mov 	RSI, 0
-	mov 	RDI, 0
-
-	xor	RCX, RCX
+	xor		RCX, RCX
 	call	get_block_infos
 
 	call	decompression_loop
@@ -172,6 +165,7 @@ decompressed_byte_case:
 ignore_case:
 	ret
 
+; --------------- ;
 check_if_last_block:
 	dec		RDX
 	cmp		RCX, RDX
@@ -191,6 +185,7 @@ remaining:
 	mov		RBX, RAX
 
 	ret
+; --------------- ;
 
 get_block_header:
 	test	RCX, 0x7
