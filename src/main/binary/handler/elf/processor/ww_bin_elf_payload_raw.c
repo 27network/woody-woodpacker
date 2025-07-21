@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 15:25:32 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 13:39:12 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/21 23:03:59 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,11 +111,11 @@ char	*Func(ww_bin_elf_payload_raw)(
 	ww_trace("decompress_size: %#lx\n", (size_t)decompress_size);
 	
 	*decryption_offset = -(decrypt_size + decompress_size);
-	ww_trace("decryption_offset: %#lx\n", (size_t)*decryption_offset);
+	ww_trace("decryption_offset: %#lx (%ld)\n", (size_t)*decryption_offset, (int64_t) *decryption_offset);
 	*decompression_offset = -decompress_size;
-	ww_trace("decompression_offset: %#lx\n", (size_t)*decompression_offset);
+	ww_trace("decompression_offset: %#lx (%ld)\n", (size_t)*decompression_offset, (int64_t) *decompression_offset);
 	*routines_offset = decompress_size + decrypt_size;
-	ww_trace("routines_offset: %#lx\n", (size_t)*routines_offset);
+	ww_trace("routines_offset: %#lx (%ld)\n", (size_t)*routines_offset, (int64_t) *routines_offset);
 
 	// This will account for the entirety of the payload, minus the user-defined extra content...
 	ww_trace("payload_raw_size: %#lx\n", (size_t)sizeof(Func(g_payload)));

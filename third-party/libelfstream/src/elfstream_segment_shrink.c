@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 17:57:20 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/12 00:00:53 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/21 22:58:53 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ FASTCALL void Func(elfstream_segment_shrink)(t_elfstream *stream, t_elf_segment 
 	Elf(Phdr)	*phdr = (Elf(Phdr) *) &segment->phdr32;
 	size_t		segment_content_size = elfstream_content_size(segment->content);
 	size_t		position = phdr->p_offset;
+
+	DBG("shrinking segment %p (at %#lx, fsz %#lx, memsz)", segment, position, phdr->p_filesz, phdr->p_memsz);
 
 	size_t		i;
 	for (i = 0; i < stream->section_count; i++) {

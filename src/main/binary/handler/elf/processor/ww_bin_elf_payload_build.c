@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 18:36:03 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/21 22:57:16 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,6 @@
 #include <ww/encrypt/aes128.h>
 
 #ifndef ELF_BITNESS 
-
-typedef struct {
-    uint64_t rbx, rcx, rdx, rsi, rdi, rbp, r8, r9, r10, r11, r12, r13, r14, r15;
-} register_state_t;
 
 # define ELF_BITNESS 32
 # include "ww_bin_elf_payload_build.c"
@@ -80,6 +76,7 @@ FASTCALL Elf(Off)	Func(ww_bin_elf_entry_offset)(t_ww_elf_handler *self, Elf(Off)
 }
 
 FASTCALL bool	Func(ww_bin_read_content)(
+	t_elfstream *stream,
 	t_elf_segment *segment,
 	char *segment_buffer
 ) {
@@ -106,16 +103,13 @@ FASTCALL bool	Func(ww_bin_read_content)(
 			ft_memcpy(segment_buffer, content_source->s_memory.data, content_source->size);
 		content_source = content_source->next;
 	}
+
 	size_t size = elfstream_content_size(segment->content);
 	elfstream_content_free(segment->content);
 	segment->content = elfstream_source_data(NULL, size, false);
 
-	//TODO: Shrinking
+	// *** the magic ***
 	// elfstream_segment_shrink(stream, segment);
-	// elfstream_content_free(segment->content);
-	// segment->content = NULL;
-	// Elf(Phdr)	*phdr = (Elf(Phdr) *)&segment->phdr32;
-	// phdr->p_filesz = 0;
 	return (true);
 }
 
@@ -156,7 +150,7 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 	char *segments_content = ft_calloc(*segments_content_size, sizeof(char));
 	if (!segments_content)
 		return (NULL);
-	if (!Func(ww_bin_read_content)(target, segments_content))
+	if (!Func(ww_bin_read_content)(stream, target, segments_content))
 		ft_strdel(&segments_content);
 	return (segments_content);
 }
