@@ -13,9 +13,6 @@
 bits 64
 default rel
 
-%include "elf/x86_64/decrypt/aes128/aes-128.inc.s"
-%include "elf/x86_64/decrypt/aes128/keyExpansion.inc.s"
-
 _woody_decrypt_aes_entry:
 	call	keyExpansion
 	call	initialize_registers
@@ -34,3 +31,6 @@ decrypt_loop:
 	jl	decrypt_loop
 
 	ret
+
+%include "elf/x86_64/decrypt/aes128/aes-128.inc.s"
+%include "elf/x86_64/decrypt/aes128/keyExpansion.inc.s"

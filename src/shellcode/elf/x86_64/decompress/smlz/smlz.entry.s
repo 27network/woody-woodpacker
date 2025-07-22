@@ -198,7 +198,7 @@ modulo_8:
 
 get_block_infos:
 	movzx	r8, word [rsi + 0x04]		;nblocks
-	movzx	r9, 8						;block_size
+	mov		r9, 8						;block_size
 	movzx	r10, word [rsi + 0x08]		;remaining
 	add		rsi, 0x0c
 

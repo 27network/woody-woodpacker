@@ -11,14 +11,11 @@
 ; **************************************************************************** ;
 
 bits 32
-default rel
 
 _woody_decompress_smlz:
 	jmp		smlz_decompression
 
 
-g_target_start		dq 0x42
-g_code				db 0x42
 bit_swap_LU			db 0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0
 					db 0x10, 0x90, 0x50, 0xD0, 0x30, 0xB0, 0x70, 0xF0
 					db 0x08, 0x88, 0x48, 0xC8, 0x28, 0xA8, 0x68, 0xE8
@@ -53,117 +50,114 @@ bit_swap_LU			db 0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0
 					db 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF
 
 smlz_decompression:
-	push	ebx
-	call	get_args
-	xor		ecx, ecx
+	push	RBX
+
+	mov		RSI, RDI
+	mov		RDI, RDX
+
+	xor		RCX, RCX
 	call	get_block_infos
 
 	call	decompression_loop
 
-	pop		ebx
-	ret
-
-get_args:
-	mov		edi, ecx
-	mov		esi, [esp + 0x10]
-
+	pop		RBX
 	ret
 
 decompression_loop:
-	push	edx
-	push	ebx
+	push	RDX
+	push	RBX
 	call	check_if_last_block
-	pop		edx
+	pop		RDX
 
-	push	eax
-	push	edx
-	push	ecx
-	xor		ecx, ecx
+	push	RAX
+	push	RDX
+	push	RCX
+	xor		RCX, RCX
 
-	;get block_header address into eax register
-	lea		eax, [esi]
+	;get block_header address into RAX register
+	lea		RAX, [RSI]
 
-	;make esi point right next to the block header
-	shr		edx, 0x03	;RDX = ebx (ebx is saved into RDX in case of remaining != 0)
-	add		esi, edx
+	;make RSI point right next to the block header
+	shr		RDX, 0x03	;RDX = RBX (RBX is saved into RDX in case of remaining != 0)
+	add		RSI, RDX
 
 	call	decompress_block_loop
 
-	pop		ecx
-	pop		edx
-	pop		eax
-	pop		edx
+	pop		RCX
+	pop		RDX
+	pop		RAX
+	pop		RDX
 
-	inc		ecx
-	cmp		ecx, edx
+	inc		RCX
+	cmp		RCX, RDX
 	jl		decompression_loop
 
 	ret
 
 decompress_block_loop:
-	push	ebx
+	push	RBX
 
 	call	get_block_header
 	call	process_block
 
-	shr		edx, 1
-	pop		ebx
-	inc		ecx
-	cmp		ecx, ebx
+	shr		RDX, 1
+	pop		RBX
+	inc		RCX
+	cmp		RCX, RBX
 	jl		decompress_block_loop
 
 	ret
 
 process_block:
-	push	edx
-	call	compressed_byte_case	;esi is incremented inside compressed_byte_case
-	pop		edx
-	call	decompressed_byte_case	;esi is incremented inside decompressed_byte_case
+	push	RDX
+	call	compressed_byte_case	;RSI is incremented inside compressed_byte_case
+	pop		RDX
+	call	decompressed_byte_case	;RSI is incremented inside decompressed_byte_case
 
 	ret
 
 compressed_byte_case:
-	test	edx, 0x01
+	test	RDX, 0x01
 	jz		ignore_case
 
-	movzx	edx, word [esi]				;offset
-	movzx	ebx, word [esi + 0x02]		;len
+	movzx	RDX, word [RSI]				;offset
+	movzx	RBX, word [RSI + 0x02]		;len
 
-	push	eax
-	push	ecx
-	xor		ecx, ecx
+	push	RAX
+	push	RCX
+	xor		RCX, RCX
 	call	compressed_byte_loop
 
-	pop		ecx
-	pop		eax
+	pop		RCX
+	pop		RAX
 	ret
 
 compressed_byte_loop:
-	sub		edi, edx
-	add		edi, ecx
-	movzx	eax, byte [edi]
-	sub		edi, ecx
-	add		edi, edx
-	mov		[edi + ecx], al
+	sub		RDI, RDX
+	add		RDI, RCX
+	movzx	RAX, byte [RDI]
+	sub		RDI, RCX
+	add		RDI, RDX
+	mov		[RDI + RCX], al
 
-	inc		ecx
-	cmp		ecx, ebx
+	inc		RCX
+	cmp		RCX, RBX
 	jl		compressed_byte_loop
 
-	add		edi, ebx
-	add		esi, 0x04
+	add		RDI, RBX
+	add		RSI, 0x04
 
 	ret
 
 decompressed_byte_case:
-	test	edx, 0x01
+	test	RDX, 0x01
 	jnz		ignore_case
 
-	movzx	ebx, byte [esi]
-	mov		[edi], ebx
+	movzx	RBX, byte [RSI]
+	mov		[RDI], RBX
 
-	inc		esi
-	inc		edi
+	inc		RSI
+	inc		RDI
 
 	ret
 
@@ -171,48 +165,57 @@ ignore_case:
 	ret
 
 check_if_last_block:
-	dec		edx
-	cmp		ecx, edx
+	dec		RDX
+	cmp		RCX, RDX
 	je		last_block
-	inc		edx
+	inc		RDX
 
 	ret
 
 last_block:
-	inc		edx
-	cmp		eax, 0
+	inc		RDX
+	cmp		RAX, 0
 	jne		remaining
 
 	ret
 
 remaining:
-	mov		ebx, eax
+	mov		RBX, RAX
 
 	ret
 
 get_block_header:
-	test	ecx, 0x7
+	test	RCX, 0x7
 	jz		modulo_8
 
 	ret
 
 modulo_8:
-	movzx	ebx, byte [eax]
-	inc		eax
+	movzx	RBX, byte [RAX]
+	inc		RAX
 
-	;get bit-swaped block_header into ebx register
-	lea		edx, [rel bit_swap_LU]
-	push	eax
-	movzx	eax, byte [edx + ebx]
-	mov		edx, eax
-	pop		eax
+	;get bit-swaped block_header into RBX register
+	; lea		RDX, [rel bit_swap_LU]
+	call	get_bit_swap_LU_address
+	push	RAX
+	movzx	RAX, byte [RDX + RBX]
+	mov		RDX, RAX
+	pop		RAX
+
+	ret
+
+get_bit_swap_LU_address:
+	pop		RDX
+	push	RDX
+	add		RDX, bit_swap_LU - get_bit_swap_LU_address
+	add		RDX, 9
 
 	ret
 
 get_block_infos:
-	movzx	edx, word [esi + 0x04]		;nblocks
-	movzx	ebx, word [esi + 0x06]		;block_size
-	movzx	eax, word [esi + 0x08]		;remaining
-	add		esi, 0x0c
+	movzx	RDX, word [RSI + 0x04]		;nblocks
+	mov		RBX, 8						;block_size
+	movzx	RAX, word [RSI + 0x08]		;remaining
+	add		RSI, 0x0c
 
 	ret
