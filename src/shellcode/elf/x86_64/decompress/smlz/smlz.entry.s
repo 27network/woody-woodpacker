@@ -17,8 +17,6 @@ _woody_decompress_smlz:
 	jmp		smlz_decompression
 
 
-g_target_start		dq 0x42
-g_code				db 0x42
 bit_swap_LU			db 0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0
 					db 0x10, 0x90, 0x50, 0xD0, 0x30, 0xB0, 0x70, 0xF0
 					db 0x08, 0x88, 0x48, 0xC8, 0x28, 0xA8, 0x68, 0xE8
@@ -95,7 +93,7 @@ decompression_loop:
 
 	ret
 
-	decompress_block_loop:
+decompress_block_loop:
 	call	get_block_header
 	call	process_block
 
@@ -200,7 +198,7 @@ modulo_8:
 
 get_block_infos:
 	movzx	r8, word [rsi + 0x04]		;nblocks
-	movzx	r9, word [rsi + 0x06]		;block_size
+	movzx	r9, 8						;block_size
 	movzx	r10, word [rsi + 0x08]		;remaining
 	add		rsi, 0x0c
 
