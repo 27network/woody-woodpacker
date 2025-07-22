@@ -2,5 +2,5 @@
 ; GENERATED AUTOMATICALLY BY ./gen-arch-wrappers.sh
 
 %include "elf/x86/callconv.inc.s"
-%include "elf/common/decompress/smlz.entry.s"
+%include "elf/x86/decompress/smlz/smlz.entry.s"
 

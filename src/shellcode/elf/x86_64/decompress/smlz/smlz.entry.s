@@ -10,13 +10,8 @@
 ;                                                                              ;
 ; **************************************************************************** ;
 
-bits BITS
+bits 64
 default rel
-
-%if BITS == 32
-_woody_decompress_smlz:
-	ret
-%else
 
 _woody_decompress_smlz:
 	jmp		smlz_decompression
@@ -65,8 +60,6 @@ smlz_decompression:
 
 	mov		RSI, RDI
 	mov		RDI, RDX
-	;lea	rdi, [g_target_start]
-	;lea	rsi, [g_code]
 	xor		rcx, rcx
 	xor		r14, r14
 	call	get_block_infos
@@ -102,7 +95,7 @@ decompression_loop:
 
 	ret
 
-decompress_block_loop:
+	decompress_block_loop:
 	call	get_block_header
 	call	process_block
 
@@ -212,4 +205,3 @@ get_block_infos:
 	add		rsi, 0x0c
 
 	ret
-%endif
