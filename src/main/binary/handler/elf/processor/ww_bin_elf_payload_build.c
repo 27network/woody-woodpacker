@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/21 22:57:16 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/22 14:52:36 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ FASTCALL bool	Func(ww_bin_read_content)(
 	size_t size = elfstream_content_size(segment->content);
 	elfstream_content_free(segment->content);
 	segment->content = elfstream_source_data(NULL, size, false);
+	(void)stream;
 
 	// *** the magic ***
 	// elfstream_segment_shrink(stream, segment);
@@ -117,7 +118,7 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 	t_elfstream *stream,
 	Elf(Off) *segments_write_offset,
 	Elf(Off) *segments_content_size,
-	Elf(Off) woody_entry
+	Elf(Off) *woody_entry
 ) {
 	t_elf_segment	*target = NULL;
 	Elf(Phdr)		*phdr = NULL;
@@ -144,7 +145,7 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 	}
 	size_t address = phdr->p_vaddr;
 	ww_trace("Stealing shit from %p\n", (void *)address);
-	*segments_write_offset = address - woody_entry;
+	*segments_write_offset = address - *woody_entry;
 
 	*segments_content_size = elfstream_content_size(target->content);
 	char *segments_content = ft_calloc(*segments_content_size, sizeof(char));
@@ -263,7 +264,7 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	t_ww_binary *bin,
 	t_ww_elf_handler *self,
 	[[maybe_unused]] t_elf_segment *segment,
-	Elf(Off) woody_entry,
+	Elf(Off) *woody_entry,
 	Elf(Off) *routines_offset
 ) {
 	struct Func(s_payload_features)	features;
@@ -312,11 +313,11 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 	);
 	if (!payload)
 		return (NULL);
-	woody_entry += *routines_offset;
+	size_t off_woody_entry = *woody_entry + *routines_offset;
 	features.segments_write_offset -= *routines_offset;
 
 	char *target = payload + payload_size - sizeof(features);
-	features.start_offset = Func(ww_bin_elf_entry_offset)(self, woody_entry);
+	features.start_offset = Func(ww_bin_elf_entry_offset)(self, off_woody_entry);
 	ft_memcpy(features.encryption_key, bin->args->encryption_key, 16);
 	features.loader_async = bin->args->payload_async;
 	ft_memcpy(target, &features, sizeof(features));

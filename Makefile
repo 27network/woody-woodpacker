@@ -112,7 +112,7 @@ test-run-static: test-static $(NAME)
 	rm -rf woody
 	./$(NAME) -vv test-static
 
-test-diff-static: test-run-static
+test-diff-static: # test-run-static
 	nix-shell -p busybox --command 'xxd test-static > static.hex && xxd woody > woody.hex' && nvim -d static.hex woody.hex
 
 test-run-dyna-32: test-dyna-32 $(NAME)

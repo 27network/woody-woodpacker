@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 14:24:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/06/24 18:24:15 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/22 01:18:36 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,11 +48,11 @@ ww_bin_elf_entry_x64(t_ww_elf_handler *self, t_elf_segment *orig, Elf64_Off offs
 
 t_content_source
 *ww_bin_elf_payload_build_x32(t_ww_binary *bin, t_ww_elf_handler *self,
-						      t_elf_segment *target, Elf32_Off woody_entry,
+						      t_elf_segment *target, Elf32_Off *woody_entry,
 							  Elf32_Off *routines_offset);
 t_content_source
 *ww_bin_elf_payload_build_x64(t_ww_binary *bin, t_ww_elf_handler *self,
-							  t_elf_segment *target, Elf64_Off woody_entry,
+							  t_elf_segment *target, Elf64_Off *woody_entry,
 							  Elf64_Off *routines_offset);
 
 char

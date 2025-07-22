@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 23:01:30 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 09:43:43 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/22 01:21:00 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,11 @@ t_ww_error	Func(ww_bin_elf_process)(t_ww_elf_handler *self, t_ww_binary *bin)
 		return (ww_err_fmt(ERROR_INTERNAL, "failed to normalize target segment"));
 	offset = elfstream_segment_append(&self->stream, target, NULL);
 	woody_entry = Func(ww_bin_elf_entry)(self, target, offset);
-	ww_trace("Injecting woody_entry @ %#lx\n", (size_t)woody_entry);
-	payload = Func(ww_bin_elf_payload_build)(bin, self, target, woody_entry, &routines_offset);
+	ww_trace("Initial woody_entry @ %#lx\n", (size_t)woody_entry);
+	payload = Func(ww_bin_elf_payload_build)(bin, self, target, &woody_entry, &routines_offset);
 	if (!payload)
 		return (ww_err_fmt(ERROR_ALLOC, "failed to allocate payload data"));
+	ww_trace("Injecting final woody_entry @ %#lx\n", (size_t)woody_entry);
 	(void)elfstream_segment_append(&self->stream, target, payload);
 	ehdr->e_entry = woody_entry + routines_offset;
 	ww_trace("New entry point: %#lx\n", (size_t)ehdr->e_entry);

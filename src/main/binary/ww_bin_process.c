@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 22:37:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/18 11:44:14 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/22 02:53:51 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,9 @@ static inline t_ww_error	ww_bin_keygen(t_ww_binary *bin)
 		if (err.type)
 			return (err);
 	}
-	ww_info("Encryption key: '%s'\n", bin->args->encryption_key);
+
+	if (bin->args->encryption_algo != ENCRYPTION_ALGO_NONE)
+		ww_info("Encryption key: '%s'\n", bin->args->encryption_key);
 	
 	char tmp[17];
 	ft_memset(tmp, 0, 17);
