@@ -6,7 +6,7 @@
 ;    By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+         ;
 ;                                                 +#+#+#+#+#+   +#+            ;
 ;    Created: 2025/05/14 21:06:17 by kiroussa          #+#    #+#              ;
-;    Updated: 2025/06/20 14:23:29 by kiroussa         ###   ########.fr        ;
+;    Updated: 2025/08/07 20:08:40 by kiroussa         ###   ########.fr        ;
 ;                                                                              ;
 ; **************************************************************************** ;
 
@@ -36,6 +36,7 @@ decompression_routine_offset: DECLARE_SIZE 0x43434343
 
 ; The decryption key, if applicable
 encryption_key: times 0x10 db 0x42
+_encryption_key_padding: times 240 db 0x00
 
 
 ; Whether the loader should waitpid/wait4 for the forked payload.

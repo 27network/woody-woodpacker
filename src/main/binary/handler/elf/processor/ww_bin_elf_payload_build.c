@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/22 14:52:36 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/08/07 20:08:04 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@
 #else // ELF_BITNESS
 # include <elfstream_macros.h>
 
+# define ENCRYPTION_KEY_PADDING 240
+
 /**
  * The structure that holds the payload features.
  *
@@ -54,7 +56,7 @@ struct Func(s_payload_features)
 	Elf(Off)	start_offset;
 	Elf(Off)	decryption_routine_offset;
 	Elf(Off)	decompression_routine_offset;
-	char		encryption_key[16];
+	char		encryption_key[16 + ENCRYPTION_KEY_PADDING]; // More bytes for runtime key derivation
 	char		loader_async;
 	char		_padding2[7];
 	Elf(Off)	user_payload_size;
@@ -63,7 +65,7 @@ struct Func(s_payload_features)
 };
 
 static_assert(
-	sizeof(struct Func(s_payload_features)) == (3 * sizeof(Elf(Off))) + 24 + (3 * sizeof(Elf(Off))),
+	sizeof(struct Func(s_payload_features)) == (3 * sizeof(Elf(Off))) + 24 + (3 * sizeof(Elf(Off))) + ENCRYPTION_KEY_PADDING,
 	"struct Func(s_payload_features) is not what we expected"
 );
 
@@ -143,11 +145,13 @@ FASTCALL char	*Func(ww_bin_get_segments_content)(
 		ww_warn("No segments with PF_X found, no executable content???\n");
 		return (NULL);
 	}
+
 	size_t address = phdr->p_vaddr;
 	ww_trace("Stealing shit from %p\n", (void *)address);
+	
 	*segments_write_offset = address - *woody_entry;
-
 	*segments_content_size = elfstream_content_size(target->content);
+
 	char *segments_content = ft_calloc(*segments_content_size, sizeof(char));
 	if (!segments_content)
 		return (NULL);

@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 17:57:20 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/22 14:45:13 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/07/22 16:33:40 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,30 @@ FASTCALL size_t Func(update_segment)(
 ) {
 	Elf(Phdr)	*phdr = (Elf(Phdr) *) &segment->phdr32;
 
+	DBG("checking if segment %zu needs to be offsetted (%zu > %zu)", seg_id, phdr->p_offset, position);
 	if (phdr->p_offset > position)
 	{
 		DBG("offsetting segment %zu of %zu (pos %#lx, filesz %#lx, memsz %#lx)", seg_id,
-			(size_t) phdr->p_offset, (size_t) phdr->p_filesz, (size_t) phdr->p_memsz,
-			segment_content_size);
+			segment_content_size, (size_t) phdr->p_offset, (size_t) phdr->p_filesz, (size_t) phdr->p_memsz);
 		if (phdr->p_offset < segment_content_size)
 			phdr->p_offset = segment_content_size;
+		size_t would = (phdr->p_offset - segment_content_size) % phdr->p_align;
+		size_t should = (phdr->p_vaddr & phdr->p_align);
+		if (would != should)
+		{
+			DBG("segment %zu won't be aligned to %#lx, fixing", seg_id, phdr->p_align);
+			DBG("would be at: %#lx", would);
+			DBG("should be at: %#lx", should);
+			size_t diff = should - would;
+			DBG("should add: %#lx", diff);
+			if (segment_content_size < diff)
+				segment_content_size = diff;
+			segment_content_size -= diff;
+			DBG("new content size: %#lx", segment_content_size);
+		}
+
 		phdr->p_offset -= segment_content_size;
+		DBG("segment %zu: new offset %#lx", seg_id, (size_t) phdr->p_offset);
 	}
 	else if (phdr->p_offset + phdr->p_filesz > position)
 	{
@@ -58,10 +74,13 @@ FASTCALL size_t Func(update_segment)(
 			phdr->p_filesz = diff;
 		phdr->p_filesz -= diff;
 	}
+#if ELFSTREAM_DEBUG
+	getchar();
+#endif // ELFSTREAM_DEBUG
 	return (segment_content_size);
 }
 
-FASTCALL size_t Func(update_section)(
+FASTCALL void Func(update_section)(
 	[[maybe_unused]] size_t sec_id,
 	t_elf_section *section,
 	size_t position,
@@ -82,11 +101,12 @@ FASTCALL size_t Func(update_section)(
 			shdr->sh_size = diff;
 		shdr->sh_size -= diff;
 	}
-	return (segment_content_size);
 }
 
-FASTCALL void Func(elfstream_segment_shrink)(t_elfstream *stream, t_elf_segment *segment)
-{
+FASTCALL void Func(elfstream_segment_shrink)(
+	t_elfstream *stream,
+	t_elf_segment *segment
+) {
 	Elf(Ehdr)	*ehdr = (Elf(Ehdr) *) &stream->ehdr32;
 	Elf(Phdr)	*phdr = (Elf(Phdr) *) &segment->phdr32;
 	size_t		segment_content_size = elfstream_content_size(segment->content);
@@ -102,32 +122,6 @@ FASTCALL void Func(elfstream_segment_shrink)(t_elfstream *stream, t_elf_segment 
 
 	DBG("shrinking segment %zu (pos %#lx, filesz %#lx, memsz %#lx)", seg_id,
 		(size_t) position, (size_t) phdr->p_filesz, (size_t) phdr->p_memsz);
-
-	// check alignment
-	if (segment_content_size % 64 != 0)
-		segment_content_size -= segment_content_size % 64;
-
-	// realign based on the next segment
-	// t_elf_segment	*closest = NULL;
-	// size_t			closest_off = (size_t) -1;
-	// size_t i;
-	// for (i = 0; i < stream->segment_count; i++) {
-	// 	Elf(Phdr) *tmp = (Elf(Phdr) *) &stream->segments[i].phdr32;
-	// 	if (tmp->p_offset <= position)
-	// 		continue ;
-	// 	if (tmp->p_offset < closest_off)
-	// 	{
-	// 		DBG("found closer segment %zu (pos %#lx, filesz %#lx, memsz %#lx)", i,
-	// 			(size_t) tmp->p_offset, (size_t) tmp->p_filesz, (size_t) tmp->p_memsz);
-	// 		closest_off = tmp->p_offset;
-	// 		closest = stream->segments + i;
-	// 	}
-	// }
-	// DBG("segment_content_size: %#lx", (size_t) segment_content_size);
-	// Elf(Phdr) *tmp2 = (Elf(Phdr) *) &closest->phdr32;
-	// size_t diff = tmp2->p_offset - position;
-	// DBG("diff: %#lx", (size_t) diff);
-	// segment_content_size = diff;
 
 	size_t offset = segment_content_size;
 	size_t i;
@@ -145,7 +139,7 @@ FASTCALL void Func(elfstream_segment_shrink)(t_elfstream *stream, t_elf_segment 
 
 	elfstream_content_free(segment->content);
 	segment->content = NULL;
-	phdr->p_filesz = 0;
+	// phdr->p_filesz = 0;
 }
 
 # undef ELF_BITNESS
