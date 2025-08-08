@@ -29,9 +29,9 @@ _woody_start:
 	add RCX, RSI ; add the offset
 	; params are:
 	; - the key
-	mov RDI, [RAX + OFFSET_ENCRYPTION_KEY]
+	lea RSI, [RAX + OFFSET_ENCRYPTION_KEY]
 	; - the target buffer
-	mov RSI, [RAX + OFFSET_SEGMENTS_CONTENT]
+	lea RDI, [RAX + OFFSET_SEGMENTS_CONTENT]
 	; - the target buffer size
 	mov RDX, [RAX + OFFSET_SEGMENTS_CONTENT_SIZE]
 

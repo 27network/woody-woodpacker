@@ -14,6 +14,6 @@ decrypt:
 	call	inv_middle_round_transformations
 	call	inv_last_round_transformations
 
-	movdqa	[rdi], xmm0
+	movdqu	[rdi], xmm0
 
 	ret

@@ -14,21 +14,24 @@ bits 64
 default rel
 
 _woody_decrypt_aes_entry:
-	call	keyExpansion
 	call	initialize_registers
+	call	keyExpansion
 
-	mov	rcx, 0x10
+	mov		rcx, 0x10
 	call	decrypt_loop
 
 	ret
 
 decrypt_loop:
+	push	rcx
+	xor		rcx, rcx
 	call	decrypt
-	add	rdi, 0x10
+	add		rdi, 0x10
 
-	add	rcx, 0x10
-	cmp	rcx, rdx
-	jl	decrypt_loop
+	pop		rcx
+	add		rcx, 0x10
+	cmp		rcx, rdx
+	jl		decrypt_loop
 
 	ret
 

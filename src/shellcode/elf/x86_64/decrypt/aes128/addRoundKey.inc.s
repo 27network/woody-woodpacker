@@ -7,7 +7,7 @@
 
 addRoundKey:
 	shl	rcx, 4
-	movdqa	xmm3, [rsi + rcx]
+	movdqu	xmm3, [rsi + rcx]
 	pxor	xmm0, xmm3
 	shr	rcx, 4
 
