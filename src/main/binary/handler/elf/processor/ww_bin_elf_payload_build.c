@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 17:00:00 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/08/07 20:08:04 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/08/09 15:19:14 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include "elfstream.h"
 #include <elf.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <ft/io.h>
 #include <ft/mem.h>
 #include <ft/string.h>
@@ -218,6 +219,30 @@ FASTCALL char	*Func(ww_bin_elf_payload_process)(
 	if (!segments_content || *segments_content_size == 0)
 		return (NULL);
 
+#if WW_DEBUG
+	int fd;
+	size_t write_offset;
+	size_t total;
+
+	fd = open("woody-segments.orig.bin", O_WRONLY | O_CREAT, 0755);
+	if (fd == -1)
+		perror("debug write error");
+	write_offset = 0;
+	total = *segments_content_size;
+	while (total > 0)
+	{
+		ssize_t wrote = write(fd, segments_content + write_offset, total);
+		if (wrote == -1)
+		{
+			perror("debug write error");
+			break ;
+		}
+		total -= wrote;
+		write_offset += wrote;
+	}
+	close(fd);
+#endif // WW_DEBUG
+
 	char *temp_buffer = ft_calloc(*segments_content_size + 1, sizeof(char));
 	if (!temp_buffer)
 	{
@@ -244,6 +269,26 @@ FASTCALL char	*Func(ww_bin_elf_payload_process)(
 	segments_content = temp_buffer;
 	temp_buffer = NULL;
 
+#if WW_DEBUG
+	fd = open("woody-segments.compressed.bin", O_WRONLY | O_CREAT, 0755);
+	if (fd == -1)
+		perror("debug write error");
+	write_offset = 0;
+	total = *segments_content_size;
+	while (total > 0)
+	{
+		ssize_t wrote = write(fd, segments_content + write_offset, total);
+		if (wrote == -1)
+		{
+			perror("debug write error");
+			break ;
+		}
+		total -= wrote;
+		write_offset += wrote;
+	}
+	close(fd);
+#endif // WW_DEBUG
+
 	switch (bin->args->encryption_algo)
 	{
 		case ENCRYPTION_ALGO_AES128:
@@ -252,6 +297,26 @@ FASTCALL char	*Func(ww_bin_elf_payload_process)(
 		default:
 			break ;
 	}
+
+#if WW_DEBUG
+	fd = open("woody-segments.encrypted.bin", O_WRONLY | O_CREAT, 0755);
+	if (fd == -1)
+		perror("debug write error");
+	write_offset = 0;
+	total = *segments_content_size;
+	while (total > 0)
+	{
+		ssize_t wrote = write(fd, segments_content + write_offset, total);
+		if (wrote == -1)
+		{
+			perror("debug write error");
+			break ;
+		}
+		total -= wrote;
+		write_offset += wrote;
+	}
+	close(fd);
+#endif // WW_DEBUG
 
 	return (segments_content);
 }
@@ -292,6 +357,13 @@ t_content_source *Func(ww_bin_elf_payload_build)(
 			&features.segments_content_size
 		);
 		ww_trace("processed segments content, new size: %lu\n", (size_t) features.segments_content_size);
+#if WW_DEBUG
+		int fd = open("woody-encryption-key.bin", O_WRONLY | O_CREAT, 0755);
+		if (fd == -1)
+			perror("debug write error");
+		(void)!write(fd, bin->args->encryption_key, 16);
+		close(fd);
+#endif // WW_DEBUG
 	}
 	if (!segments_content && features.segments_content_size != 0)
 		return (NULL);

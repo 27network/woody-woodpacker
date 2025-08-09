@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 21:22:53 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/05/15 02:41:08 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/08/09 15:20:30 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,18 @@
 static void	ww_dump_args(t_ww_args *args)
 {
 	ww_bin_handler_registry_dump();
-	ww_trace("struct s_ww_args {\n");
-	ww_trace("\ttarget: %s\n", args->target);
-	ww_trace("\toutput: %s\n", args->output);
-	ww_trace("\tencryption_algo: %s\n",
+	ww_debug("struct s_ww_args {\n");
+	ww_debug("\ttarget: %s\n", args->target);
+	ww_debug("\toutput: %s\n", args->output);
+	ww_debug("\tencryption_algo: %s\n",
 		ww_encryption_algo_str(args->encryption_algo));
-	ww_trace("\tencryption_key: %s\n", args->encryption_key);
-	ww_trace("\tlog_level: %s\n", ww_log_level_str(args->log_level));
-	ww_trace("\tcompression: %s\n",
+	ww_debug("\tencryption_key: %s\n", args->encryption_key);
+	ww_debug("\tlog_level: %s\n", ww_log_level_str(args->log_level));
+	ww_debug("\tcompression: %s\n",
 		ww_compression_algo_str(args->compression_algo));
-	ww_trace("\tpayload_file: %s\n", args->payload_file);
-	ww_trace("\tpayload_async: %d\n", args->payload_async);
-	ww_trace("}\n");
+	ww_debug("\tpayload_file: %s\n", args->payload_file);
+	ww_debug("\tpayload_async: %d\n", args->payload_async);
+	ww_debug("}\n");
 }
 
 static int	ww_process(t_ww_args *args)

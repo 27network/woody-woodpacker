@@ -6,7 +6,7 @@
 /*   By: kiroussa <oss@xtrm.me>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/17 22:37:16 by kiroussa          #+#    #+#             */
-/*   Updated: 2025/07/22 02:53:51 by kiroussa         ###   ########.fr       */
+/*   Updated: 2025/08/09 15:13:05 by kiroussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ static inline void	ww_bin_key_hash(char out[16], const char *in_str)
     h4 *= prime3;
     h4 ^= h4 >> 16;
 
-	ww_debug("Encryption key hash: '%x%x%x%x'\n", h1, h2, h3, h4);
+	ww_debug("Encryption key hash: '%x%x%x%x'\n", __builtin_bswap32(h1), __builtin_bswap32(h2), __builtin_bswap32(h3), __builtin_bswap32(h4));
 
 	ft_memcpy(out, &h1, 4);
 	ft_memcpy(out + 4, &h2, 4);
