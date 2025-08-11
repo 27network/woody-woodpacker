@@ -5,7 +5,7 @@ initialize_registers:
 	lea		rax, [rel vector_depacking_mask]
 	movdqa	xmm1, [rax]
 	lea		rax, [rel shift_masks]
-	vmovdqa	ymm2, [rax]
+	vmovdqa	xmm2, [rax]
 	lea		rdx, [rel mixcolumns_matrix]
 	lea		rbx, [rel Rcon_table]
 	lea		rax, [rdi]

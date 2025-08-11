@@ -2,65 +2,55 @@ keyExpansion:
 	push	edi
 	push	ebx
 
-	add	ecx, 4
-	mov	eax, [esi + 12]
-	xor	edi, edi
-	jmp	expansion_loop
+	add		ecx, 4
+	mov		eax, [esi + 12]
+	xor		edi, edi
+	jmp		expansion_loop
 
 expansion_loop:
 	test	cl, 3	;calculate ecx % 4
-	jz	g_vector
+	jz		g_vector
 
 	push	edx
-	mov	edx, [esi + 4 * (ecx - 4)]
-	xor	eax, edx
-	pop	edx
-	mov	[esi + 4 * ecx], eax
+	mov		edx, [esi + 4 * (ecx - 4)]
+	xor		eax, edx
+	pop		edx
+	mov		[esi + 4 * ecx], eax
 
-	inc	ecx
-	cmp	ecx, Nb * (Nr + 1)
-	jl	expansion_loop
+	inc		ecx
+	cmp		ecx, Nb * (Nr + 1)
+	jl		expansion_loop
 
-	pop	ebx
-	pop	edi
+	pop		ebx
+	pop		edi
 	ret
 
 g_vector:
 	bswap	eax
 	call	shiftWord ;on last key-expanded word (eax)
 	push	edi
+	push	esi
 	call	subBytes_32bits_words ;on last key-expanded word (eax)
-	pop	edi
+	pop		esi
+	pop		edi
 	call	Rcon
 	push	edx
-	mov	edx, [esi + 4 * (ecx - 4)]
-	xor	eax, edx
-	pop	edx
-	mov	[esi + 4 * ecx], eax
-	inc	ecx
-	cmp	ecx, Nb * (Nr + 1)
-	jl	expansion_loop
+	mov		edx, [esi + 4 * (ecx - 4)]
+	xor		eax, edx
+	pop		edx
+	mov		[esi + 4 * ecx], eax
+	inc		ecx
+	cmp		ecx, Nb * (Nr + 1)
+	jl		expansion_loop
 	ret
-
-subBytes_32bits_words:
-	push    esi
-	push    ebx
-	push    ecx
-
-	xor	ecx, ecx
-	xor	esi, esi
-
-	mov	esi, eax
-	xor	eax, eax
-	jmp	loop
 
 shiftWord:
 	push	edx
-	mov	edx, eax
-	shl	eax, 8
-	shr	edx, 24
-	add	al, dl
-	pop	edx
+	mov		edx, eax
+	shl		eax, 8
+	shr		edx, 24
+	add		al, dl
+	pop		edx
 
 	ret
 
@@ -68,32 +58,64 @@ Rcon:
 	push	ecx
 	push	edx
 
-	xor	ecx, ecx
-	mov	edx, Rcon_base
-	jmp	Rcon_loop
+	xor		ecx, ecx
+	mov		edx, Rcon_base
+	jmp		Rcon_loop
 
 Rcon_loop:
-	cmp	ecx, edi
-	jge	xor_operation
+	cmp		ecx, edi
+	jge		xor_operation
 
-	mov	ebx, edx
-	shl	dl, 1
-	and	ebx, 0b10000000
-	jnz	.modulo_reduction
+	mov		ebx, edx
+	shl		dl, 1
+	and		ebx, 0b10000000
+	jnz		.modulo_reduction
 
-	inc	ecx
-	jmp	Rcon_loop
+	inc		ecx
+	jmp		Rcon_loop
 
 .modulo_reduction:
-	xor	edx, 0x1b
+	xor		edx, 0x1b
 
-	inc	ecx
-	jmp	Rcon_loop
+	inc		ecx
+	jmp		Rcon_loop
 
 xor_operation:
-	xor	eax, edx
-	inc	edi
+	xor		eax, edx
+	inc		edi
 
-	pop	edx
-	pop	ecx
+	pop		edx
+	pop		ecx
+	ret
+
+subBytes_32bits_words:
+	push	ecx
+	xor		ecx, ecx
+	xor		esi, esi
+	mov		esi, eax
+	xor		eax, eax
+	jmp		.loop
+
+.loop:
+	xor		ebx, ebx
+	mov		bx, si
+	and		bx, 0x00FF
+	call	getSboxEntry ;update eax with substitue words
+	shr		esi, 8
+
+	inc		ecx
+	cmp		ecx, Nb
+	jl		.loop
+
+	pop		ecx
+	ret
+
+getSboxEntry:
+	mov		al, [edx + ebx]
+	cmp		ecx, Nb - 1
+	jne		.shiftLeft
+	ret
+
+.shiftLeft:
+	shl 	eax, 8
 	ret

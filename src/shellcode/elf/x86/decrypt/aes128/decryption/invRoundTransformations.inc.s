@@ -1,9 +1,9 @@
 inv_first_round_transformation:
-	mov	ecx, Nr
+	mov		ecx, Nr
 	call	addRoundKey
 	call	invShiftRows
 	call	invSubBytes
-	dec	ecx
+	dec		ecx
 
 	ret
 
@@ -13,9 +13,9 @@ inv_middle_round_transformations:
 	call	invShiftRows
 	call	invSubBytes
 
-	dec	ecx
-	cmp	ecx, 0
-	jg	inv_middle_round_transformations
+	dec		ecx
+	cmp		ecx, 0
+	jg		inv_middle_round_transformations
 
 	ret
 

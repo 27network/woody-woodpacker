@@ -199,7 +199,11 @@ FASTCALL void	Func(ww_aesify)(
 ) {
 	ww_trace("aesifying buffer (total: %lu)\n", (size_t) plaintext_size);
 	Elf(Off) done = 0;
-	while (done < plaintext_size && plaintext_size - done >= 16)
+	if (plaintext_size < 16)
+		return;
+	else if (plaintext_size % 16)
+		plaintext_size -= 16;
+	while (done < plaintext_size/* && plaintext_size - done >= 16*/)
 	{
 		aes128_encrypt(plaintext + done, bin->args->encryption_key);
 		done += 16;

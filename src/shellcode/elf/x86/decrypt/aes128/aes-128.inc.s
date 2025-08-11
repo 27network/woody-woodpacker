@@ -1,5 +1,6 @@
 %include "elf/x86/decrypt/aes128/includes/defines.inc.s"
 %include "elf/x86/decrypt/aes128/addRoundKey.inc.s"
+%include "elf/x86/decrypt/aes128/initialize_registers.inc.s"
 %include "elf/x86/decrypt/aes128/decryption/invMixColumns.inc.s"
 %include "elf/x86/decrypt/aes128/decryption/invRoundTransformations.inc.s"
 %include "elf/x86/decrypt/aes128/decryption/invShiftRows.inc.s"

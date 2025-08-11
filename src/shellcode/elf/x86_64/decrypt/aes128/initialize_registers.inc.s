@@ -12,7 +12,8 @@ initialize_registers:
 	movdqu	xmm1, [rax]
 	lea		rax, [rel inv_shift_mask]
 	movdqu	xmm2, [rax]
-	lea		rbx, [rel inv_mixcolumns_matrix]
+	lea		rdx, [rel inv_mixcolumns_matrix]
+	lea     rbx, [rel Rcon_table]
 	test	rdi, 0xF
 	jz		get_aligned_memory
 	jmp		get_unaligned_memory

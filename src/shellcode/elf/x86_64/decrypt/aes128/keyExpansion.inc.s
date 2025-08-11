@@ -43,7 +43,7 @@ subBytes_32bits_words:
 	movd			xmm4, eax
 	vpmovzxbd		ymm4, xmm4
 	push			rax
-	lea				rax, [rel inv_s_box]
+	lea				rax, [rel s_box]
 	vpgatherdd		ymm5, [rax + ymm4 * 4], ymm3
 	pop				rax
 	vextracti128	xmm4, ymm5, 0
