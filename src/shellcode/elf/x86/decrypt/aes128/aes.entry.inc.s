@@ -38,7 +38,8 @@ decrypt_loop:
 	jl		exit
 
 	sub		ecx, 0x10
-	jmp		decrypt_loop
+	cmp		ecx, 0
+	jne		decrypt_loop
 
 	ret
 
