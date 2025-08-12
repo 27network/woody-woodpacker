@@ -203,7 +203,7 @@ FASTCALL void	Func(ww_aesify)(
 		return;
 	else if (plaintext_size % 16)
 		plaintext_size -= 16;
-	while (done < plaintext_size/* && plaintext_size - done >= 16*/)
+	while (done < plaintext_size)
 	{
 		aes128_encrypt(plaintext + done, bin->args->encryption_key);
 		done += 16;
