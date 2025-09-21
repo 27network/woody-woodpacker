@@ -7,10 +7,15 @@ VERSION = 0.9.3
 MAKE = make --no-print-directory
 
 CC = clang
-CFLAGS = -Wall -Wextra -Wpedantic -std=c23
+CFLAGS = -Wall -Wextra -std=c23
 LDFLAGS = 
 NASM = nasm
 NASMFLAGS = -f elf64
+
+PEDANTIC ?= 1
+ifeq ($(PEDANTIC), 1)
+CFLAGS += -Wpedantic
+endif
 
 CFLAGS += -DWW_PROJECT_NAME=\"$(NAME)\"
 CFLAGS += -DWW_PROJECT_VERSION=\"$(VERSION)\"
